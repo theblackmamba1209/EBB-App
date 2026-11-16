@@ -1,0 +1,1653 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Ebb">
+<meta name="format-detection" content="telephone=no">
+<meta name="theme-color" content="#E9EFEC" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#081A1E" media="(prefers-color-scheme: dark)">
+<title>Ebb Recovery Tracker</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Young+Serif&display=swap" rel="stylesheet">
+<style>
+/* Layout idea: one calm column. A living tide at the top shows progress toward the next milestone;
+   quiet surfaces below; everything a thumb needs sits low on the screen. */
+:root{
+  --bg:#E9EFEC;
+  --surface:#F7FAF8;
+  --surface-2:#DEE8E4;
+  --ink:#0F2A2E;
+  --ink-2:#44605F;
+  --muted:#5C7473;
+  --line:#CAD8D3;
+  --tide:#12786F;
+  --tide-ink:#FFFFFF;
+  --foam:#CDE7E1;
+  --lantern:#B57A16;
+  --lantern-soft:#F5E4C2;
+  --berry:#AE3D62;
+  --berry-soft:#F4D9E2;
+  --berry-ink:#FFFFFF;
+  --lantern-ink:#FFFFFF;
+  --font-display:"Young Serif","New York",ui-serif,Georgia,serif;
+  --font-body:"Atkinson Hyperlegible",-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;
+  --r-hero:28px; --r-card:18px; --r-ctl:14px;
+  --shadow:0 1px 0 rgba(15,42,46,.04),0 14px 30px -18px rgba(15,42,46,.35);
+  --gut:max(16px,env(safe-area-inset-left));
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#081A1E; --surface:#0F262B; --surface-2:#173339; --ink:#E4EFEC; --ink-2:#A8BEBB; --muted:#8AA3A1; --line:#24423F;
+    --tide:#4CC3B2; --tide-ink:#04201F; --foam:#164442; --lantern:#F1BF5C; --lantern-soft:#3A3120; --berry:#E87C9F; --berry-soft:#43212D; --berry-ink:#2B0A16; --lantern-ink:#2A1E05;
+    --shadow:0 14px 30px -18px rgba(0,0,0,.7);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#081A1E; --surface:#0F262B; --surface-2:#173339; --ink:#E4EFEC; --ink-2:#A8BEBB; --muted:#8AA3A1; --line:#24423F;
+  --tide:#4CC3B2; --tide-ink:#04201F; --foam:#164442; --lantern:#F1BF5C; --lantern-soft:#3A3120; --berry:#E87C9F; --berry-soft:#43212D; --berry-ink:#2B0A16; --lantern-ink:#2A1E05;
+  --shadow:0 14px 30px -18px rgba(0,0,0,.7);
+  color-scheme:dark;
+}
+
+*,*::before,*::after{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.45 var(--font-body);-webkit-font-smoothing:antialiased;-webkit-text-size-adjust:100%;-webkit-tap-highlight-color:transparent;text-rendering:optimizeLegibility}
+body.locked{overflow:hidden}
+button,input,textarea,select{font:inherit;color:inherit}
+button{touch-action:manipulation;cursor:pointer}
+a{color:var(--tide);text-underline-offset:3px}
+:focus-visible{outline:3px solid var(--lantern);outline-offset:2px;border-radius:8px}
+h1,h2{font-family:var(--font-display);font-weight:400;letter-spacing:-.01em;text-wrap:balance;margin:0}
+h1{font-size:31px;line-height:1.1}
+h2{font-size:23px;line-height:1.2}
+h3{font-size:17px;line-height:1.3;margin:0;font-weight:700}
+p{margin:0}
+.lede{color:var(--ink-2);font-size:17px;max-width:62ch}
+.fine{color:var(--muted);font-size:14px;line-height:1.4}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.num{font-variant-numeric:tabular-nums}
+svg.i{width:22px;height:22px;flex:none;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+
+/* ---------- Shell ---------- */
+#app{max-width:560px;margin:0 auto;min-height:100%}
+.topbar{position:sticky;top:0;z-index:30;display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:calc(10px + env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) 10px var(--gut);
+  background:var(--bg);background:color-mix(in srgb,var(--bg) 86%,transparent);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
+.wordmark{font-family:var(--font-display);font-size:26px;line-height:1;letter-spacing:-.02em;display:flex;align-items:center;gap:8px}
+.wordmark svg{width:26px;height:26px}
+.sos{display:inline-flex;align-items:center;gap:8px;min-height:40px;padding:8px 14px;border-radius:999px;border:0;background:var(--berry);color:var(--berry-ink);font-weight:700;font-size:15px}
+.sos svg{width:18px;height:18px}
+#banner:empty{display:none}
+.banner{margin:0 var(--gut) 10px;padding:12px 14px;border-radius:14px;background:var(--lantern-soft);color:var(--ink);display:flex;gap:12px;align-items:center;justify-content:space-between;font-size:15px}
+.banner button{flex:none;border:0;background:var(--ink);color:var(--bg);border-radius:999px;padding:8px 12px;font-weight:700;font-size:14px}
+main{padding:4px var(--gut) calc(104px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:16px}
+
+.tabbar{position:fixed;z-index:40;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:560px;display:grid;grid-template-columns:repeat(5,1fr);
+  padding:6px max(6px,env(safe-area-inset-right)) calc(6px + env(safe-area-inset-bottom)) max(6px,env(safe-area-inset-left));
+  background:var(--surface);background:color-mix(in srgb,var(--surface) 92%,transparent);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border-top:1px solid var(--line)}
+.tabbar button{border:0;background:none;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:3px;padding:7px 2px 5px;min-height:52px;font-size:12px;font-weight:700;border-radius:12px;position:relative}
+.tabbar button[aria-current="page"]{color:var(--tide)}
+.tabbar button[aria-current="page"]::before{content:"";position:absolute;top:-7px;left:30%;right:30%;height:3px;border-radius:0 0 3px 3px;background:var(--tide)}
+
+/* ---------- Building blocks ---------- */
+.card{background:var(--surface);border-radius:var(--r-card);padding:18px;box-shadow:inset 0 0 0 1px var(--line);display:flex;flex-direction:column;gap:12px}
+.card.soft{background:transparent;box-shadow:inset 0 0 0 1.5px var(--line)}
+.card-h{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+.card-h a,.linkbtn{font-size:15px;font-weight:700;color:var(--tide);background:none;border:0;padding:6px 0;text-decoration:none}
+.sec-title{margin:10px 2px -4px;font-family:var(--font-display);font-size:21px}
+.btn{appearance:none;-webkit-appearance:none;border:0;font-weight:700;min-height:50px;padding:12px 18px;border-radius:var(--r-ctl);display:inline-flex;align-items:center;justify-content:center;gap:10px;text-align:center;line-height:1.2;text-decoration:none}
+.btn-primary{background:var(--tide);color:var(--tide-ink)}
+.btn-quiet{background:var(--surface-2);color:var(--ink)}
+.btn-line{background:transparent;color:var(--ink);box-shadow:inset 0 0 0 1.5px var(--line)}
+.btn-danger{background:var(--berry);color:var(--berry-ink)}
+.btn-block{width:100%}
+.btn:disabled{opacity:.45}
+.btn-icon{border:0;background:var(--surface-2);color:var(--ink-2);width:44px;height:44px;border-radius:12px;display:inline-flex;align-items:center;justify-content:center;flex:none}
+.row{display:flex;gap:10px}
+.row>*{flex:1}
+.stack{display:flex;flex-direction:column;gap:12px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:0;min-height:42px;padding:9px 14px;border-radius:999px;background:var(--surface);box-shadow:inset 0 0 0 1.5px var(--line);font-size:16px;line-height:1.2;color:var(--ink);text-align:left}
+.chip[aria-pressed="true"]{background:var(--tide);color:var(--tide-ink);box-shadow:none}
+.seg{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:6px;background:var(--surface-2);padding:5px;border-radius:16px}
+.seg .chip{box-shadow:none;background:transparent;border-radius:12px;text-align:center;padding:9px 6px;font-size:15px}
+.seg .chip[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.field{display:flex;flex-direction:column;gap:8px}
+.field>label,.flabel{font-weight:700;font-size:16px}
+input[type=text],input[type=tel],input[type=datetime-local],input[type=date],textarea{width:100%;font-size:17px;padding:13px 14px;border-radius:12px;border:0;background:var(--surface-2);color:var(--ink);min-height:50px;-webkit-appearance:none;appearance:none}
+input[type=datetime-local]{display:block;text-align:left}
+input::-webkit-date-and-time-value{text-align:left}
+textarea{resize:vertical;line-height:1.4}
+input::placeholder,textarea::placeholder{color:var(--muted)}
+input:focus,textarea:focus{outline:2px solid var(--tide);outline-offset:0}
+.slider-head{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+.sv{font-family:var(--font-display);font-size:30px;line-height:1}
+.sv small{font-size:16px;color:var(--muted)}
+.sv span{font-family:var(--font-body);font-size:15px;color:var(--ink-2);margin-left:4px}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:40px;background:transparent;margin:0}
+input[type=range]::-webkit-slider-runnable-track{height:10px;border-radius:10px;background:linear-gradient(to right,var(--tide) var(--p,50%),var(--surface-2) var(--p,50%))}
+input[type=range]::-moz-range-track{height:10px;border-radius:10px;background:var(--surface-2)}
+input[type=range]::-moz-range-progress{height:10px;border-radius:10px;background:var(--tide)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:32px;height:32px;border-radius:50%;background:var(--surface);box-shadow:0 0 0 2.5px var(--tide),0 3px 8px rgba(0,0,0,.25);margin-top:-11px}
+input[type=range]::-moz-range-thumb{width:28px;height:28px;border-radius:50%;background:var(--surface);border:2.5px solid var(--tide)}
+.scale-ends{display:flex;justify-content:space-between;font-size:13px;color:var(--muted);margin-top:-6px}
+.stepper{display:flex;align-items:center;gap:14px}
+.stepper output{font-family:var(--font-display);font-size:30px;min-width:4ch;text-align:center}
+.stepper button{width:50px;height:50px;border-radius:14px;border:0;background:var(--surface-2);font-size:26px;line-height:1}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;font-size:13px;font-weight:700;background:var(--surface-2);color:var(--ink-2)}
+.pill.ok{background:var(--foam);color:var(--ink)}
+.pill.warn{background:var(--lantern-soft);color:var(--ink)}
+.pill.hi{background:var(--berry-soft);color:var(--ink)}
+.pill.act{background:var(--berry);color:var(--berry-ink)}
+.pill .dot{width:8px;height:8px;border-radius:50%;background:currentColor}
+.pill.ok .dot{background:var(--tide)} .pill.warn .dot{background:var(--lantern)} .pill.hi .dot{background:var(--berry)}
+.src{font-size:13px;color:var(--muted)}
+.src a{color:var(--muted)}
+.empty{padding:22px 18px;border-radius:var(--r-card);border:1.5px dashed var(--line);color:var(--ink-2);display:flex;flex-direction:column;gap:12px;align-items:flex-start}
+
+/* ---------- Hero tide ---------- */
+.hero{position:relative;border-radius:var(--r-hero);overflow:hidden;min-height:336px;background:var(--surface);box-shadow:var(--shadow)}
+canvas.tide{position:absolute;inset:0;width:100%;height:100%;display:block}
+.hero-in{position:relative;padding:20px 22px 18px;display:flex;flex-direction:column;min-height:336px}
+.hero-label{font-size:15px;color:var(--ink-2);font-weight:700}
+.hero-num{display:flex;align-items:baseline;gap:10px;margin-top:2px}
+.hero-num .n{font-family:var(--font-display);font-size:96px;line-height:.92;letter-spacing:-.03em}
+.hero-num .u{font-family:var(--font-display);font-size:28px}
+.hero-sub{font-size:17px;color:var(--ink-2);margin-top:6px}
+.hero-foot{margin-top:auto;display:flex;justify-content:space-between;align-items:flex-end;gap:12px;font-size:15px;padding-top:18px}
+.hero-foot b{font-family:var(--font-display);font-weight:400;font-size:19px;display:block;color:var(--ink)}
+.hero-foot .r{text-align:right}
+.tally{display:grid;grid-template-columns:1fr 1fr;gap:0;background:var(--surface);border-radius:var(--r-card);box-shadow:inset 0 0 0 1px var(--line)}
+.tally>div{padding:14px 16px}
+.tally>div+div{border-left:1px solid var(--line)}
+.tally .big{font-family:var(--font-display);font-size:30px;line-height:1.05;color:var(--ink)}
+.tally .big small{font-size:17px;color:var(--muted)}
+.tally p{font-size:14px;color:var(--ink-2);margin-top:4px;line-height:1.3}
+.cta{display:flex;align-items:center;gap:14px;width:100%;border:0;text-align:left;padding:18px;border-radius:20px;background:var(--tide);color:var(--tide-ink)}
+.cta svg{width:34px;height:34px;flex:none}
+.cta b{display:block;font-size:20px;font-family:var(--font-display);font-weight:400}
+.cta span{font-size:15px;opacity:.86}
+.duo{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.tile{border:0;text-align:left;padding:14px 16px;border-radius:18px;background:var(--surface);box-shadow:inset 0 0 0 1px var(--line);display:flex;flex-direction:column;gap:4px;min-height:84px;color:var(--ink)}
+.tile b{font-size:17px}
+.tile span{font-size:14px;color:var(--ink-2)}
+.tile .pill{align-self:flex-start;margin-top:auto}
+.reason{font-family:var(--font-display);font-size:24px;line-height:1.25;text-wrap:balance}
+.kv{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.kv div{background:var(--surface-2);border-radius:12px;padding:10px}
+.kv b{display:block;font-family:var(--font-display);font-weight:400;font-size:18px;line-height:1.15;overflow-wrap:anywhere}
+.kv span{font-size:13px;color:var(--ink-2)}
+
+/* ---------- Philippines + editing ---------- */
+.greet{font-family:var(--font-display);font-size:22px;line-height:1.2;margin:2px 2px -4px}
+.hero-meta{display:flex;justify-content:space-between;gap:12px;margin-top:14px;font-size:15px;color:var(--ink-2)}
+.hero-meta b{font-family:var(--font-display);font-weight:400;font-size:20px;display:block;color:var(--ink)}
+.hero-meta .r{text-align:right}
+.tally>.money{grid-column:1/-1;border-left:0;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:4px 12px}
+.tally>.money p{margin-top:0}
+.tl{font-family:var(--font-display);font-size:24px;color:var(--ink-2);margin-top:-6px}
+.reward{display:inline-flex;align-items:center;gap:6px;margin-top:6px;padding:5px 10px;border-radius:10px;background:var(--lantern-soft);color:var(--ink);font-size:14px}
+.reward svg{width:16px;height:16px}
+.addrow{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:8px}
+.addrow .btn{min-height:46px;padding:8px;font-size:15px}
+.ph-sec{display:flex;flex-direction:column;gap:8px;padding:16px 0;border-top:1px solid var(--line)}
+.ph-sec ul{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:4px}
+.setrow{border:0;width:100%;background:var(--surface-2);border-radius:12px;padding:12px 14px;display:flex;justify-content:space-between;align-items:center;gap:10px;text-align:left;color:var(--ink)}
+.setrow b{display:block;font-size:16px}
+.setrow span{font-size:14px;color:var(--ink-2)}
+.setrow svg{color:var(--muted)}
+[hidden]{display:none!important}
+.install{display:flex;flex-direction:column;gap:12px;padding:18px;border-radius:20px;background:var(--surface);box-shadow:var(--shadow)}
+.install ol{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:12px;counter-reset:st}
+.install li{display:grid;grid-template-columns:34px 1fr;gap:12px;align-items:start;counter-increment:st}
+.install li::before{content:counter(st);width:30px;height:30px;border-radius:50%;background:var(--tide);color:var(--tide-ink);font-weight:700;display:flex;align-items:center;justify-content:center;font-size:15px}
+.install li b{display:block}
+.install .ico{display:inline-flex;vertical-align:-5px;width:22px;height:22px;color:var(--tide)}
+
+/* ---------- Journey ---------- */
+.cal-h{display:flex;align-items:center;justify-content:space-between}
+.cal-h h2{font-size:21px}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
+.cal .wd{font-size:12px;color:var(--muted);text-align:center;font-weight:700;padding-bottom:2px}
+.cal button{aspect-ratio:1;border:0;border-radius:10px;background:transparent;color:var(--ink);font-size:15px;position:relative;display:flex;align-items:center;justify-content:center;padding:0}
+.cal .clean{background:var(--foam)}
+.cal .used{background:var(--berry);color:var(--berry-ink)}
+.cal .used::after{content:"";position:absolute;top:5px;right:5px;width:7px;height:7px;background:
+  linear-gradient(45deg,transparent 40%,var(--berry-ink) 40%,var(--berry-ink) 60%,transparent 60%),linear-gradient(-45deg,transparent 40%,var(--berry-ink) 40%,var(--berry-ink) 60%,transparent 60%)}
+.cal .start{box-shadow:inset 0 0 0 2px var(--lantern)}
+.cal .pre,.cal .future{color:var(--muted)}
+.cal .today{font-weight:700;text-decoration:underline;text-underline-offset:4px;text-decoration-thickness:2px}
+.cal .ci{position:absolute;bottom:4px;left:50%;width:5px;height:5px;margin-left:-2.5px;border-radius:50%;background:var(--tide)}
+.cal .used .ci{background:var(--berry-ink)}
+.legend{display:flex;flex-wrap:wrap;gap:8px 16px;font-size:13px;color:var(--ink-2)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:14px;height:14px;border-radius:4px;display:inline-block}
+.miles{list-style:none;margin:0;padding:0;position:relative}
+.miles li{display:grid;grid-template-columns:28px 1fr;gap:12px;padding:0 0 18px;position:relative}
+.miles li::before{content:"";position:absolute;left:13px;top:26px;bottom:0;width:2px;background:var(--line)}
+.miles li:last-child::before{display:none}
+.miles .node{width:28px;height:28px;border-radius:50%;box-shadow:inset 0 0 0 2px var(--line);background:var(--surface);display:flex;align-items:center;justify-content:center}
+.miles .got .node{background:var(--lantern);box-shadow:none;color:var(--lantern-ink)}
+.miles .got .node svg{width:16px;height:16px;stroke-width:2.6}
+.miles .nx .node{box-shadow:inset 0 0 0 2px var(--tide);background:conic-gradient(var(--tide) calc(var(--pp)*1%),var(--surface) 0)}
+.miles b{font-size:17px}
+.miles .when{font-size:14px;color:var(--ink-2)}
+.miles .note{font-size:14px;color:var(--ink-2);margin-top:6px;padding:10px 12px;border-radius:12px;background:var(--surface-2);max-width:62ch}
+.feed{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.feed button{width:100%;border:0;background:none;text-align:left;display:grid;grid-template-columns:36px 1fr auto;align-items:center;gap:12px;padding:12px 2px;border-top:1px solid var(--line);color:var(--ink)}
+.feed li:first-child button{border-top:0}
+.feed .ic{width:36px;height:36px;border-radius:11px;display:flex;align-items:center;justify-content:center;background:var(--surface-2);color:var(--ink-2)}
+.feed .ic.l{background:var(--berry-soft);color:var(--berry)}
+.feed .ic.c{background:var(--foam);color:var(--tide)}
+.feed b{font-size:16px;display:block}
+.feed span{font-size:14px;color:var(--ink-2)}
+.feed time{font-size:13px;color:var(--muted);white-space:nowrap}
+
+/* ---------- Insights ---------- */
+.stats3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.stat{background:var(--surface);border-radius:16px;box-shadow:inset 0 0 0 1px var(--line);padding:12px}
+.stat b{display:block;font-family:var(--font-display);font-weight:400;font-size:27px;line-height:1.05}
+.stat span{font-size:13px;color:var(--ink-2);display:block;margin-top:4px;line-height:1.3}
+.chart{position:relative}
+.chart svg{width:100%;height:auto;display:block;overflow:visible;touch-action:pan-y}
+.chart .g{stroke:var(--line);stroke-width:1}
+.chart .base{stroke:var(--muted);stroke-width:1;opacity:.6}
+.chart .ax{fill:var(--muted);font-size:10.5px;font-family:var(--font-body)}
+.chart .ln{fill:none;stroke:var(--tide);stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
+.chart .ar{fill:var(--tide);opacity:.13}
+.chart .dot{fill:var(--tide)}
+.chart .end{fill:var(--tide);stroke:var(--surface);stroke-width:2}
+.chart .endl{fill:var(--ink);font-size:12px;font-weight:700;font-family:var(--font-body)}
+.chart .xh{stroke:var(--ink-2);stroke-width:1;stroke-dasharray:3 3}
+.tip{position:absolute;top:-6px;pointer-events:none;background:var(--ink);color:var(--bg);border-radius:10px;padding:6px 10px;font-size:13px;line-height:1.25;width:120px;box-shadow:0 6px 18px rgba(0,0,0,.2)}
+.tip b{display:block;font-size:15px}
+.hbars{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:9px}
+.hbars li{display:grid;grid-template-columns:minmax(0,9.5em) 1fr 2.2em;align-items:center;gap:10px;font-size:15px}
+.hbars .hl{color:var(--ink);overflow-wrap:anywhere;line-height:1.2}
+.hbars .hb{height:14px;background:var(--surface-2);border-radius:0 5px 5px 0;overflow:hidden}
+.hbars .hb i{display:block;height:100%;background:var(--tide);border-radius:0 4px 4px 0;min-width:3px}
+.hbars .hv{text-align:right;font-variant-numeric:tabular-nums;color:var(--ink-2);font-weight:700}
+.cols{display:grid;grid-template-columns:repeat(8,1fr);gap:6px;align-items:end;height:130px;padding-top:18px;border-bottom:1px solid var(--line)}
+.cols button{border:0;background:none;padding:0;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:stretch;position:relative}
+.cols i{display:block;background:var(--tide);border-radius:4px 4px 0 0;min-height:2px}
+.cols i.lo{opacity:.55}
+.cols em{position:absolute;left:0;right:0;font-style:normal;font-size:12px;font-weight:700;text-align:center;color:var(--ink)}
+.cols-x{display:grid;grid-template-columns:repeat(8,1fr);gap:6px;font-size:11.5px;color:var(--muted);text-align:center;margin-top:6px}
+.cap{font-size:14px;color:var(--ink-2);min-height:1.4em}
+.insight{display:grid;grid-template-columns:4px 1fr;gap:14px}
+.insight::before{content:"";background:var(--tide);border-radius:4px}
+.insight p{font-size:16px}
+details.tbl summary{font-size:14px;color:var(--ink-2);cursor:pointer;padding:6px 0}
+details.tbl table{width:100%;border-collapse:collapse;font-size:14px;font-variant-numeric:tabular-nums}
+details.tbl td,details.tbl th{padding:6px 4px;border-top:1px solid var(--line);text-align:left}
+
+/* ---------- Toolkit ---------- */
+.feature{position:relative;overflow:hidden;border-radius:var(--r-hero);background:var(--surface);box-shadow:var(--shadow);min-height:220px;border:0;padding:0;text-align:left;width:100%;color:var(--ink)}
+.feature .in{position:relative;padding:20px 20px 22px;display:flex;flex-direction:column;gap:8px;min-height:220px}
+.feature h2{font-size:27px}
+.feature p{max-width:30ch;color:var(--ink-2)}
+.feature .go{margin-top:auto;align-self:flex-start;background:var(--tide);color:var(--tide-ink);font-weight:700;padding:10px 16px;border-radius:999px;font-size:15px}
+.tools{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.tool{border:0;text-align:left;background:var(--surface);box-shadow:inset 0 0 0 1px var(--line);border-radius:18px;padding:16px;display:flex;flex-direction:column;gap:6px;min-height:132px;color:var(--ink)}
+.tool svg{width:26px;height:26px;color:var(--tide)}
+.tool b{font-size:17px;margin-top:4px}
+.tool span{font-size:14px;color:var(--ink-2);line-height:1.35}
+.tool.wide{grid-column:1/-1;flex-direction:row;align-items:center;gap:14px;min-height:0}
+.tool.wide div{display:flex;flex-direction:column;gap:2px}
+.tool.alert svg{color:var(--berry)}
+
+/* ---------- Plan ---------- */
+.plist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+.plist li{padding:12px 14px;border-radius:12px;background:var(--surface-2)}
+.plist .r{font-family:var(--font-display);font-size:19px;line-height:1.3}
+.plist small{display:block;font-size:13px;color:var(--ink-2);font-weight:700;margin-bottom:2px}
+.contact{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.contact a{display:inline-flex;align-items:center;gap:8px;font-weight:700;text-decoration:none;background:var(--tide);color:var(--tide-ink);padding:9px 14px;border-radius:999px;font-size:15px;white-space:nowrap}
+.contact a svg{width:16px;height:16px}
+.refs{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:10px;font-size:14px;color:var(--ink-2)}
+.status{display:flex;gap:10px;align-items:flex-start;font-size:15px}
+.status i{flex:none;width:10px;height:10px;border-radius:50%;margin-top:6px;background:var(--muted)}
+.status.ok i{background:var(--tide)} .status.bad i{background:var(--berry)} .status.wait i{background:var(--lantern)}
+.ed-row{display:flex;flex-direction:column;gap:8px;padding:14px;border-radius:14px;background:var(--surface-2);position:relative}
+.ed-row input,.ed-row textarea{background:var(--surface)}
+.ed-row .flabel{font-size:14px;color:var(--ink-2)}
+.ed-row .rm{align-self:flex-end;border:0;background:none;color:var(--berry);font-weight:700;font-size:14px;padding:4px 0}
+.ed-rows{display:flex;flex-direction:column;gap:10px}
+
+/* ---------- Sheets ---------- */
+#sheetRoot{position:fixed;inset:0;z-index:60;pointer-events:none}
+#sheetRoot.open{pointer-events:auto}
+.scrim{position:absolute;inset:0;background:rgba(4,18,20,.45);opacity:0;transition:opacity .25s ease}
+#sheetRoot.in .scrim{opacity:1}
+.sheet{position:absolute;left:0;right:0;bottom:0;margin:0 auto;max-width:560px;max-height:92vh;max-height:92dvh;background:var(--surface);color:var(--ink);border-radius:26px 26px 0 0;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;
+  padding:10px max(20px,env(safe-area-inset-right)) calc(28px + env(safe-area-inset-bottom)) max(20px,env(safe-area-inset-left));transform:translateY(102%);transition:transform .34s cubic-bezier(.2,.85,.25,1)}
+#sheetRoot.in .sheet{transform:none}
+.sheet.full{top:0;max-height:none;border-radius:0;padding-top:calc(10px + env(safe-area-inset-top))}
+.sheet-top{position:sticky;top:-10px;z-index:3;display:flex;justify-content:space-between;align-items:center;margin:-10px -6px 6px;padding:10px 6px 6px;background:var(--surface)}
+.grab{width:40px;height:5px;border-radius:5px;background:var(--line);margin-left:calc(50% - 20px)}
+.sheet .x{border:0;background:var(--surface-2);width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--ink)}
+.sheet-body{display:flex;flex-direction:column;gap:18px}
+.sheet-body h2{font-size:26px}
+.actions{display:flex;flex-direction:column;gap:10px;margin-top:4px}
+.step{font-size:14px;font-weight:700;color:var(--ink-2)}
+.safety{border-radius:16px;padding:16px;background:var(--berry-soft);display:flex;flex-direction:column;gap:8px;font-size:15px}
+.safety h3{display:flex;gap:8px;align-items:center}
+.safety ul{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:4px}
+.note-box{border-radius:16px;padding:16px;background:var(--surface-2);display:flex;flex-direction:column;gap:6px;font-size:15px}
+.regions{margin-bottom:-4px}
+.line{display:flex;flex-direction:column;gap:6px;padding:14px 0;border-top:1px solid var(--line)}
+.line:first-child{border-top:0}
+.line .nums{display:flex;flex-wrap:wrap;gap:8px}
+.line .nums a{display:inline-flex;align-items:center;gap:8px;padding:9px 14px;border-radius:999px;background:var(--surface-2);color:var(--ink);font-weight:700;text-decoration:none;font-size:16px;font-variant-numeric:tabular-nums}
+.line .nums a svg{width:16px;height:16px;color:var(--tide)}
+.check{display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border-radius:14px;background:var(--surface-2);cursor:pointer;font-size:16px;line-height:1.35}
+.check input{width:24px;height:24px;flex:none;margin:0;accent-color:var(--tide)}
+.checks{display:flex;flex-direction:column;gap:8px}
+.option{display:flex;gap:12px;align-items:flex-start;padding:16px;border-radius:16px;box-shadow:inset 0 0 0 1.5px var(--line);cursor:pointer}
+.option input{width:22px;height:22px;margin:2px 0 0;flex:none;accent-color:var(--tide)}
+.option b{display:block}
+.option span{font-size:15px;color:var(--ink-2)}
+.option.dis{opacity:.55}
+
+/* Surf + breathe */
+.surf{position:relative;border-radius:24px;overflow:hidden;background:var(--surface-2);height:min(46vh,380px);min-height:280px}
+.surf .in{position:relative;height:100%;display:flex;flex-direction:column;padding:20px;gap:8px}
+.clock{font-family:var(--font-display);font-size:64px;line-height:1;font-variant-numeric:tabular-nums}
+.phase{font-size:18px;line-height:1.35;max-width:30ch;min-height:3.2em}
+.breath{margin-top:auto;font-family:var(--font-display);font-size:24px}
+.breath small{font-family:var(--font-body);font-size:15px;color:var(--ink-2);margin-left:6px}
+.bcircle-wrap{display:flex;align-items:center;justify-content:center;height:300px}
+.bcircle{width:110px;height:110px;border-radius:50%;background:var(--foam);box-shadow:0 0 0 2px var(--tide) inset;display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:22px;transition:transform 4s ease-in-out}
+.bcircle.big{transform:scale(2.2)}
+.bnum{font-size:30px}
+.toast{position:fixed;z-index:80;left:50%;bottom:calc(92px + env(safe-area-inset-bottom));transform:translate(-50%,20px);opacity:0;background:var(--ink);color:var(--bg);padding:12px 18px;border-radius:14px;font-weight:700;font-size:15px;transition:all .25s ease;max-width:calc(100% - 32px);pointer-events:none;text-align:center}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+
+/* ---------- Onboarding ---------- */
+#onboard{position:fixed;inset:0;z-index:50;background:var(--bg);overflow-y:auto;-webkit-overflow-scrolling:touch}
+#onboard[hidden]{display:none}
+.ob{max-width:560px;margin:0 auto;min-height:100%;display:flex;flex-direction:column;padding:calc(18px + env(safe-area-inset-top)) max(20px,env(safe-area-inset-right)) calc(24px + env(safe-area-inset-bottom)) max(20px,env(safe-area-inset-left));gap:18px}
+.ob-welcome{position:relative;padding:0;max-width:none}
+.ob-welcome canvas.tide{position:fixed;inset:0;height:100%}
+.ob-welcome .in{position:relative;max-width:560px;margin:0 auto;width:100%;min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;gap:16px;padding:calc(28px + env(safe-area-inset-top)) max(22px,env(safe-area-inset-right)) calc(24px + env(safe-area-inset-bottom)) max(22px,env(safe-area-inset-left))}
+.ob-welcome h1{font-size:46px;line-height:1.02;letter-spacing:-.025em;max-width:10ch;margin-top:18px}
+.ob-welcome .lede{font-size:18px;max-width:34ch}
+.ob-welcome .actions{margin-top:auto}
+.ob-welcome .fine{color:var(--ink-2)}
+.ob-head{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.ob-prog{display:flex;gap:5px;flex:1;max-width:220px}
+.ob-prog i{flex:1;height:4px;border-radius:4px;background:var(--line)}
+.ob-prog i.on{background:var(--tide)}
+.ob .actions{margin-top:auto;padding-top:8px}
+.ob-body{display:flex;flex-direction:column;gap:18px}
+
+@media (prefers-reduced-motion: reduce){
+  *{transition:none!important;animation:none!important}
+  .bcircle{transition:none!important}
+}
+@media (min-width:600px){
+  .hero-num .n{font-size:112px}
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <header class="topbar">
+    <div class="wordmark" aria-label="Ebb">
+      <svg viewBox="0 0 26 26" aria-hidden="true"><circle cx="13" cy="13" r="12" fill="var(--tide)"/><path d="M4 15.5c2.2-2 4.3-2 6.5 0s4.3 2 6.5 0 3.3-1.6 5 0" fill="none" stroke="var(--tide-ink)" stroke-width="2" stroke-linecap="round"/><path d="M6 19.5c1.7-1.4 3.3-1.4 5 0s3.3 1.4 5 0 3.3-1.4 4.5-.4" fill="none" stroke="var(--tide-ink)" stroke-width="1.6" stroke-linecap="round" opacity=".6"/></svg>
+      <span>Ebb</span>
+    </div>
+    <button class="sos" data-act="sos" type="button"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"/></svg>Help now</button>
+  </header>
+  <div id="banner"></div>
+  <main id="view" tabindex="-1"></main>
+  <nav class="tabbar" aria-label="Sections">
+    <button type="button" data-act="tab" data-tab="today"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 12a5 5 0 0 1 10 0"/><path d="M12 3v2M4.5 6.5l1.4 1.4M19.5 6.5l-1.4 1.4"/><path d="M3 16c1.5-1.2 3-1.2 4.5 0s3 1.2 4.5 0 3-1.2 4.5 0 3 1.2 4.5 0"/><path d="M3 20c1.5-1.2 3-1.2 4.5 0s3 1.2 4.5 0 3-1.2 4.5 0 3 1.2 4.5 0"/></svg>Today</button>
+    <button type="button" data-act="tab" data-tab="journey"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M8 3v4M16 3v4M3.5 10h17"/><path d="M8 14h.01M12 14h.01M16 14h.01M8 17h.01M12 17h.01"/></svg>Journey</button>
+    <button type="button" data-act="tab" data-tab="insights"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h16"/><path d="M7 16v-5M12 16V6M17 16v-8"/></svg>Insights</button>
+    <button type="button" data-act="tab" data-tab="toolkit"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3.5"/><path d="M6 6l3.5 3.5M18 6l-3.5 3.5M6 18l3.5-3.5M18 18l-3.5-3.5"/></svg>Toolkit</button>
+    <button type="button" data-act="tab" data-tab="plan"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="4" width="14" height="17" rx="2.5"/><path d="M9 4.5V3h6v1.5"/><path d="M8.5 10h7M8.5 13.5h7M8.5 17h4"/></svg>My plan</button>
+  </nav>
+</div>
+<div id="onboard" hidden></div>
+<div id="sheetRoot"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+'use strict';
+/* ============ Basics ============ */
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const DAY=864e5, HOUR=36e5, MIN=6e4;
+const uid=()=>Math.random().toString(36).slice(2,9)+Date.now().toString(36).slice(-4);
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const avg=a=>a.length?a.reduce((x,y)=>x+y,0)/a.length:0;
+const RM=window.matchMedia?matchMedia('(prefers-reduced-motion: reduce)'):{matches:false};
+const pad=n=>String(n).padStart(2,'0');
+const LOC='en-PH';
+const APP_BUILD=true, APP_VERSION='1.0';
+const IS_IOS=/iPhone|iPad|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+const IS_STANDALONE=(window.matchMedia&&matchMedia('(display-mode: standalone)').matches)||navigator.standalone===true;
+const NEEDS_INSTALL=APP_BUILD&&IS_IOS&&!IS_STANDALONE;
+function dk(t){const d=new Date(t);return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());}
+function parseDk(k){const p=k.split('-').map(Number);return new Date(p[0],p[1]-1,p[2]);}
+function addDays(k,n){const d=parseDk(k);d.setDate(d.getDate()+n);return dk(d);}
+function daysBetween(a,b){return Math.round((parseDk(b)-parseDk(a))/DAY);}
+function toInput(t){const d=new Date(t);return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())+'T'+pad(d.getHours())+':'+pad(d.getMinutes());}
+function fromInput(s){const m=/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/.exec(s||'');if(!m)return null;return new Date(+m[1],+m[2]-1,+m[3],+m[4],+m[5]).getTime();}
+const fmtD=(t,o)=>new Date(t).toLocaleDateString(LOC,Object.assign({month:'short',day:'numeric'},o||{}));
+const fmtDT=t=>new Date(t).toLocaleString(LOC,{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});
+const fmtT=t=>new Date(t).toLocaleTimeString(LOC,{hour:'numeric',minute:'2-digit'});
+function fmtDY(t){const d=new Date(t);return d.toLocaleDateString(LOC,d.getFullYear()===new Date().getFullYear()?{month:'short',day:'numeric'}:{month:'short',day:'numeric',year:'numeric'});}
+function ago(t){const s=(Date.now()-t)/1e3;if(s<60)return 'just now';if(s<3600)return Math.round(s/60)+' min ago';if(s<86400)return Math.round(s/3600)+' h ago';return fmtDY(t);}
+function stable(o){if(o===null||typeof o!=='object')return JSON.stringify(o);if(Array.isArray(o))return '['+o.map(stable).join(',')+']';return '{'+Object.keys(o).filter(k=>o[k]!==undefined).sort().map(k=>JSON.stringify(k)+':'+stable(o[k])).join(',')+'}';}
+const clone=o=>JSON.parse(JSON.stringify(o));
+const telHref=n=>'tel:'+String(n).replace(/[^\d+]/g,'');
+
+/* ============ Content ============ */
+const SUBSTANCES=['Shabu (methamphetamine)','Marijuana (damo)','Alcohol (alak)','Nicotine (yosi or vape)','Rugby or other inhalants','Ecstasy (MDMA)','Cocaine','Sleeping pills or sedatives','Opioids','Prescription pills'];
+const DEPRESSANTS=/Alcohol|Opioid|sedative|Sleeping|Prescription/i;
+const STIMULANTS=/Shabu|methamph|Cocaine|Ecstasy|MDMA/i;
+const TRIGGERS=[{k:'stress',l:'Stress'},{k:'money',l:'Sweldo or cash on hand'},{k:'people',l:'Barkada I used with'},{k:'party',l:'Inuman, party or fiesta'},{k:'family',l:'Family conflict (away sa bahay)'},{k:'work',l:'Work pressure or night shift'},{k:'tired',l:'Puyat or exhausted'},{k:'bored',l:'Boredom (walang magawa)'},{k:'lonely',l:'Loneliness'},{k:'sad',l:'Sadness or problems'},{k:'anger',l:'Anger'},{k:'place',l:'A place linked to use'},{k:'cue',l:'Saw, smelled or was offered it'},{k:'pain',l:'Physical pain'},{k:'other',l:'Something else'}];
+const TRIG=Object.fromEntries(TRIGGERS.map(t=>[t.k,t.l]));
+const HALT=[{k:'h',l:'Hungry'},{k:'a',l:'Angry'},{k:'l',l:'Lonely'},{k:'t',l:'Tired'}];
+const ACTIONS=[{k:'meet',l:'NA meeting or support group'},{k:'rehab',l:'Rehab, CBDRP or aftercare session'},{k:'therapy',l:'Counseling or therapy'},{k:'meds',l:'Took medication as prescribed'},{k:'move',l:'Exercise or a walk'},{k:'family',l:'Time with family'},{k:'talk',l:'Talked to someone supportive'},{k:'pray',l:'Prayer, Mass or church'},{k:'mind',l:'Mindfulness or slow breathing'},{k:'meals',l:'Regular meals'},{k:'joy',l:'Did something I enjoy'},{k:'help',l:'Helped someone'}];
+const MOODS=[{v:'1',l:'Very low'},{v:'2',l:'Low'},{v:'3',l:'Okay'},{v:'4',l:'Good'},{v:'5',l:'Great'}];
+const NEXT24=[{k:'tell',l:'Tell someone I trust'},{k:'pro',l:'Contact my counselor or doctor'},{k:'meet',l:'Go to a meeting'},{k:'remove',l:'Get rid of what’s left'},{k:'routine',l:'Get back to my routine'},{k:'rest',l:'Eat, rest and sleep'}];
+const WARN_E=[{k:'iso',l:'Isolating, or skipping support or meetings'},{k:'bottle',l:'Keeping my feelings to myself'},{k:'sleep',l:'Sleeping badly'},{k:'eat',l:'Skipping meals or eating poorly'},{k:'mood',l:'Anxious, irritable, or up and down'},{k:'others',l:'Focusing on other people’s problems instead of mine'},{k:'nofun',l:'No time for rest or anything I enjoy'}];
+const WARN_M=[{k:'think',l:'Thinking about people, places or things linked to using'},{k:'glam',l:'Remembering past use as better than it was'},{k:'lie',l:'Lying, or playing down what’s going on'},{k:'bargain',l:'Bargaining with myself: “just once”, “only on weekends”'},{k:'plan',l:'Thinking about how I could use without anyone knowing'},{k:'friends',l:'Wanting to see people I used with'},{k:'crave',l:'Cravings getting stronger or more frequent'}];
+const WARN_P=[{k:'steps',l:'I’ve taken a step toward using: contacted a dealer, went to a place, or set money aside'}];
+const STAGES={
+  steady:{t:'Steady',cls:'ok',d:'Few warning signs this week. Keep doing what’s working.',acts:['Keep your routines: sleep, meals, support','Notice what helped this week and plan more of it']},
+  emotional:{t:'Emotional relapse signs',cls:'warn',d:'Relapse often starts here, before you even think about using. The answer is self-care.',acts:['Protect sleep and eat regular meals','Tell someone how you really feel','Go to a meeting or contact your counselor','Do one thing this week just for you']},
+  mental:{t:'Mental relapse signs',cls:'hi',d:'Part of you wants to use and part of you doesn’t. This is the moment to reach out and use your craving tools.',acts:['Tell someone you’re having urges','Play the tape forward','Ride out urges with the timer: most pass in 15 to 30 minutes','Stay away from high-risk people and places for now','Take it one day, or one hour, at a time']},
+  act:{t:'Act now',cls:'act',d:'You’ve started moving toward use. It is much easier to stop now than later.',acts:['Leave the situation if you can','Call someone on your list or a helpline right now','Put distance between you and the substance','Use the Help now button']}
+};
+const MILES=[
+  {h:24,l:'24 hours',n:'Early days are often when cravings are strongest. Every urge you ride out is practice for the next one.',s:'melemis'},
+  {h:72,l:'3 days',n:'Withdrawal differs by substance. Stopping alcohol or benzodiazepines suddenly can be dangerous, so get medical help if symptoms feel severe.'},
+  {h:168,l:'1 week',n:'Hungry, angry, lonely and tired all make urges harder to resist. A quick HALT check points to what you need.',s:'kretchman'},
+  {h:336,l:'2 weeks',n:'Poor sleep is linked to relapse across many substances. Protecting your sleep protects your recovery.',s:'brower'},
+  {h:720,l:'30 days',n:'Most urges last less than 15 to 30 minutes. You now have a month of proof that they pass.',s:'melemis'},
+  {h:1440,l:'60 days',n:'Relapse usually begins weeks before use, when self-care slips. Keep up the weekly warning-signs check.',s:'melemis'},
+  {h:2160,l:'90 days',n:'In treatment research, most people reach the threshold of significant improvement at about three months in treatment.',s:'nida'},
+  {h:4392,l:'6 months',n:'In a randomized trial, people who learned relapse-prevention skills had lower relapse risk at 6 months than people in usual care.',s:'bowen'},
+  {h:8760,l:'1 year',n:'Brain scans of people recovering from methamphetamine showed dopamine transporters substantially recovering after 12 to 17 months without use.',s:'volkow'},
+  {h:13140,l:'18 months',n:'Recovery builds on itself. A study that followed 1,162 people for eight years linked longer abstinence with gains in other parts of life.',s:'dennis'},
+  {h:17520,l:'2 years',n:'Keep the habits that got you here. Recovery is a new way of living, and it keeps paying off.',s:'melemis'},
+  {h:43824,l:'5 years',n:'Researchers place the point where the risk of future relapse falls below about 15% at 4 to 5 years of continuous recovery.',s:'white'}
+];
+const TIPS=[
+  {t:'Relapse rates for addiction, 40 to 60%, are similar to those for other chronic illnesses like hypertension and asthma. A slip means the plan needs adjusting. It doesn’t mean recovery failed.',s:'mclellan'},
+  {t:'Relapse usually starts as emotional relapse: poor sleep, isolating, bottling things up. It is easiest to turn around at that stage.',s:'melemis'},
+  {t:'Most urges last less than 15 to 30 minutes. Delay, distract, and let the wave pass.',s:'melemis'},
+  {t:'How you explain a slip matters. Treating it as a fixable mistake, instead of proof that you’re weak, makes a full relapse less likely.',s:'larimer'},
+  {t:'Hungry, angry, lonely, tired. Each one makes urges harder to resist. A 30-second HALT check can show you what you actually need.',s:'kretchman'},
+  {t:'Poor sleep is linked to higher relapse risk across many substances. Protecting sleep protects recovery.',s:'brower'},
+  {t:'In a 12-month trial, people who learned mindfulness-based relapse prevention had fewer drug-use days than people in standard programs.',s:'bowen'},
+  {t:'Recovery means building a life where it is easier not to use: new routines, new people, new ways to relax.',s:'melemis'},
+  {t:'Many relapses happen when there’s an opportunity and it feels like no one will find out. Plan ahead for those moments.',s:'melemis'},
+  {t:'In a study of people quitting smoking, stronger guilt after a lapse was linked to a faster slide back into regular use. Self-compassion is a relapse-prevention skill.',s:'kirchner'},
+  {t:'Contingency management, which rewards drug-free milestones, has the strongest evidence of any treatment for shabu and other stimulants. Plan a reward for your next milestone.',s:'tip33'},
+  {t:'In a national survey, Filipinos named the household as the most helpful source of support for people who use drugs. Let someone at home in on your plan.',s:'ddbsurvey'},
+  {t:'Many cities and municipalities run DOH-guided community-based drug rehabilitation. Ask your city or municipal health office or rural health unit.',s:'cbdrp'}
+];
+const SRC={
+  melemis:{a:'Melemis, 2015',t:'Melemis SM. Relapse prevention and the five rules of recovery. Yale J Biol Med. 2015;88(3):325–332.',u:'https://pmc.ncbi.nlm.nih.gov/articles/PMC4553654/'},
+  larimer:{a:'Larimer, Palmer & Marlatt, 1999',t:'Larimer ME, Palmer RS, Marlatt GA. Relapse prevention: an overview of Marlatt’s cognitive-behavioral model. Alcohol Res Health. 1999;23(2):151–160.',u:'https://pubs.niaaa.nih.gov/publications/arh23-2/151-160.pdf'},
+  bowen:{a:'Bowen et al., 2014',t:'Bowen S, Witkiewitz K, Clifasefi SL, et al. Relative efficacy of mindfulness-based relapse prevention, standard relapse prevention, and treatment as usual for substance use disorders: a randomized clinical trial. JAMA Psychiatry. 2014;71(5):547–556.',u:'https://pubmed.ncbi.nlm.nih.gov/24647726/'},
+  kirchner:{a:'Kirchner, Shiffman & Wileyto, 2012',t:'Kirchner TR, Shiffman S, Wileyto EP. Relapse dynamics during smoking cessation: recurrent abstinence violation effects and lapse-relapse progression. J Abnorm Psychol. 2012;121(1):187–197.',u:'https://pmc.ncbi.nlm.nih.gov/articles/PMC3296289/'},
+  mclellan:{a:'McLellan et al., 2000',t:'McLellan AT, Lewis DC, O’Brien CP, Kleber HD. Drug dependence, a chronic medical illness: implications for treatment, insurance, and outcomes evaluation. JAMA. 2000;284(13):1689–1695.',u:'https://pubmed.ncbi.nlm.nih.gov/11015800/'},
+  brower:{a:'Brower & Perron, 2010',t:'Brower KJ, Perron BE. Sleep disturbance as a universal risk factor for relapse in addictions to psychoactive substances. Med Hypotheses. 2010;74(5):928–933.',u:'https://pmc.ncbi.nlm.nih.gov/articles/PMC2850945/'},
+  kretchman:{a:'Kretchman, 2026',t:'Kretchman D. HALT: Relapse prevention to resilience. Adv Drug Alcohol Res. 2026;5:15477.',u:'https://www.frontierspartnerships.org/journals/advances-in-drug-and-alcohol-research/articles/10.3389/adar.2025.15477'},
+  volkow:{a:'Volkow et al., 2001',t:'Volkow ND, Chang L, Wang GJ, et al. Loss of dopamine transporters in methamphetamine abusers recovers with protracted abstinence. J Neurosci. 2001;21(23):9414–9418.',u:'https://pmc.ncbi.nlm.nih.gov/articles/PMC6763886/'},
+  nida:{a:'NIDA',t:'National Institute on Drug Abuse. Principles of Drug Addiction Treatment: A Research-Based Guide.',u:'https://nida.nih.gov/publications/principles-drug-addiction-treatment-research-based-guide-third-edition'},
+  dennis:{a:'Dennis, Foss & Scott, 2007',t:'Dennis ML, Foss MA, Scott CK. An eight-year perspective on the relationship between the duration of abstinence and other aspects of recovery. Eval Rev. 2007;31(6):585–612.',u:'https://journals.sagepub.com/doi/10.1177/0193841X07307771'},
+  white:{a:'White, 2013',t:'White WL. Recovery durability: the 5-year set point. Chestnut Health Systems, 2013.',u:'https://chestnut.org/li/william-white-library/blogs/article/2013/07/recovery-durability-the-5-year-set-point'},
+  tip33:{a:'SAMHSA TIP 33',t:'SAMHSA. Treatment Improvement Protocol 33: Treatment for Stimulant Use Disorders, chapter on treatment approaches.',u:'https://www.ncbi.nlm.nih.gov/books/NBK576540/'},
+  ddbsurvey:{a:'DDB 2019 survey',t:'Dangerous Drugs Board. 2019 National Household Survey on the Patterns and Trends of Drug Abuse (Philippine News Agency report).',u:'https://www.pna.gov.ph/articles/1118715'},
+  ddbadmit:{a:'DDB 2022 data',t:'Dangerous Drugs Board treatment admission data, 2022 (Manila Bulletin report).',u:'https://mb.com.ph/2023/9/3/shabu-ph-most-abused-illegal-drug-in-2022-says-ddb'},
+  cbdrp:{a:'DOH via PIA, 2024',t:'Philippine Information Agency. DOH certifies over 100 community-based drug rehab programs in CALABARZON, 2024.',u:'https://pia.gov.ph/news/2024/03/05/doh-certifies-over-100-community-based-drug-rehab-programs-in-calabarzon'},
+  ddb:{a:'Dangerous Drugs Board',t:'Dangerous Drugs Board. Treatment and Rehabilitation: help with petitions for voluntary submission (Sec. 54) and compulsory confinement (Sec. 61) under RA 9165.',u:'https://ddb.gov.ph/treatment-and-rehabilitation/'},
+  ra9165:{a:'RA 9165 summary',t:'Republic Act No. 9165, Comprehensive Dangerous Drugs Act of 2002: voluntary and compulsory submission (Secs. 54 to 64) and confidentiality of records.',u:'https://www.digest.ph/laws/comprehensive-dangerous-drugs-act-of-2002'},
+  philhealth:{a:'PhilHealth, 2016',t:'PhilHealth Circular 2016-0030, Medical Detoxification Package (Philippine Daily Inquirer report).',u:'https://newsinfo.inquirer.net/?p=848824'},
+  datrc:{a:'PhilHealth list, 2025',t:'PhilHealth. List of Accredited Drug Abuse Treatment and Rehabilitation Centers, CY 2025 (updated May 31, 2025).',u:'https://www.philhealth.gov.ph/partners/providers/facilities/accredited/DATRC_053125.pdf'},
+  oregon:{a:'Oregon Health Authority, 2022',t:'Oregon Health Authority. Methamphetamine overdose overview, 2022.',u:'https://www.oregon.gov/oha/PH/HEALTHYENVIRONMENTS/TRACKINGASSESSMENT/ENVIRONMENTALHEALTHASSESSMENT/Documents/Methamphetamine-Overdose-Overview_Oregon_Dec2022.pdf'},
+  na:{a:'Narcotics Anonymous',t:'Narcotics Anonymous. Meeting search.',u:'https://www.na.org/meetingsearch/'},
+  samhsa:{a:'SAMHSA',t:'SAMHSA. Opioid Overdose Prevention Toolkit.',u:'https://portal.ct.gov/-/media/dmhas/forms/mat/samhsaoverdosetoolkitpdf.pdf'}
+};
+const cite=k=>SRC[k]?`<p class="src">Source: <a href="${SRC[k].u}" target="_blank" rel="noopener">${esc(SRC[k].a)}</a></p>`:'';
+const LINES={
+  ph:{name:'Philippines',items:[
+    {n:'Emergency',d:'Call for a possible overdose or if anyone is in danger.',nums:['911']},
+    {n:'NCMH Crisis Hotline',d:'National Center for Mental Health. Free and open 24/7.',nums:['1553','0917 899 8727','0966 351 4518','0919 057 1553']},
+    {n:'DOH Substance Abuse Helpline',d:'Department of Health. Monday to Friday, 8 AM to 5 PM.',nums:['1550']},
+    {n:'HOPELINE',d:'Emotional crisis support, 24/7.',nums:['(02) 8804 4673','0917 558 4673','2919']},
+    {n:'DOH Treatment and Rehabilitation Center, Bicutan',d:'Government drug treatment in Taguig, with outpatient and aftercare services.',nums:['(02) 8401 9056','0918 486 6614']}]},
+  other:{name:'Abroad',items:[
+    {n:'Your local emergency number',d:'Call for a possible overdose or if anyone is in danger.',nums:[]},
+    {n:'Find A Helpline',d:'Free, confidential helplines listed by country. Useful if you live or work abroad.',link:'https://findahelpline.com'}]},
+  us:{name:'United States',items:[
+    {n:'Emergency',d:'Call for a possible overdose or if anyone is in danger.',nums:['911']},
+    {n:'SAMHSA National Helpline',d:'Free, confidential treatment referral, 24/7, in English and Spanish.',nums:['1-800-662-4357']},
+    {n:'988 Suicide & Crisis Lifeline',d:'Call or text, 24/7.',nums:['988']},
+    {n:'Never Use Alone',d:'If you are going to use, a volunteer stays on the line and sends help if you stop responding.',nums:['1-800-484-3731']}]}
+};
+
+/* ============ Icons ============ */
+const I={
+  wave:'<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12c2-2 4-2 6 0s4 2 6 0 4-2 6 0"/><path d="M2 17c2-2 4-2 6 0s4 2 6 0 4-2 6 0"/><path d="M8 7c1.5-1.4 3-1.4 4.5 0"/></svg>',
+  check:'<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7"/></svg>',
+  x:'<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+  phone:'<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"/></svg>',
+  breath:'<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="7" opacity=".6"/><circle cx="12" cy="12" r="10" opacity=".3"/></svg>',
+  eye:'<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/></svg>',
+  halt:'<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.2 3h7.6L21 8.2v7.6L15.8 21H8.2L3 15.8V8.2z"/><path d="M9 12h6"/></svg>',
+  tape:'<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.3-5.6"/><path d="M4 4v4h4"/><path d="M12 8v4l3 2"/></svg>',
+  clock:'<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M9.5 2.5h5"/></svg>',
+  people:'<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 4.6a3.5 3.5 0 0 1 0 6.8M18.5 20a6.5 6.5 0 0 0-2.3-5"/></svg>',
+  rules:'<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3z"/><path d="M5 17a3 3 0 0 1 3-3h11"/><path d="M9 8h6"/></svg>',
+  shield:'<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M12 8v5M12 16h.01"/></svg>',
+  list:'<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11"/><path d="M4 6l1 1 2-2M4 12l1 1 2-2M4 18l1 1 2-2"/></svg>',
+  drop:'<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/></svg>',
+  pulse:'<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12h4l2-5 4 10 2-5h6"/></svg>',
+  pen:'<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/></svg>',
+  gift:'<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="8.5" width="17" height="4" rx="1"/><path d="M5 12.5V20h14v-7.5M12 8.5V20"/><path d="M12 8.5C10.5 5 6.5 4.5 6.5 7S10 8.5 12 8.5zm0 0c1.5-3.5 5.5-4 5.5-1.5S14 8.5 12 8.5z"/></svg>',
+  home:'<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 11L12 4l8.5 7"/><path d="M6 9.5V20h12V9.5"/><path d="M10 20v-5h4v5"/></svg>',
+  ground:'<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21V11"/><path d="M12 11c0-4 3-6 7-6 0 4-3 6-7 6zM12 14c0-3-2.5-5-6-5 0 3 2.5 5 6 5z"/><path d="M6 21h12"/></svg>'
+};
+
+/* ============ State & local storage ============ */
+const KEY='ebb-recovery-v1';
+let LOCAL_OK=false, S=null;
+function testLocal(){try{const k='__ebb_t';localStorage.setItem(k,'1');localStorage.removeItem(k);return true;}catch(e){return false;}}
+function loadLocal(){if(!LOCAL_OK)return null;try{const s=localStorage.getItem(KEY);return s?JSON.parse(s):null;}catch(e){return null;}}
+function saveLocal(){if(!LOCAL_OK)return false;try{localStorage.setItem(KEY,JSON.stringify(S));return true;}catch(e){return false;}}
+function blank(){return {v:1,profile:null,settings:{sync:false,region:'ph',lastMile:0},plan:{name:'',spend:0,reasons:[],contacts:[],risks:[],signs:[],lines:[],rewards:{},triggers:null,actions:null,trigOld:{},tape:{hour:'',tomorrow:'',week:'',sober:''}},checkins:{},cravings:{},lapses:{},warn:{},demo:false,coreU:0,u:0};}
+function normalize(x){
+  const o=Object.assign(blank(),x||{});
+  o.settings=Object.assign(blank().settings,o.settings||{});
+  o.plan=Object.assign(blank().plan,o.plan||{});
+  o.plan.tape=Object.assign(blank().plan.tape,o.plan.tape||{});
+  ['checkins','cravings','lapses','warn'].forEach(k=>{if(!o[k]||typeof o[k]!=='object'||Array.isArray(o[k]))o[k]={};});
+  ['reasons','contacts','risks','signs','lines'].forEach(k=>{if(!Array.isArray(o.plan[k]))o.plan[k]=[];});
+  ['rewards','trigOld'].forEach(k=>{if(!o.plan[k]||typeof o.plan[k]!=='object'||Array.isArray(o.plan[k]))o.plan[k]={};});
+  return o;
+}
+function save(){S.u=Date.now();saveLocal();scheduleSync();}
+function touchCore(){S.coreU=Date.now();}
+const live=m=>Object.values(m||{}).filter(x=>x&&!x.del);
+function trigList(){return S&&Array.isArray(S.plan.triggers)&&S.plan.triggers.length?S.plan.triggers:TRIGGERS;}
+function trigL(k){const f=trigList().find(t=>t.k===k);return f?f.l:((S&&S.plan.trigOld||{})[k]||TRIG[k]||k);}
+function actList(){return S&&Array.isArray(S.plan.actions)&&S.plan.actions.length?S.plan.actions:ACTIONS;}
+const peso=n=>'₱'+Math.round(n).toLocaleString(LOC);
+function greeting(){const h=new Date().getHours();return h<12?'Magandang umaga':h<18?'Magandang hapon':'Magandang gabi';}
+const heroLvl=p=>.1+.17*clamp(p,0,1);
+
+/* ============ Derived numbers ============ */
+function lapsesSorted(){return live(S.lapses).sort((a,b)=>a.t-b.t);}
+function stats(now){
+  now=now||Date.now();
+  const start=S.profile.start;
+  const ut=[start].concat(lapsesSorted().map(l=>l.t).filter(t=>t>start&&t<=now)).sort((a,b)=>a-b);
+  const last=ut[ut.length-1];
+  const streakMs=Math.max(0,now-last);
+  let longest=streakMs; for(let i=1;i<ut.length;i++)longest=Math.max(longest,ut[i]-ut[i-1]);
+  const startK=dk(start), todayK=dk(now);
+  const total=Math.max(0,daysBetween(startK,todayK));
+  const useDays=new Set(); lapsesSorted().forEach(l=>{const k=dk(l.t);if(l.t>start&&l.t<=now&&k>startK)useDays.add(k);});
+  const clean=Math.max(0,total-useDays.size);
+  return {last,streakMs,longest,total,clean,used:useDays.size,slips:ut.length-1,startK,todayK,useDays};
+}
+function fmtStreak(ms){
+  const d=Math.floor(ms/DAY),h=Math.floor(ms%DAY/HOUR),m=Math.floor(ms%HOUR/MIN);
+  if(d>=1)return {big:d,unit:d===1?'day':'days',small:h+' h '+m+' min'};
+  if(h>=1)return {big:h,unit:h===1?'hour':'hours',small:m+' min'};
+  return {big:m,unit:m===1?'minute':'minutes',small:'The clock is running.'};
+}
+function dur(ms){if(ms>=DAY*1.5){const d=Math.round(ms/DAY);return d+' days';}if(ms>=DAY)return '1 day';const h=Math.max(1,Math.round(ms/HOUR));return h+(h===1?' hour':' hours');}
+function nextMile(ms){const hrs=ms/HOUR;let prev=0;for(const m of MILES){if(hrs<m.h)return {next:m,prevH:prev,prog:(hrs-prev)/(m.h-prev),leftMs:m.h*HOUR-ms};prev=m.h;}return {next:null,prevH:prev,prog:1,leftMs:0};}
+function intensityWord(v){v=+v;return v===0?'None':v<=2?'Mild':v<=5?'Moderate':v<=8?'Strong':'Intense';}
+function dayCravings(k){return live(S.cravings).filter(c=>dk(c.t)===k);}
+function checkin(k){const c=S.checkins[k];return c&&!c.del?c:null;}
+function stageOf(e,m,p){return p?'act':m>=2?'mental':(m===1||e>=3)?'emotional':'steady';}
+function lastWarn(){return live(S.warn).sort((a,b)=>b.t-a.t)[0]||null;}
+
+/* ============ Private backup (claude db) ============ */
+const Cloud={db:null,uid:null,status:'checking',sync:'idle',err:null,last:0,busy:false,dirty:new Set(),hash:{},timer:null,retry:null};
+let cloudDone; const CloudReady=new Promise(r=>cloudDone=r);
+function withTimeout(p,ms){return Promise.race([p,new Promise((_,rej)=>setTimeout(()=>rej({code:'timeout'}),ms))]);}
+async function initCloud(){
+  if(APP_BUILD){Cloud.status='absent';cloudDone();return;}
+  try{
+    let t0=Date.now();
+    while(!(window.claude&&typeof window.claude.use==='function')){if(Date.now()-t0>4000)throw 0;await sleep(200);}
+    const both=await withTimeout(Promise.all([window.claude.use('db'),window.claude.use('user')]),12000);
+    const db=both[0],user=both[1];
+    if(!db||!user)throw 0;
+    const id=await withTimeout(user.id(),8000);
+    if(!id)throw 0;
+    Cloud.db=db;Cloud.uid=id;Cloud.status='ready';
+  }catch(e){Cloud.status='absent';}
+  cloudDone();refreshSyncUI();
+  if(Cloud.status==='ready'&&S.profile&&S.settings.sync&&!S.demo)pull();
+}
+const userCol=()=>Cloud.db.collection('data/users/'+Cloud.uid);
+function buildDocs(){
+  const out={core:{profile:S.profile,plan:S.plan,settings:{region:S.settings.region||null,lastMile:S.settings.lastMile||0},u:S.coreU||0}};
+  const put=(k,id,obj,t)=>{const key='m-'+dk(t).slice(0,7);(out[key]=out[key]||{checkins:{},cravings:{},lapses:{},warn:{}})[k][id]=obj;};
+  Object.entries(S.checkins).forEach(([id,o])=>put('checkins',id,o,parseDk(id).getTime()));
+  ['cravings','lapses','warn'].forEach(k=>Object.entries(S[k]).forEach(([id,o])=>put(k,id,o,o.t)));
+  return clone(out);
+}
+function mergeCore(r){
+  if(!r||!r.u||!r.profile)return false;
+  if(r.u>(S.coreU||0)){S.profile=r.profile;S.plan=normalize({plan:r.plan}).plan;const sync=S.settings.sync;S.settings=Object.assign({},S.settings,r.settings||{},{sync});S.coreU=r.u;return true;}
+  return false;
+}
+function mergeMonth(r){
+  let ch=false;
+  ['checkins','cravings','lapses','warn'].forEach(k=>{const m=(r&&r[k])||{};Object.keys(m).forEach(id=>{const a=S[k][id],b=m[id];if(b&&(!a||(b.u||0)>(a.u||0))){S[k][id]=b;ch=true;}});});
+  return ch;
+}
+async function pull(){
+  if(Cloud.status!=='ready'||!S.settings.sync||S.demo)return;
+  Cloud.sync='syncing';refreshSyncUI();
+  try{
+    const snap=await withTimeout(userCol().get(),12000);
+    let changed=false;const remote={};
+    snap.docs.forEach(d=>{if(!d.exists)return;const data=clone(d.data());remote[d.id]=data;
+      if(d.id==='core')changed=mergeCore(data)||changed;else if(d.id.indexOf('m-')===0)changed=mergeMonth(data)||changed;});
+    Object.keys(remote).forEach(id=>Cloud.hash[id]=stable(remote[id]));
+    if(changed){saveLocal();if(S.profile&&$('#onboard').hidden)render();}
+    const docs=buildDocs();Object.keys(docs).forEach(id=>{if(Cloud.hash[id]!==stable(docs[id]))Cloud.dirty.add(id);});
+    Cloud.sync='ok';Cloud.last=Date.now();Cloud.err=null;
+    await flush();
+    return changed;
+  }catch(e){Cloud.sync='error';Cloud.err=e&&e.code;refreshSyncUI();return false;}
+}
+function scheduleSync(){
+  if(Cloud.status!=='ready'||!S.settings.sync||S.demo||!S.profile)return;
+  clearTimeout(Cloud.timer);
+  Cloud.timer=setTimeout(()=>{const docs=buildDocs();Object.keys(docs).forEach(id=>{if(Cloud.hash[id]!==stable(docs[id]))Cloud.dirty.add(id);});flush();},1200);
+}
+async function flush(){
+  if(Cloud.busy||Cloud.status!=='ready'||!S.settings.sync||S.demo)return;
+  if(!Cloud.dirty.size){refreshSyncUI();return;}
+  Cloud.busy=true;Cloud.sync='syncing';refreshSyncUI();
+  let id=null;
+  try{
+    const docs=buildDocs();
+    while(Cloud.dirty.size){
+      id=Cloud.dirty.values().next().value;Cloud.dirty.delete(id);
+      const body=docs[id]||{checkins:{},cravings:{},lapses:{},warn:{}};
+      await withTimeout(userCol().doc(id).set(body),15000);
+      Cloud.hash[id]=stable(body);id=null;
+    }
+    Cloud.sync='ok';Cloud.last=Date.now();Cloud.err=null;
+  }catch(e){
+    if(id)Cloud.dirty.add(id);
+    Cloud.sync='error';Cloud.err=(e&&e.code)||'error';
+    clearTimeout(Cloud.retry);
+    if(Cloud.err!=='invalid_argument'&&Cloud.err!=='quota_exceeded')Cloud.retry=setTimeout(flush,20000);
+  }
+  Cloud.busy=false;refreshSyncUI();
+}
+async function deleteCloud(){
+  if(Cloud.status!=='ready')return;
+  try{const snap=await withTimeout(userCol().get(),12000);for(const d of snap.docs){await withTimeout(userCol().doc(d.id).delete(),12000);}Cloud.hash={};Cloud.dirty.clear();return true;}catch(e){return false;}
+}
+function syncLine(){
+  if(S.demo)return {c:'wait',t:'Private backup is off while you explore sample data.'};
+  if(Cloud.status==='checking')return {c:'wait',t:'Checking whether private backup is available here…'};
+  if(Cloud.status==='absent')return {c:'',t:'Private backup isn’t available in this view. Open Ebb while signed in to Claude to use it.'};
+  if(!S.settings.sync)return {c:'',t:'Private backup is off.'};
+  if(Cloud.sync==='syncing')return {c:'wait',t:'Backing up…'};
+  if(Cloud.sync==='error'){const m=Cloud.err==='quota_exceeded'?'Your backup is full. Copy a backup code, then delete old entries.':Cloud.err==='timeout'?'Couldn’t reach your backup. It will try again.':'Backup hit a problem. It will try again.';return {c:'bad',t:m};}
+  return {c:'ok',t:'Backed up to your Claude account'+(Cloud.last?' · '+ago(Cloud.last):'')+'. Only you can see it.'};
+}
+function refreshSyncUI(){
+  const el=$('#syncStatus');if(el){const s=syncLine();el.className='status '+s.c;el.innerHTML='<i></i><span>'+esc(s.t)+'</span>';}
+  const b=$('#syncBtns');if(b)b.innerHTML=syncButtons();
+  if(OB&&OB.step===5)renderOB();
+}
+function syncButtons(){
+  if(S.demo||Cloud.status!=='ready')return '';
+  return S.settings.sync?'<div class="row"><button class="btn btn-quiet" data-act="sync-now">Back up now</button><button class="btn btn-line" data-act="sync-off">Turn off</button></div>'
+    :'<button class="btn btn-primary btn-block" data-act="sync-on">Turn on private backup</button>';
+}
+
+/* ============ Tide canvas ============ */
+const Tides=new Set();
+function makeTide(canvas,levelFn,opt){
+  opt=opt||{};
+  const ctx=canvas.getContext('2d');let w=0,h=0,raf=0,alive=true,cols=null,n=0;const t0=performance.now();
+  function size(){const r=canvas.getBoundingClientRect();const d=Math.min(2,window.devicePixelRatio||1);w=r.width;h=r.height;if(!w||!h)return;canvas.width=Math.round(w*d);canvas.height=Math.round(h*d);ctx.setTransform(d,0,0,d,0,0);}
+  function readCols(){const cs=getComputedStyle(canvas);cols={foam:cs.getPropertyValue('--foam').trim()||'#CDE7E1',tide:cs.getPropertyValue('--tide').trim()||'#12786F'};}
+  const layers=[{a:.42,amp:12,k:1.5,s:.28,ph:0,dy:-8},{a:.68,amp:8,k:1.05,s:-.38,ph:2.1,dy:6},{a:1,amp:6,k:.72,s:.52,ph:4.2,dy:20}];
+  function draw(t){
+    if(!w)size();if(!w)return;if(!cols||n%120===0)readCols();n++;
+    ctx.clearRect(0,0,w,h);
+    const o=levelFn(t)||{};const L=o.level==null?.4:o.level,A=o.amp==null?1:o.amp;const base=h*(1-L);
+    layers.forEach((ly,i)=>{
+      const pts=[];
+      for(let x=0;x<=w+6;x+=6){const u=x/w;pts.push([x,base+ly.dy+Math.sin(u*Math.PI*2*ly.k+t*ly.s+ly.ph)*ly.amp*A+Math.sin(u*Math.PI*5.3*ly.k-t*ly.s*1.7)*ly.amp*.3*A]);}
+      ctx.beginPath();ctx.moveTo(0,h);pts.forEach(p=>ctx.lineTo(p[0],p[1]));ctx.lineTo(w,h);ctx.closePath();
+      ctx.globalAlpha=ly.a;ctx.fillStyle=cols.foam;ctx.fill();
+      if(i===0||i===2){ctx.beginPath();pts.forEach((p,j)=>j?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]));ctx.globalAlpha=i===0?.55:.35;ctx.strokeStyle=cols.tide;ctx.lineWidth=i===0?1.6:1.2;ctx.stroke();}
+    });
+    ctx.globalAlpha=1;
+  }
+  function loop(now){if(!alive)return;if(!canvas.isConnected){api.destroy();return;}draw((now-t0)/1000);raf=requestAnimationFrame(loop);}
+  const api={
+    start(){cancelAnimationFrame(raf);if(RM.matches||opt.still){size();draw(2);return;}raf=requestAnimationFrame(loop);},
+    stop(){cancelAnimationFrame(raf);},
+    destroy(){alive=false;cancelAnimationFrame(raf);Tides.delete(api);},
+    resize(){size();if(RM.matches||opt.still)draw(2);},
+    redraw(){readCols();if(RM.matches||opt.still)draw(2);}
+  };
+  api.canvas=canvas;Tides.add(api);size();api.start();return api;
+}
+window.addEventListener('resize',()=>Tides.forEach(t=>t.resize()));
+document.addEventListener('visibilitychange',()=>{
+  if(document.hidden){Tides.forEach(t=>t.stop());}
+  else{Tides.forEach(t=>t.start());if(S&&S.profile){tick();if(S.settings.sync&&Date.now()-Cloud.last>60000)pull();}}
+});
+if(window.matchMedia){const mq=matchMedia('(prefers-color-scheme: dark)');(mq.addEventListener?mq.addEventListener('change',()=>Tides.forEach(t=>t.redraw())):mq.addListener&&mq.addListener(()=>Tides.forEach(t=>t.redraw())));}
+new MutationObserver(()=>Tides.forEach(t=>t.redraw())).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+
+/* ============ UI helpers ============ */
+function toast(msg){const t=$('#toast');t.textContent=msg;t.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(()=>t.classList.remove('on'),2600);}
+const Sheet={cleanup:null,tok:0};
+function openSheet(build,opt){
+  opt=opt||{};closeSheet(true);Sheet.tok++;
+  const root=$('#sheetRoot');
+  root.innerHTML='<div class="scrim" data-act="sheet-close"></div><section class="sheet'+(opt.full?' full':'')+'" role="dialog" aria-modal="true" aria-label="'+esc(opt.label||'Panel')+'"><div class="sheet-top"><span class="grab" aria-hidden="true"></span><button type="button" class="x" data-act="sheet-close" aria-label="Close">'+I.x+'</button></div><div class="sheet-body"></div></section>';
+  root.classList.add('open');document.body.classList.add('locked');
+  const body=$('.sheet-body',root);build(body);
+  requestAnimationFrame(()=>requestAnimationFrame(()=>root.classList.add('in')));
+  setTimeout(()=>{const h=$('.sheet h2',root);if(h){h.setAttribute('tabindex','-1');h.focus({preventScroll:true});}},60);
+  return body;
+}
+function sheetScrollTop(){const s=$('#sheetRoot .sheet');if(s)s.scrollTop=0;}
+function closeSheet(immediate){
+  const root=$('#sheetRoot');if(!root.classList.contains('open'))return;
+  if(Sheet.cleanup){try{Sheet.cleanup();}catch(e){}Sheet.cleanup=null;}
+  root.classList.remove('in');const tok=++Sheet.tok;
+  const done=()=>{if(tok!==Sheet.tok)return;root.innerHTML='';root.classList.remove('open');if($('#onboard').hidden)document.body.classList.remove('locked');};
+  if(immediate||RM.matches)done();else setTimeout(done,300);
+}
+function confirmSheet(o){
+  openSheet(b=>{
+    b.innerHTML='<h2>'+esc(o.title)+'</h2>'+(o.body?'<p class="lede">'+o.body+'</p>':'')+'<div class="actions"><button class="btn '+(o.danger?'btn-danger':'btn-primary')+' btn-block" id="cOk">'+esc(o.ok||'Confirm')+'</button><button class="btn btn-line btn-block" data-act="sheet-close">Cancel</button></div>';
+    $('#cOk',b).onclick=()=>{closeSheet(true);o.onOk();};
+  },{label:o.title});
+}
+function chipsHTML(group,items,selected,multi){
+  multi=multi!==false;const sel=[].concat(selected==null?[]:selected).map(String);
+  return '<div class="chips" data-group="'+group+'" data-multi="'+(multi?1:0)+'" role="group">'+items.map(it=>{const v=String(it.k!=null?it.k:it.v);return '<button type="button" class="chip" data-v="'+esc(v)+'" aria-pressed="'+sel.includes(v)+'">'+esc(it.l)+'</button>';}).join('')+'</div>';
+}
+function segHTML(group,items,selected){return chipsHTML(group,items,selected,false).replace('class="chips"','class="seg"');}
+function bindChips(root,group,cb){
+  const g=$('[data-group="'+group+'"]',root);if(!g)return;
+  g.addEventListener('click',e=>{const b=e.target.closest('.chip');if(!b)return;const multi=g.dataset.multi==='1';
+    if(multi)b.setAttribute('aria-pressed',b.getAttribute('aria-pressed')!=='true');else $$('.chip',g).forEach(c=>c.setAttribute('aria-pressed',String(c===b)));
+    const vals=$$('.chip[aria-pressed="true"]',g).map(c=>c.dataset.v);cb(multi?vals:(vals[0]||null));});
+}
+function sliderHTML(id,label,val,lo,hi){
+  lo=lo||'None';hi=hi||'Intense';
+  return '<div class="field"><div class="slider-head"><label for="'+id+'">'+label+'</label><output id="'+id+'-o" class="sv" for="'+id+'">'+val+'<small>/10</small><span>'+intensityWord(val)+'</span></output></div><input type="range" id="'+id+'" min="0" max="10" step="1" value="'+val+'" style="--p:'+(val*10)+'%" aria-valuetext="'+val+' out of 10, '+intensityWord(val)+'"><div class="scale-ends" aria-hidden="true"><span>'+lo+'</span><span>'+hi+'</span></div></div>';
+}
+function bindSlider(root,id,cb){
+  const el=$('#'+id,root),o=$('#'+id+'-o',root);
+  el.addEventListener('input',()=>{const v=+el.value;el.style.setProperty('--p',v*10+'%');o.innerHTML=v+'<small>/10</small><span>'+intensityWord(v)+'</span>';el.setAttribute('aria-valuetext',v+' out of 10, '+intensityWord(v));cb(v);});
+}
+function contactsHTML(){
+  const cs=S.plan.contacts.filter(c=>c.name||c.phone);
+  if(!cs.length)return '<p class="fine">No one on your list yet. Add people in My plan.</p>';
+  return '<div class="stack">'+cs.map(c=>'<div class="contact"><div><b>'+esc(c.name||'Contact')+'</b><div class="fine">'+esc(c.phone)+'</div></div>'+(c.phone?'<a href="'+telHref(c.phone)+'">'+I.phone+'Call</a>':'')+'</div>').join('')+'</div>';
+}
+function reasonsHTML(){
+  const rs=S.plan.reasons.filter(r=>r.text);
+  if(!rs.length)return '<p class="fine">Add your reasons in My plan. They help most in hard moments.</p>';
+  return '<ul class="plist">'+rs.map(r=>'<li class="r">'+esc(r.text)+'</li>').join('')+'</ul>';
+}
+function safetyHTML(){
+  const subs=(S&&S.profile&&S.profile.substances)||[];
+  const top=' style="border-top:0;padding-top:4px"';
+  const stim=t=>'<div class="ph-sec"'+t+'><h3>Shabu and other stimulants</h3><p>After a break, the same amount can hit much harder. The main dangers are overheating, heart attack, stroke and seizures.</p><ul><li>Call 911 for chest pain, a racing or irregular heartbeat, a very hot body, a seizure, or severe confusion or paranoia.</li><li>While waiting, move them somewhere cool, loosen tight clothing and stay with them.</li><li>During a seizure, protect their head and don’t hold them down. Once it stops, roll them onto their side.</li><li>Naloxone doesn’t reverse a stimulant overdose.</li></ul>'+cite('oregon')+'</div>';
+  const dep=t=>'<div class="ph-sec"'+t+'><h3>Alcohol, opioids and sedatives</h3><p>Tolerance drops during a break. An amount you used before can now slow or stop your breathing, especially when these are mixed.</p><ul><li>Don’t use alone, and don’t mix substances.</li><li>Can’t wake someone, slow or no breathing, blue or grey lips: call 911, put them on their side and stay with them. Give naloxone if opioids are involved and you have it.</li></ul>'+cite('samhsa')+'</div>';
+  const depFirst=subs.some(x=>DEPRESSANTS.test(x))&&!subs.some(x=>STIMULANTS.test(x));
+  return '<div class="safety"><h3>'+I.shield+'If you use again, stay safer</h3>'+(depFirst?dep(top)+stim(''):stim(top)+dep(''))+'</div>';
+}
+
+/* ============ Routing & render ============ */
+const TABS=['today','journey','insights','toolkit','plan'];
+let ROUTE='today', CAL=null;
+function readRoute(){const h=(location.hash||'').replace('#','');ROUTE=TABS.includes(h)?h:'today';}
+function go(tab){if(tab===ROUTE){$('#view').scrollIntoView({block:'start'});window.scrollTo(0,0);return;}try{location.hash=tab;}catch(e){ROUTE=tab;render();}}
+window.addEventListener('hashchange',()=>{readRoute();if(S&&S.profile){render();window.scrollTo(0,0);}});
+function render(){
+  if(!S.profile)return;
+  $$('.tabbar button').forEach(b=>b.setAttribute('aria-current',b.dataset.tab===ROUTE?'page':'false'));
+  $('#banner').innerHTML=S.demo?'<div class="banner"><span>You’re exploring sample data. Nothing here is real.</span><button type="button" data-act="demo-exit">Start my own</button></div>':'';
+  const v=$('#view');
+  Tides.forEach(t=>{if(!t.canvas.isConnected)t.destroy();});
+  ({today:renderToday,journey:renderJourney,insights:renderInsights,toolkit:renderToolkit,plan:renderPlan}[ROUTE]||renderToday)(v);
+}
+let heroLevel=.3;
+function tick(){
+  if(!S||!S.profile)return;
+  const s=stats();const st=fmtStreak(s.streakMs);const m=nextMile(s.streakMs);
+  heroLevel=heroLvl(m.prog);
+  const n=$('#heroN');if(n){n.textContent=st.big;$('#heroU').textContent=st.unit;$('#heroSub').textContent=st.small+' · since '+fmtD(s.last);$('#heroLeft').textContent=m.next?dur(m.leftMs):'All reached';$('#heroNext').textContent=m.next?m.next.l:'5 years';}
+  let reached=0;MILES.forEach(mm=>{if(s.streakMs>=mm.h*HOUR)reached=mm.h;});
+  const key=s.last+':'+reached;
+  if(reached&&S.settings.lastMile!==key){const same=S.settings.lastMile&&String(S.settings.lastMile).split(':')[0]===String(s.last);S.settings.lastMile=key;saveLocal();if(same){const mm=MILES.find(x=>x.h===reached);const rw=S.plan.rewards&&S.plan.rewards[reached];toast('You reached '+mm.l+' substance-free.'+(rw?' Time for your reward: '+rw:''));}}
+}
+
+/* ---------- Today ---------- */
+function renderToday(v){
+  const s=stats();const st=fmtStreak(s.streakMs);const m=nextMile(s.streakMs);
+  heroLevel=heroLvl(m.prog);
+  const today=s.todayK;const ci=checkin(today);
+  const rs=S.plan.reasons.filter(r=>r.text);const dayIdx=daysBetween('2026-01-01',today);
+  const reason=rs.length?rs[((dayIdx%rs.length)+rs.length)%rs.length].text:null;
+  const tip=TIPS[((dayIdx%TIPS.length)+TIPS.length)%TIPS.length];
+  const lw=lastWarn();const warnDue=!lw||Date.now()-lw.t>6*DAY;
+  const recentSlip=lapsesSorted().filter(l=>l.t>S.profile.start&&Date.now()-l.t<3*DAY).pop();
+  const ridden=live(S.cravings).filter(c=>c.out==='passed'||c.out==='strong').length;
+  const spend=+S.plan.spend||0;const reward=m.next&&S.plan.rewards?S.plan.rewards[m.next.h]:null;
+  const backupDue=APP_BUILD&&!S.demo&&Date.now()-(S.settings.lastBackup||S.profile.created||Date.now())>14*DAY&&(live(S.checkins).length+live(S.cravings).length)>0;
+  v.innerHTML=
+  (NEEDS_INSTALL?'<button class="tile" data-act="install" type="button" style="min-height:0;background:var(--lantern-soft);box-shadow:none"><b>Install Ebb on your Home Screen</b><span>So it opens like an app, works offline and keeps your entries. Takes 30 seconds.</span></button>':'')+
+  '<p class="greet">'+esc(greeting())+(S.plan.name?', '+esc(S.plan.name):'')+'.</p>'+
+  '<section class="hero" aria-label="Current substance-free stretch"><canvas class="tide" aria-hidden="true"></canvas><div class="hero-in">'+
+    '<p class="hero-label">Substance-free for</p>'+
+    '<p class="hero-num"><span class="n num" id="heroN">'+st.big+'</span><span class="u" id="heroU">'+st.unit+'</span></p>'+
+    '<p class="hero-sub" id="heroSub">'+esc(st.small+' · since '+fmtD(s.last))+'</p>'+
+    '<div class="hero-meta"><div>Next milestone<b id="heroNext">'+(m.next?m.next.l:'5 years')+'</b></div><div class="r">To go<b id="heroLeft">'+(m.next?dur(m.leftMs):'All reached')+'</b></div></div>'+
+  '</div></section>'+
+  '<div class="tally"><div><p class="big num">'+s.clean+'<small> / '+s.total+'</small></p><p>days without use since '+esc(fmtDY(S.profile.start))+'</p></div><div><p class="big num">'+Math.floor(s.longest/DAY)+'<small> days</small></p><p>longest stretch'+(ridden?' · '+ridden+' cravings ridden out':'')+'</p></div>'+
+    '<div class="money">'+(spend?'<p class="big num">'+peso(s.clean*spend)+'</p><p>kept, not spent on using ('+peso(spend)+' a day)</p>':'<p>Add what you used to spend each day to see the money you keep.</p><button class="linkbtn" data-act="prefs">Add amount</button>')+'</div></div>'+
+  (reward?'<button class="tile" data-act="rewards" type="button" style="min-height:0"><span class="pill warn" style="margin-top:0"><span class="dot"></span>Your reward at '+esc(m.next.l)+'</span><b>'+esc(reward)+'</b></button>':'')+
+  (recentSlip?'<div class="card soft"><h3>After a slip</h3><p>You logged a slip on '+esc(fmtDT(recentSlip.t))+'. Your '+s.clean+' substance-free days still count, and so does everything you learned getting them.</p><p class="fine">Tolerance drops during a break, which raises overdose risk if you use again. Don’t use alone.</p><button class="linkbtn" data-act="safety" style="align-self:flex-start">Read the safety steps</button></div>':'')+
+  (backupDue?'<div class="card soft"><h3>Time to save a backup</h3><p>Your entries live only in this app. A backup file in Files or Notes protects them if your phone is lost or the app is removed.</p><button class="btn btn-quiet" data-act="backup-file" style="align-self:flex-start">Save backup file</button></div>':'')+
+  '<button class="cta" data-act="craving" type="button">'+I.wave+'<div><b>I’m having a craving</b><span>Rate it, then ride it out with a guided timer</span></div></button>'+
+  '<div class="duo">'+
+    '<button class="tile" data-act="checkin" data-k="'+today+'" type="button"><b>Daily check-in</b><span>'+(ci?'Mood, cravings, sleep, HALT':'Two minutes: mood, cravings, sleep')+'</span>'+(ci?'<span class="pill ok"><span class="dot"></span>Done today</span>':'<span class="pill">Not yet</span>')+'</button>'+
+    '<button class="tile" data-act="lapse" type="button"><b>Log a slip</b><span>Record it, learn from it, and keep going</span></button>'+
+  '</div>'+
+  (ci?'<div class="card"><div class="card-h"><h3>Today’s check-in</h3><button class="linkbtn" data-act="checkin" data-k="'+today+'">Edit</button></div><div class="kv"><div><b>'+esc((MOODS.find(x=>x.v==ci.mood)||{l:'–'}).l)+'</b><span>Mood</span></div><div><b class="num">'+(ci.craving!=null?ci.craving:'–')+'</b><span>Craving</span></div><div><b class="num">'+(ci.sleep!=null?ci.sleep+'h':'–')+'</b><span>Sleep</span></div><div><b>'+(HALT.filter(x=>ci.halt&&ci.halt[x.k]).map(x=>x.l[0]).join(' ')||'None')+'</b><span>HALT</span></div></div></div>':'')+
+  (reason?'<div class="card"><div class="card-h"><p class="fine">One of your reasons</p><button class="linkbtn" data-act="edit-reasons">Edit</button></div><p class="reason">'+esc(reason)+'</p></div>':'<div class="empty"><p>Writing down why you want to recover gives you something to hold onto during a craving.</p><button class="btn btn-quiet" data-act="edit-reasons">Add my reasons</button></div>')+
+  (warnDue?'<button class="tile" data-act="warn" type="button"><b>Weekly warning-signs check</b><span>'+(lw?'Last check '+esc(fmtDY(lw.t))+'. ':'')+'Relapse starts long before use. Catch it early in about a minute.</span><span class="pill warn"><span class="dot"></span>Due</span></button>'
+    :'<button class="tile" data-act="entry" data-type="warn" data-id="'+esc(lw.id)+'" type="button"><b>Warning signs this week</b><span>Checked '+esc(fmtDY(lw.t))+'. Tap to review or edit.</span><span class="pill '+STAGES[lw.stage].cls+'"><span class="dot"></span>'+esc(STAGES[lw.stage].t)+'</span></button>')+
+  '<button class="tool wide" data-act="phhelp" type="button">'+I.home+'<div><b>Treatment in the Philippines</b><span>City and barangay programs, DOH rehab centers, PhilHealth, and your rights under RA 9165.</span></div></button>'+
+  '<div class="card soft"><p class="fine">From the research</p><p>'+esc(tip.t)+'</p>'+cite(tip.s)+'</div>';
+  makeTide($('.hero canvas',v),()=>({level:heroLevel,amp:.8}));
+}
+
+/* ---------- Journey ---------- */
+function renderJourney(v){
+  const s=stats();const now=new Date();
+  if(!CAL)CAL={y:now.getFullYear(),m:now.getMonth()};
+  const first=new Date(CAL.y,CAL.m,1);const daysIn=new Date(CAL.y,CAL.m+1,0).getDate();
+  const wd=[];for(let i=0;i<7;i++)wd.push(new Date(2023,0,1+i).toLocaleDateString(LOC,{weekday:'narrow'}));
+  let cells='';for(let i=0;i<first.getDay();i++)cells+='<span></span>';
+  for(let d=1;d<=daysIn;d++){
+    const k=CAL.y+'-'+pad(CAL.m+1)+'-'+pad(d);let cls,lab;
+    if(k<s.startK){cls='pre';lab='before tracking';}else if(k>s.todayK){cls='future';lab='';}
+    else if(k===s.startK){cls='start';lab='recovery start';}else if(s.useDays.has(k)){cls='used';lab='used';}else{cls='clean';lab='substance-free';}
+    if(k===s.todayK)cls+=' today';
+    const hasCi=!!checkin(k);
+    cells+='<button type="button" class="'+cls+'" data-act="day" data-k="'+k+'" aria-label="'+esc(fmtD(parseDk(k).getTime(),{weekday:'long',month:'long',day:'numeric'}))+(lab?', '+lab:'')+(hasCi?', check-in done':'')+'"'+(/^(future|pre)/.test(cls)?' disabled':'')+'>'+d+(hasCi?'<span class="ci"></span>':'')+'</button>';
+  }
+  const sd=new Date(S.profile.start);
+  const canPrev=CAL.y*12+CAL.m>sd.getFullYear()*12+sd.getMonth();
+  const canNext=CAL.y*12+CAL.m<now.getFullYear()*12+now.getMonth();
+  const miles=MILES.map(mm=>({mm,got:s.streakMs>=mm.h*HOUR,when:s.last+mm.h*HOUR}));
+  const nxIdx=miles.findIndex(x=>!x.got);const nm=nextMile(s.streakMs);
+  const showUpTo=Math.min(MILES.length,(nxIdx<0?MILES.length:nxIdx+3));
+  const RW=S.plan.rewards||{};
+  const ml=miles.slice(0,showUpTo).map((x,i)=>{
+    const cls=x.got?'got':i===nxIdx?'nx':'';const rw=RW[x.mm.h];
+    const showNote=(x.got&&i>=Math.max(0,(nxIdx<0?MILES.length:nxIdx)-1))||i===nxIdx;
+    return '<li class="'+cls+'"'+(i===nxIdx?' style="--pp:'+Math.round(nm.prog*100)+'"':'')+'><span class="node" aria-hidden="true">'+(x.got?I.check:'')+'</span><div><b>'+x.mm.l+'</b><div class="when">'+(x.got?'Reached '+esc(fmtDY(x.when)):i===nxIdx?esc(dur(nm.leftMs))+' to go · '+esc(fmtDY(x.when)):esc(fmtDY(x.when)))+'</div>'+
+      (rw?'<span class="reward">'+I.gift+esc(rw)+'</span>':'')+
+      (showNote?'<p class="note">'+esc(x.mm.n)+(x.mm.s?' <span class="src">('+esc(SRC[x.mm.s].a)+')</span>':'')+'</p>':'')+'</div></li>';
+  }).join('');
+  const feed=[];
+  live(S.checkins).forEach(c=>feed.push({t:parseDk(c.d).getTime()+20*HOUR,type:'checkin',id:c.d,o:c}));
+  live(S.cravings).forEach(c=>feed.push({t:c.t,type:'craving',id:c.id,o:c}));
+  live(S.lapses).forEach(c=>feed.push({t:c.t,type:'lapse',id:c.id,o:c}));
+  live(S.warn).forEach(c=>feed.push({t:c.t,type:'warn',id:c.id,o:c}));
+  feed.sort((a,b)=>b.t-a.t);
+  const fl=feed.slice(0,20).map(f=>{
+    let ic,cl='',ti,sub;
+    if(f.type==='checkin'){ic=I.list;ti='Check-in';sub='Mood '+((MOODS.find(x=>x.v==f.o.mood)||{l:'–'}).l).toLowerCase()+' · craving '+(f.o.craving!=null?f.o.craving:'–')+'/10';}
+    else if(f.type==='craving'){ic=I.wave;cl='c';ti='Craving '+f.o.i+'/10';sub=f.o.out==='used'?'Used afterward':f.o.after!=null?'Down to '+f.o.after+'/10'+(f.o.mins?' after '+f.o.mins+' min':''):(f.o.trig||[]).map(k=>trigL(k)).filter(Boolean).slice(0,2).join(', ')||'Logged';}
+    else if(f.type==='lapse'){ic=I.drop;cl='l';ti=f.o.kind==='relapse'?'Return to use':'Slip';sub=(f.o.trig||[]).map(k=>trigL(k)).filter(Boolean).slice(0,2).join(', ')||'Logged';}
+    else{ic=I.pulse;ti='Warning-signs check';sub=STAGES[f.o.stage].t;}
+    return '<li><button type="button" data-act="entry" data-type="'+f.type+'" data-id="'+esc(f.id)+'" aria-label="Edit '+esc(ti)+'"><span class="ic '+cl+'">'+ic+'</span><span><b>'+esc(ti)+'</b><span>'+esc(sub)+'</span></span><time>'+esc(f.type==='checkin'?fmtDY(parseDk(f.id).getTime()):fmtDY(f.t))+'</time></button></li>';
+  }).join('');
+  v.innerHTML=
+  '<div class="card"><div class="cal-h"><button class="btn-icon" data-act="calprev" aria-label="Previous month"'+(canPrev?'':' disabled')+'><svg class="i" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button><h2>'+esc(first.toLocaleDateString(LOC,{month:'long',year:'numeric'}))+'</h2><button class="btn-icon" data-act="calnext" aria-label="Next month"'+(canNext?'':' disabled')+'><svg class="i" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button></div>'+
+  '<div class="cal">'+wd.map(x=>'<span class="wd" aria-hidden="true">'+esc(x)+'</span>').join('')+cells+'</div>'+
+  '<div class="legend"><span><i style="background:var(--foam)"></i>Substance-free</span><span><i style="background:var(--berry)"></i>Used</span><span><i style="box-shadow:inset 0 0 0 2px var(--lantern)"></i>Start</span><span><i style="width:6px;height:6px;border-radius:50%;background:var(--tide)"></i>Check-in</span></div>'+
+  '<p class="fine">'+s.clean+' of '+s.total+' days without use since you started. Tap any day to see, add or edit its entries, including past days you forgot to log.</p></div>'+
+  '<div class="card-h" style="margin:10px 2px -4px"><h2 class="sec-title" style="margin:0">Milestones</h2><button class="linkbtn" data-act="rewards">Set rewards</button></div><div class="card"><ol class="miles">'+ml+'</ol></div>'+
+  '<h2 class="sec-title">Recent entries</h2><div class="card"><p class="fine">Tap any entry to edit or delete it.</p>'+(fl?'<ul class="feed">'+fl+'</ul>':'<p class="fine">Your check-ins, cravings and warning-sign checks will show up here.</p>')+'</div>';
+}
+
+/* ---------- Insights ---------- */
+const CH={};
+function lineChart(id,pts,o){
+  const W=340,H=160,pl=26,pr=26,pt=14,pb=24,iw=W-pl-pr,ih=H-pt-pb,n=pts.length;
+  const x=i=>pl+(n<=1?iw/2:i*iw/(n-1)),y=val=>pt+ih-(val-o.min)/(o.max-o.min)*ih;
+  let g='';o.ticks.forEach(t=>{g+='<line class="'+(t===o.min?'base':'g')+'" x1="'+pl+'" x2="'+(W-pr)+'" y1="'+y(t)+'" y2="'+y(t)+'"/><text class="ax" x="'+(pl-6)+'" y="'+(y(t)+3.5)+'" text-anchor="end">'+(o.tickFmt?o.tickFmt(t):t)+'</text>';});
+  const segs=[];let cur=[];pts.forEach((p,i)=>{if(p.v==null){if(cur.length)segs.push(cur);cur=[];}else cur.push([x(i),y(p.v)]);});if(cur.length)segs.push(cur);
+  const P=s=>s.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join('L');
+  const area=segs.filter(s=>s.length>1).map(s=>'<path class="ar" d="M'+s[0][0].toFixed(1)+','+y(o.min)+'L'+P(s)+'L'+s[s.length-1][0].toFixed(1)+','+y(o.min)+'Z"/>').join('');
+  const line=segs.map(s=>s.length===1?'<circle class="dot" cx="'+s[0][0]+'" cy="'+s[0][1]+'" r="2.6"/>':'<path class="ln" d="M'+P(s)+'"/>').join('');
+  let li=-1;for(let i=n-1;i>=0;i--)if(pts[i].v!=null){li=i;break;}
+  const end=li>=0?'<circle class="end" cx="'+x(li)+'" cy="'+y(pts[li].v)+'" r="5"/><text class="endl" text-anchor="end" x="'+(x(li)+6)+'" y="'+(y(pts[li].v)-10)+'">'+(o.fmt?o.fmt(pts[li].v):pts[li].v)+'</text>':'';
+  const xl=[0,Math.floor((n-1)/2),n-1].map((i,j)=>'<text class="ax" x="'+x(i)+'" y="'+(H-6)+'" text-anchor="'+(j===0?'start':j===2?'end':'middle')+'">'+esc(fmtD(parseDk(pts[i].k).getTime()))+'</text>').join('');
+  CH[id]={pts,x,W,pl,iw,fmt:o.fmt,unit:o.unit};
+  return '<div class="chart" id="'+id+'"><svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="'+esc(o.label)+'">'+g+area+line+end+xl+'<line class="xh" x1="0" x2="0" y1="'+pt+'" y2="'+(pt+ih)+'" style="opacity:0"/></svg><div class="tip" hidden></div></div>';
+}
+function wireLine(id){
+  const el=document.getElementById(id);if(!el)return;const c=CH[id];const svg=$('svg',el),tip=$('.tip',el),xh=$('.xh',svg);
+  const show=cx=>{const r=svg.getBoundingClientRect();const sx=(cx-r.left)/r.width*c.W;let i=Math.round((sx-c.pl)/c.iw*(c.pts.length-1));i=clamp(i,0,c.pts.length-1);const p=c.pts[i];const X=c.x(i);
+    xh.setAttribute('x1',X);xh.setAttribute('x2',X);xh.style.opacity=1;tip.hidden=false;
+    tip.innerHTML='<b>'+(p.v==null?'No entry':esc(c.fmt?c.fmt(p.v):p.v)+(c.unit||''))+'</b>'+esc(fmtD(parseDk(p.k).getTime(),{weekday:'short',month:'short',day:'numeric'}));
+    const px=X/c.W*r.width;tip.style.left=clamp(px-60,0,r.width-120)+'px';tip.style.top='-52px';};
+  const hide=()=>{xh.style.opacity=0;tip.hidden=true;};
+  svg.addEventListener('pointerdown',e=>show(e.clientX));
+  svg.addEventListener('pointermove',e=>{if(e.pointerType==='mouse'||e.pressure>0)show(e.clientX);});
+  svg.addEventListener('pointerleave',hide);svg.addEventListener('pointercancel',hide);
+}
+function hbars(items){const max=Math.max(1,...items.map(i=>i.v));return '<ul class="hbars">'+items.map(i=>'<li><span class="hl">'+esc(i.l)+'</span><span class="hb" aria-hidden="true"><i style="width:'+(i.v/max*100).toFixed(1)+'%"></i></span><span class="hv">'+i.v+'</span></li>').join('')+'</ul>';}
+function renderInsights(v){
+  const today=dk(Date.now());const keys=[];for(let i=29;i>=0;i--)keys.push(addDays(today,-i));
+  const startK=dk(S.profile.start);
+  const crav=live(S.cravings);
+  const cravPts=keys.map(k=>{if(k<startK)return {k,v:null};const ci=checkin(k);const logs=dayCravings(k).map(c=>c.i);const vals=[];if(ci&&ci.craving!=null)vals.push(ci.craving);if(logs.length)vals.push(Math.max(...logs));return {k,v:vals.length?Math.max(...vals):null};});
+  const moodPts=keys.map(k=>{const ci=checkin(k);return {k,v:ci&&ci.mood?+ci.mood:null};});
+  const nCrav=cravPts.filter(p=>p.v!=null).length,nMood=moodPts.filter(p=>p.v!=null).length;
+  const nCi=keys.filter(k=>checkin(k)).length;
+  const noUse=crav.filter(c=>c.out!=='used').length;
+  const surfed=crav.filter(c=>c.after!=null&&c.i!=null);
+  const drop=surfed.length?avg(surfed.map(c=>c.i-c.after)):null;
+  // triggers
+  const tc={};crav.forEach(c=>(c.trig||[]).forEach(k=>tc[k]=(tc[k]||0)+1));live(S.lapses).forEach(l=>(l.trig||[]).forEach(k=>tc[k]=(tc[k]||0)+1));
+  const trigs=Object.keys(tc).map(k=>({l:trigL(k),v:tc[k]})).sort((a,b)=>b.v-a.v).slice(0,6);
+  // time of day
+  const bins=[0,0,0,0,0,0,0,0];crav.forEach(c=>{bins[Math.floor(new Date(c.t).getHours()/3)]++;});
+  const bmax=Math.max(1,...bins);const peak=bins.indexOf(Math.max(...bins));
+  const binL=['12a','3a','6a','9a','12p','3p','6p','9p'];
+  const binLong=['12 to 3 AM','3 to 6 AM','6 to 9 AM','9 AM to 12 PM','12 to 3 PM','3 to 6 PM','6 to 9 PM','9 PM to 12 AM'];
+  // HALT
+  const hc={h:0,a:0,l:0,t:0};let withHalt=0;crav.forEach(c=>{let any=false;HALT.forEach(x=>{if(c.halt&&c.halt[x.k]){hc[x.k]++;any=true;}});if(any)withHalt++;});
+  // patterns
+  const cis=live(S.checkins).filter(c=>c.craving!=null);const pats=[];
+  const low=cis.filter(c=>c.sleep!=null&&c.sleep<6),ok=cis.filter(c=>c.sleep!=null&&c.sleep>=7);
+  if(low.length>=3&&ok.length>=3)pats.push({t:'On days after less than 6 hours of sleep, your cravings averaged '+avg(low.map(c=>c.craving)).toFixed(1)+' out of 10. After 7 hours or more, they averaged '+avg(ok.map(c=>c.craving)).toFixed(1)+'.',s:'brower'});
+  const wa=cis.filter(c=>(c.actions||[]).length>=2),na=cis.filter(c=>!(c.actions||[]).length);
+  if(wa.length>=3&&na.length>=3)pats.push({t:'On days you did two or more recovery actions, cravings averaged '+avg(wa.map(c=>c.craving)).toFixed(1)+'. On days with none, '+avg(na.map(c=>c.craving)).toFixed(1)+'.',s:'melemis'});
+  if(crav.length>=5){const top=HALT.slice().sort((a,b)=>hc[b.k]-hc[a.k])[0];pats.push({t:Math.round(withHalt/crav.length*100)+'% of your logged cravings came when you were hungry, angry, lonely or tired. '+top.l+' came up most.',s:'kretchman'});}
+  if(trigs.length&&crav.length>=5)pats.push({t:'Your most common trigger is '+trigs[0].l.toLowerCase()+'. Add it to the high-risk situations in My plan with a specific exit plan.',s:'larimer'});
+  const tableRows=cravPts.filter(p=>p.v!=null).slice(-30).reverse().map(p=>'<tr><td>'+esc(fmtD(parseDk(p.k).getTime(),{weekday:'short',month:'short',day:'numeric'}))+'</td><td>'+p.v+'/10</td><td>'+(checkin(p.k)&&checkin(p.k).mood?esc(MOODS.find(m=>m.v==checkin(p.k).mood).l):'–')+'</td></tr>').join('');
+  v.innerHTML=
+  '<div class="stats3"><div class="stat"><b class="num">'+noUse+'<small style="font-size:15px;color:var(--muted)">/'+crav.length+'</small></b><span>cravings passed without use</span></div><div class="stat"><b class="num">'+(drop==null?'–':'−'+drop.toFixed(1))+'</b><span>average drop after riding one out</span></div><div class="stat"><b class="num">'+nCi+'<small style="font-size:15px;color:var(--muted)">/30</small></b><span>check-ins in the last 30 days</span></div></div>'+
+  '<div class="card"><div><h3>Craving strength, last 30 days</h3><p class="fine">Strongest craving each day, 0 to 10, from check-ins and craving logs. Tap the chart for a day.</p></div>'+
+    (nCrav>=2?lineChart('chC',cravPts,{min:0,max:10,ticks:[0,5,10],label:'Daily craving strength over the last 30 days',unit:'/10'})+'<details class="tbl"><summary>Show as a table</summary><table><thead><tr><th>Day</th><th>Craving</th><th>Mood</th></tr></thead><tbody>'+tableRows+'</tbody></table></details>':'<p class="fine">Log a few check-ins or cravings to see this chart.</p>')+'</div>'+
+  '<div class="card"><div><h3>Mood, last 30 days</h3><p class="fine">From your daily check-ins: 1 is very low, 5 is great.</p></div>'+
+    (nMood>=2?lineChart('chM',moodPts,{min:1,max:5,ticks:[1,3,5],label:'Daily mood over the last 30 days',fmt:v2=>MOODS[v2-1].l,tickFmt:t=>t}):'<p class="fine">Mood appears after two check-ins.</p>')+'</div>'+
+  (pats.length?'<h2 class="sec-title">Patterns in your entries</h2><div class="card">'+pats.map(p=>'<div class="insight"><div><p>'+esc(p.t)+'</p>'+cite(p.s)+'</div></div>').join('')+'<p class="fine">These are patterns in your own entries, not proof of cause. They’re worth talking through with a counselor.</p></div>':'')+
+  '<div class="card"><div><h3>What sets off your cravings</h3><p class="fine">From craving logs and slips. Marlatt’s research found negative emotions are the most common high-risk situation.</p></div>'+(trigs.length?hbars(trigs):'<p class="fine">Triggers appear once you log cravings.</p>')+cite('larimer')+'</div>'+
+  '<div class="card"><div><h3>When cravings hit</h3><p class="fine">Logged cravings by time of day. Tap a bar.</p></div>'+(crav.length?
+    '<p class="cap" id="colCap">Most cravings: '+binLong[peak]+' ('+bins[peak]+')</p><div class="cols" role="img" aria-label="Cravings by time of day">'+bins.map((b,i)=>'<button type="button" data-bin="'+i+'" aria-label="'+binLong[i]+': '+b+' cravings"><i class="'+(i===peak?'':'lo')+'" style="height:'+(b/bmax*100)+'%"></i>'+(i===peak?'<em style="bottom:calc('+(b/bmax*100)+'% + 3px)">'+b+'</em>':'')+'</button>').join('')+'</div><div class="cols-x" aria-hidden="true">'+binL.map(l=>'<span>'+l+'</span>').join('')+'</div>'
+    :'<p class="fine">This fills in as you log cravings.</p>')+'</div>'+
+  '<div class="card"><div><h3>HALT during cravings</h3><p class="fine">How often each state was present when you logged a craving.</p></div>'+(crav.length?hbars(HALT.map(x=>({l:x.l,v:hc[x.k]}))):'<p class="fine">Nothing logged yet.</p>')+'</div>';
+  wireLine('chC');wireLine('chM');
+  const cols=$('.cols',v);if(cols)cols.addEventListener('click',e=>{const b=e.target.closest('[data-bin]');if(!b)return;const i=+b.dataset.bin;$('#colCap').textContent=binLong[i]+': '+bins[i]+(bins[i]===1?' craving':' cravings');});
+}
+
+/* ---------- Toolkit ---------- */
+function renderToolkit(v){
+  v.innerHTML=
+  '<button class="feature" data-act="craving" type="button"><canvas class="tide" aria-hidden="true"></canvas><div class="in"><h2>Urge surfing</h2><p>Watch a craving rise, peak and fall without acting on it. A guided timer and breathing pace you through.</p><span class="go">Start riding it out</span></div></button>'+
+  '<p class="fine" style="margin-top:-6px">Developed by psychologist Alan Marlatt. In a 2014 randomized trial, mindfulness-based relapse prevention cut drug-use days at 12 months compared with standard programs (Bowen et al., 2014).</p>'+
+  '<div class="tools">'+
+    '<button class="tool" data-act="breathe" type="button">'+I.breath+'<b>Slow breathing</b><span>In for 4, out for 6. Calms the body in about three minutes.</span></button>'+
+    '<button class="tool" data-act="halt" type="button">'+I.halt+'<b>HALT check</b><span>Hungry, angry, lonely or tired? Fix the need underneath.</span></button>'+
+    '<button class="tool" data-act="tape" type="button">'+I.tape+'<b>Play the tape forward</b><span>Think past the first hour to tomorrow and next week.</span></button>'+
+    '<button class="tool" data-act="delay" type="button">'+I.clock+'<b>Wait 30 minutes</b><span>Most urges pass in 15 to 30. Get busy until then.</span></button>'+
+    '<button class="tool" data-act="ground" type="button">'+I.eye+'<b>5-4-3-2-1 grounding</b><span>Use your senses to come back to the present.</span></button>'+
+    '<button class="tool" data-act="sos" type="button">'+I.people+'<b>Call someone</b><span>Telling someone about an urge takes away some of its power.</span></button>'+
+    '<button class="tool wide" data-act="phhelp" type="button">'+I.home+'<div><b>Treatment in the Philippines</b><span>City and barangay programs, DOH rehab centers, PhilHealth, NA meetings, and your rights under RA 9165.</span></div></button>'+
+    '<button class="tool wide" data-act="rewards" type="button">'+I.gift+'<div><b>Milestone rewards</b><span>Rewarding drug-free milestones is the best-supported approach for shabu and other stimulants.</span></div></button>'+
+    '<button class="tool wide" data-act="rules" type="button">'+I.rules+'<div><b>The five rules of recovery</b><span>Change your life, be honest, ask for help, practice self-care, don’t bend the rules.</span></div></button>'+
+    '<button class="tool wide alert" data-act="safety" type="button">'+I.shield+'<div><b>Safety if you use</b><span>Lower tolerance after a break raises overdose risk. Know the steps.</span></div></button>'+
+    '<button class="tool wide" data-act="warn" type="button">'+I.pulse+'<div><b>Warning-signs check</b><span>Spot emotional and mental relapse before it becomes physical.</span></div></button>'+
+  '</div>'+cite('melemis');
+  makeTide($('.feature canvas',v),t=>({level:.3+Math.sin(t*.4)*.04,amp:1}));
+}
+
+/* ---------- Plan ---------- */
+function linesHTML(){const ls=S.plan.lines.filter(l=>l.name||l.phone);return '<div class="stack">'+ls.map(c=>'<div class="contact"><div><b>'+esc(c.name||'Saved number')+'</b>'+(c.note?'<div class="fine">'+esc(c.note)+'</div>':'')+'<div class="fine">'+esc(c.phone)+'</div></div>'+(c.phone?'<a href="'+telHref(c.phone)+'">'+I.phone+'Call</a>':'')+'</div>').join('')+'</div>';}
+function renderPlan(v){
+  const p=S.plan;const lw=lastWarn();const sl=syncLine();const spend=+p.spend||0;
+  const risks=p.risks.filter(r=>r.situation||r.plan);const signs=p.signs.filter(x=>x.text);const mine=p.lines.filter(l=>l.name||l.phone);
+  const nRw=Object.values(p.rewards||{}).filter(Boolean).length;
+  const setrow=(act,label,val)=>'<button type="button" class="setrow" data-act="'+act+'"><div><b>'+esc(label)+'</b><span>'+esc(val)+'</span></div><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>';
+  v.innerHTML=
+  '<div class="card"><div class="card-h"><h3>Why I’m doing this</h3><button class="linkbtn" data-act="edit-reasons">Edit</button></div>'+reasonsHTML()+'</div>'+
+  '<div class="card"><div class="card-h"><h3>My people</h3><button class="linkbtn" data-act="edit-contacts">Edit</button></div>'+contactsHTML()+'<p class="fine">Asking for help is one of the five rules of recovery. In a national survey, Filipinos named the household as the most helpful support for people who use drugs.</p>'+cite('ddbsurvey')+'</div>'+
+  '<div class="card"><div class="card-h"><h3>My saved numbers</h3><button class="linkbtn" data-act="edit-lines">Edit</button></div>'+(mine.length?linesHTML():'<p class="fine">Save numbers you might need, like your barangay health center, rural health unit, doctor, counselor or rehab center. They also appear under Help now.</p>')+'</div>'+
+  '<div class="card"><div class="card-h"><h3>High-risk situations</h3><button class="linkbtn" data-act="edit-risks">Edit</button></div>'+
+    (risks.length?'<ul class="plist">'+risks.map(r=>'<li><small>When</small>'+esc(r.situation)+'<small style="margin-top:8px">My exit plan</small>'+esc(r.plan)+'</li>').join('')+'</ul>':'<p class="fine">Relapse prevention starts with knowing your high-risk situations, like sweldo day or an inuman with old barkada, and planning a specific way out of each one.</p>')+cite('larimer')+'</div>'+
+  '<div class="card"><div class="card-h"><h3>My early warning signs</h3><button class="linkbtn" data-act="edit-signs">Edit</button></div>'+
+    (signs.length?'<ul class="plist">'+signs.map(x=>'<li>'+esc(x.text)+'</li>').join('')+'</ul><p class="fine">These appear as checkboxes in your weekly warning-signs check.</p>':'<p class="fine">What do you notice in yourself before things slide? Staying up late, skipping meals, avoiding calls?</p>')+
+    '<button class="btn btn-quiet btn-block" data-act="warn">Do the warning-signs check'+(lw?' · last '+esc(fmtDY(lw.t)):'')+'</button></div>'+
+  '<div class="card"><h3>Customize Ebb</h3><p class="fine">Everything here is yours to change.</p><div class="stack" style="gap:8px">'+
+    setrow('prefs','Name and daily spend',(p.name||'No nickname')+' · '+(spend?peso(spend)+' a day':'no amount set'))+
+    setrow('edit-recovery','Substances and recovery start',(S.profile.substances.join(', ')||'None listed')+' · since '+fmtDY(S.profile.start))+
+    setrow('rewards','Milestone rewards',nRw?nRw+' set':'None set yet')+
+    setrow('edit-triggers','Trigger list',trigList().length+' triggers')+
+    setrow('edit-actions','Recovery actions',actList().length+' actions in your check-in')+
+    setrow('tape','Play the tape forward',(p.tape.hour||p.tape.tomorrow||p.tape.week)?'Written':'Not written yet')+
+  '</div></div>'+
+  '<h2 class="sec-title">Your data</h2>'+
+  (APP_BUILD?'<div class="card">'+(NEEDS_INSTALL?'<div class="status wait"><i></i><span>You\u2019re using Ebb in Safari. Install it to your Home Screen so it opens like an app and keeps your entries.</span></div><button class="btn btn-primary btn-block" data-act="install">How to install</button>':'<div class="status '+(LOCAL_OK?'ok':'bad')+'"><i></i><span>'+(LOCAL_OK?'Saved inside the Ebb app on this '+(IS_IOS?'iPhone':'device')+'. Nothing is sent anywhere.':'This browser isn\u2019t keeping your entries. Save a backup file before you close Ebb.')+'</span></div>')+
+    '<div class="status '+(S.settings.lastBackup?'ok':'wait')+'"><i></i><span>'+(S.settings.lastBackup?'Last backup '+esc(fmtDY(S.settings.lastBackup)):'No backup saved yet')+'</span></div>'+
+    '<p class="fine">Removing Ebb from your Home Screen deletes its entries. Save a backup file every couple of weeks, and restore it if you reinstall or change phones.</p>'+
+    '<button class="btn btn-primary btn-block" data-act="backup-file">Save backup file</button>'+
+    '<div class="row"><button class="btn btn-quiet" data-act="backup-copy">Copy backup code</button><button class="btn btn-quiet" data-act="backup-restore">Restore</button></div>'+
+    '<button class="btn btn-line btn-block" data-act="wipe" style="color:var(--berry)">Delete all my data</button><p class="fine">Ebb version '+APP_VERSION+'</p></div>':
+  '<div class="card"><div class="status '+(LOCAL_OK?'ok':'bad')+'"><i></i><span>'+(LOCAL_OK?'Saved in this browser on this device.':'This browser isn’t keeping your entries. Turn on private backup or copy a backup code before you close Ebb.')+'</span></div>'+
+    '<div id="syncStatus" class="status '+sl.c+'"><i></i><span>'+esc(sl.t)+'</span></div><div id="syncBtns">'+syncButtons()+'</div>'+
+    '<p class="fine">Private backup saves your entries to your own Claude account so they survive a cleared browser and appear on your other devices. Other people who open this page can’t see them.</p>'+
+    '<div class="row"><button class="btn btn-quiet" data-act="backup-copy">Copy backup code</button><button class="btn btn-quiet" data-act="backup-restore">Restore</button></div>'+
+    '<button class="btn btn-line btn-block" data-act="wipe" style="color:var(--berry)">Delete all my data</button></div>')+
+  '<h2 class="sec-title">Research behind Ebb</h2>'+
+  '<div class="card"><ol class="refs">'+Object.keys(SRC).map(k=>'<li><a href="'+SRC[k].u+'" target="_blank" rel="noopener">'+esc(SRC[k].t)+'</a></li>').join('')+'</ol>'+
+  '<p class="fine">Ebb supports recovery. It doesn’t replace treatment, medication, medical or legal advice. If you or someone else is in danger, call 911.</p></div>';
+}
+
+/* ============ Flows ============ */
+function openCheckin(k){
+  k=k||dk(Date.now());const ex=checkin(k);
+  const C=ex?clone(ex):{id:k,d:k,mood:null,craving:3,halt:{h:false,a:false,l:false,t:false},sleep:7,used:false,actions:[],note:''};
+  if(!C.halt)C.halt={};
+  const isToday=k===dk(Date.now());
+  openSheet(b=>{
+    b.innerHTML='<div><p class="step">'+(isToday?'Today':esc(fmtD(parseDk(k).getTime(),{weekday:'long',month:'long',day:'numeric'})))+'</p><h2>Daily check-in</h2></div>'+
+    '<div class="field"><span class="flabel">How are you feeling?</span>'+segHTML('mood',MOODS,C.mood)+'</div>'+
+    sliderHTML('ciC','Strongest craving'+(isToday?' today':''),C.craving)+
+    '<div class="field"><span class="flabel">'+(isToday?'Right now I’m…':'That day I was…')+'</span>'+chipsHTML('halt',HALT,HALT.filter(x=>C.halt[x.k]).map(x=>x.k))+'</div>'+
+    '<div class="field"><span class="flabel" id="slL">Sleep the night before</span><div class="stepper" role="group" aria-labelledby="slL"><button type="button" id="slM" aria-label="Less sleep">−</button><output id="slO" class="num">'+C.sleep+'h</output><button type="button" id="slP" aria-label="More sleep">+</button></div></div>'+
+    '<div class="field"><span class="flabel">Did you use'+(isToday?' today':'')+'?</span>'+segHTML('used',[{v:'no',l:'No'},{v:'yes',l:'Yes'}],C.used?'yes':'no')+'</div>'+
+    '<div class="field"><span class="flabel">What did you do for your recovery?</span>'+chipsHTML('acts',actList(),C.actions)+'</div>'+
+    '<div class="field"><label for="ciN">Note or something you’re grateful for</label><textarea id="ciN" rows="3" placeholder="Optional">'+esc(C.note)+'</textarea></div>'+
+    '<div class="actions"><button class="btn btn-primary btn-block" id="ciSave">Save check-in</button>'+(ex?'<button class="btn btn-line btn-block" id="ciDel" style="color:var(--berry)">Delete this check-in</button>':'')+'</div>';
+    bindChips(b,'mood',v=>C.mood=v);bindSlider(b,'ciC',v=>C.craving=v);
+    bindChips(b,'halt',vals=>{HALT.forEach(x=>C.halt[x.k]=vals.includes(x.k));});
+    bindChips(b,'used',v=>C.used=v==='yes');bindChips(b,'acts',vals=>C.actions=vals);
+    const so=$('#slO',b);$('#slM',b).onclick=()=>{C.sleep=clamp(C.sleep-.5,0,16);so.textContent=C.sleep+'h';};$('#slP',b).onclick=()=>{C.sleep=clamp(C.sleep+.5,0,16);so.textContent=C.sleep+'h';};
+    $('#ciSave',b).onclick=()=>{
+      C.note=$('#ciN',b).value.trim();C.u=Date.now();S.checkins[k]=C;
+      let newLapse=null;
+      if(C.used&&!live(S.lapses).some(l=>dk(l.t)===k)){const t=isToday?Date.now():parseDk(k).getTime()+12*HOUR;newLapse={id:uid(),t,kind:'lapse',subs:S.profile.substances.slice(0,1),trig:[],auto:true,u:Date.now()};S.lapses[newLapse.id]=newLapse;}
+      save();closeSheet(true);render();
+      if(newLapse){openLapse({id:newLapse.id,fromCheckin:true});}else toast('Check-in saved.');
+    };
+    if(ex)$('#ciDel',b).onclick=()=>confirmSheet({title:'Delete this check-in?',ok:'Delete',danger:true,onOk:()=>{S.checkins[k]=Object.assign({},S.checkins[k],{del:true,u:Date.now()});save();render();toast('Check-in deleted.');}});
+  },{label:'Daily check-in'});
+}
+
+function openCraving(){
+  const C={id:uid(),t:Date.now(),i:6,trig:[],halt:{h:false,a:false,l:false,t:false},dur:15};
+  let raf=0,tmr=0,paused=false,elapsed=0,lastT=0,tide=null;
+  openSheet(b=>stepA(b),{label:'Ride out a craving',full:true});
+  Sheet.cleanup=()=>{cancelAnimationFrame(raf);clearInterval(tmr);if(tide)tide.destroy();};
+  function stepA(b){
+    b.innerHTML='<div><p class="step">Step 1 of 3</p><h2>Name the craving</h2></div><p class="lede">Noticing it is the first step. You don’t have to act on it or fight it.</p>'+
+    sliderHTML('crI','How strong is it right now?',C.i,'None','Intense')+
+    '<div class="field"><span class="flabel">What set it off?</span>'+chipsHTML('trig',trigList(),C.trig)+'</div>'+
+    '<div class="field"><span class="flabel">Right now I’m…</span>'+chipsHTML('halt',HALT,[])+'</div>'+
+    '<div class="field"><span class="flabel">Ride it out for</span>'+segHTML('dur',[5,10,15,20].map(m=>({v:String(m),l:m+' min'})),String(C.dur))+'<p class="fine">Most urges ease within 15 to 30 minutes (Melemis, 2015). You can add time or stop early.</p></div>'+
+    '<div class="actions"><button class="btn btn-primary btn-block" id="crGo">'+I.wave+'Start riding it out</button><button class="btn btn-line btn-block" id="crLog">Just log it</button></div>';
+    bindSlider(b,'crI',v=>C.i=v);bindChips(b,'trig',v=>C.trig=v);bindChips(b,'halt',vals=>HALT.forEach(x=>C.halt[x.k]=vals.includes(x.k)));bindChips(b,'dur',v=>C.dur=+v||15);
+    $('#crGo',b).onclick=()=>{stepB(b);sheetScrollTop();};
+    $('#crLog',b).onclick=()=>{C.out='logged';C.mins=0;C.u=Date.now();S.cravings[C.id]=C;save();closeSheet();render();toast('Craving logged.');};
+  }
+  function stepB(b){
+    const tape=S.plan.tape;const hasTape=tape.hour||tape.tomorrow||tape.week;
+    b.innerHTML='<div class="surf"><canvas class="tide" aria-hidden="true"></canvas><div class="in"><p class="step">Step 2 of 3 · Riding it out</p><p class="clock" id="sClock" aria-live="off">'+C.dur+':00</p><p class="phase" id="sPhase" aria-live="polite">Notice the urge. You don’t have to act on it or fight it.</p><p class="breath" id="sBreath" aria-hidden="true">Breathe in<small>4</small></p></div></div>'+
+    '<div class="row"><button class="btn btn-quiet" id="sPause">Pause</button><button class="btn btn-quiet" id="sPlus">+5 min</button></div>'+
+    '<button class="btn btn-primary btn-block" id="sDone">It’s eased. Finish</button>'+
+    '<div class="card soft"><h3>Play the tape forward</h3>'+(hasTape?'<ul class="plist">'+(tape.hour?'<li><small>In the next hour</small>'+esc(tape.hour)+'</li>':'')+(tape.tomorrow?'<li><small>Tomorrow</small>'+esc(tape.tomorrow)+'</li>':'')+(tape.week?'<li><small>Next week</small>'+esc(tape.week)+'</li>':'')+(tape.sober?'<li><small>If I don’t use</small>'+esc(tape.sober)+'</li>':'')+'</ul>':'<p>Picture past the first few minutes. How does tonight end if you use? How do you feel tomorrow morning? Next week?</p>')+'</div>'+
+    '<div class="card soft"><h3>My reasons</h3>'+reasonsHTML()+'</div>'+
+    '<div class="card soft"><h3>Call someone</h3>'+contactsHTML()+hotlinesInline()+'</div>';
+    let total=C.dur*60;const cl=$('#sClock',b),ph=$('#sPhase',b),br=$('#sBreath',b);let lastPhase='';
+    const PH=[[.15,'Notice the urge. You don’t have to act on it or fight it.'],[.35,'Where do you feel it? Chest, stomach, hands, mouth? Breathe into that spot.'],[.6,'Urges rise like a wave, peak, then fall. Ride the crest with your breath.'],[.85,'Notice any change in strength, even a small one.'],[1.01,'It’s passing. You’re riding it out.']];
+    lastT=performance.now();
+    const curve=f=>f<.35?.62+.38*(f/.35):1-.72*((f-.35)/.65);
+    tide=makeTide($('.surf canvas',b),t=>{const f=clamp(elapsed/total,0,1);const cyc=(elapsed%10);const bre=cyc<4?cyc/4:1-(cyc-4)/6;return {level:.12+.55*curve(f)*(.35+.65*C.i/10)+bre*.05,amp:.7+bre*.6};});
+    const upd=()=>{const now=performance.now();if(!paused)elapsed+=(now-lastT)/1000;lastT=now;
+      const left=Math.max(0,total-elapsed);cl.textContent=Math.floor(left/60)+':'+pad(Math.floor(left%60));
+      const f=elapsed/total;const p=(PH.find(x=>f<x[0])||PH[PH.length-1])[1];if(p!==lastPhase){ph.textContent=p;lastPhase=p;}
+      const cyc=elapsed%10;br.innerHTML=paused?'Paused':(cyc<4?'Breathe in<small>'+(4-Math.floor(cyc))+'</small>':'Breathe out<small>'+(6-Math.floor(cyc-4))+'</small>');
+      if(left<=0){clearInterval(tmr);finish(true);}};
+    tmr=setInterval(upd,250);
+    $('#sPause',b).onclick=e=>{paused=!paused;e.currentTarget.textContent=paused?'Resume':'Pause';};
+    $('#sPlus',b).onclick=()=>{total+=300;};
+    $('#sDone',b).onclick=()=>finish(false);
+    function finish(timeUp){clearInterval(tmr);if(tide){tide.destroy();tide=null;}C.mins=Math.max(1,Math.round(elapsed/60));stepC(b,timeUp);sheetScrollTop();}
+  }
+  function stepC(b,timeUp){
+    C.after=Math.max(0,C.i-3);C.out='passed';
+    b.innerHTML='<div><p class="step">Step 3 of 3</p><h2>'+(timeUp?'Time’s up. How strong is it now?':'How strong is it now?')+'</h2></div><p class="lede">You stayed with it for '+C.mins+(C.mins===1?' minute':' minutes')+'. It started at '+C.i+' out of 10.</p>'+
+    sliderHTML('crA','Craving strength now',C.after)+
+    '<div class="field"><span class="flabel">What happened?</span>'+chipsHTML('out',[{k:'passed',l:'It passed or eased'},{k:'strong',l:'Still strong, I need support'},{k:'used',l:'I used'}],'passed',false)+'</div>'+
+    '<div class="field"><label for="crN">What helped, if anything?</label><textarea id="crN" rows="2" placeholder="Optional"></textarea></div>'+
+    '<div class="actions"><button class="btn btn-primary btn-block" id="crSave">Save</button></div>';
+    bindSlider(b,'crA',v=>C.after=v);bindChips(b,'out',v=>C.out=v||'passed');
+    $('#crSave',b).onclick=()=>{
+      C.note=$('#crN',b).value.trim();C.u=Date.now();S.cravings[C.id]=C;save();closeSheet(true);render();
+      if(C.out==='used')openLapse({t:Date.now(),trig:C.trig});
+      else if(C.out==='strong'){openSOS();toast('Craving saved. Reach out now.');}
+      else toast('Saved. You rode out a '+C.i+'/10 craving.');
+    };
+  }
+}
+
+function openLapse(pre){
+  pre=pre||{};const ex=pre.id?S.lapses[pre.id]:null;
+  const L=ex?clone(ex):{id:uid(),t:pre.t||Date.now(),kind:'lapse',subs:S.profile.substances.slice(0,1),trig:pre.trig||[],before:'',thought:'',diff:'',next:[]};
+  const subs=Array.from(new Set(S.profile.substances.concat(L.subs||[]))).map(x=>({k:x,l:x}));
+  openSheet(b=>{
+    b.innerHTML='<div><p class="step">'+(pre.fromCheckin?'You said you used':'Log a slip')+'</p><h2>Thank you for being honest</h2></div>'+
+    '<p class="lede">A slip is information about what you need, not proof you’ve failed. Logging it is a recovery skill.</p>'+
+    '<div class="field"><label for="lT">When</label><input type="datetime-local" id="lT" value="'+toInput(L.t)+'"></div>'+
+    (subs.length?'<div class="field"><span class="flabel">What did you use?</span>'+chipsHTML('subs',subs,L.subs)+'</div>':'')+
+    '<div class="field"><span class="flabel">Was this a one-time slip or a return to regular use?</span>'+segHTML('kind',[{v:'lapse',l:'One-time slip'},{v:'relapse',l:'Regular use'},{v:'unsure',l:'Not sure'}],L.kind)+'</div>'+
+    '<div class="field"><span class="flabel">What set it off?</span>'+chipsHTML('trig',trigList(),L.trig)+'</div>'+
+    '<div class="field"><label for="lB">What was happening just before?</label><textarea id="lB" rows="2" placeholder="Where you were, who you were with, how you felt">'+esc(L.before)+'</textarea></div>'+
+    '<div class="field"><label for="lTh">What thought made it feel okay?</label><textarea id="lTh" rows="2" placeholder="For example: “I’ve earned it” or “just this once”">'+esc(L.thought)+'</textarea></div>'+
+    '<div class="field"><label for="lD">What would you do differently next time?</label><textarea id="lD" rows="2" placeholder="One specific thing">'+esc(L.diff)+'</textarea></div>'+
+    '<div class="field"><span class="flabel">In the next 24 hours I will…</span>'+chipsHTML('next',NEXT24,L.next)+'</div>'+
+    safetyHTML()+
+    '<div class="actions"><button class="btn btn-primary btn-block" id="lSave">Save and keep going</button>'+(ex?'<button class="btn btn-line btn-block" id="lDel" style="color:var(--berry)">Delete this entry</button>':'')+'</div>';
+    bindChips(b,'subs',v=>L.subs=v);bindChips(b,'kind',v=>L.kind=v||'lapse');bindChips(b,'trig',v=>L.trig=v);bindChips(b,'next',v=>L.next=v);
+    $('#lSave',b).onclick=()=>{
+      const t=fromInput($('#lT',b).value);if(t)L.t=Math.min(t,Date.now());
+      L.before=$('#lB',b).value.trim();L.thought=$('#lTh',b).value.trim();L.diff=$('#lD',b).value.trim();L.auto=false;L.u=Date.now();
+      S.lapses[L.id]=L;const k=dk(L.t);if(checkin(k)&&!checkin(k).used){S.checkins[k]=Object.assign({},S.checkins[k],{used:true,u:Date.now()});}
+      save();render();after(b);sheetScrollTop();
+    };
+    if(ex)$('#lDel',b).onclick=()=>confirmSheet({title:'Delete this entry?',body:'Your streak and totals will be recalculated without it.',ok:'Delete',danger:true,onOk:()=>{S.lapses[L.id]=Object.assign({},S.lapses[L.id],{del:true,u:Date.now()});save();render();toast('Entry deleted.');}});
+  },{label:'Log a slip'});
+  function after(b){
+    const s=stats();
+    b.innerHTML='<h2>Your progress still counts</h2>'+
+    '<div class="tally"><div><p class="big num">'+s.clean+'<small> / '+s.total+'</small></p><p>days without use since you started</p></div><div><p class="big num">'+Math.floor(s.longest/DAY)+'<small> days</small></p><p>longest stretch so far</p></div></div>'+
+    '<p>Your current streak restarts from this slip. The days you’ve already stayed substance-free don’t disappear, and neither do the skills you used to get them.</p>'+
+    '<div class="note-box"><h3>Why this matters</h3><p>Research on relapse finds that how people explain a slip shapes what happens next. Blaming yourself as a person (“I’m hopeless”) makes a full relapse more likely. Treating it as a mistake with causes you can work on makes it less likely.</p>'+cite('larimer')+'</div>'+
+    (L.kind==='relapse'?'<div class="note-box"><h3>Get more support now</h3><p>A return to regular use is a sign the plan needs more support. Contact your counselor, doctor or a helpline today. Relapse is common in a chronic condition, and treatment can be restarted or adjusted.</p>'+cite('mclellan')+'<button class="btn btn-quiet" data-act="phhelp">Treatment options in the Philippines</button></div>':'')+
+    '<div class="actions"><button class="btn btn-primary btn-block" data-act="sos">Call someone or a helpline</button><button class="btn btn-line btn-block" data-act="sheet-close">Done</button></div>';
+  }
+}
+
+function openWarn(id){
+  const ex=id&&S.warn[id]&&!S.warn[id].del?S.warn[id]:null;
+  const sel=new Set(ex?[].concat(ex.e||[],ex.m||[],ex.p||[]):[]);let t=ex?ex.t:Date.now();
+  openSheet(b=>{
+    const own=S.plan.signs.filter(x=>x.text);
+    const box=(g,k,l)=>'<label class="check"><input type="checkbox" data-g="'+g+'" value="'+esc(k)+'"'+(sel.has(k)?' checked':'')+'>'+esc(l)+'</label>';
+    b.innerHTML='<div><p class="step">'+(ex?'Edit this check':'About one minute')+'</p><h2>Warning-signs check</h2></div><p class="lede">Relapse is usually a gradual process with stages. Tick anything that’s been true this past week.</p>'+
+    (ex?'<div class="field"><label for="wT">Date of this check</label><input type="datetime-local" id="wT" value="'+toInput(t)+'"></div>':'')+
+    '<div class="field"><h3>Taking care of myself</h3><p class="fine">Emotional relapse signs'+(own.length?', including your own':'')+'</p><div class="checks">'+WARN_E.map(x=>box('e',x.k,x.l)).join('')+own.map(x=>box('e','own:'+x.id,x.text)).join('')+'</div></div>'+
+    '<div class="field"><h3>Thoughts about using</h3><p class="fine">Mental relapse signs</p><div class="checks">'+WARN_M.map(x=>box('m',x.k,x.l)).join('')+'</div></div>'+
+    '<div class="field"><h3>Actions</h3><div class="checks">'+WARN_P.map(x=>box('p',x.k,x.l)).join('')+'</div></div>'+
+    '<div class="actions"><button class="btn btn-primary btn-block" id="wSave">'+(ex?'Save changes':'See my result')+'</button>'+(ex?'<button class="btn btn-line btn-block" id="wDel" style="color:var(--berry)">Delete this check</button>':'')+'</div>'+cite('melemis');
+    $('#wSave',b).onclick=()=>{
+      const W={e:[],m:[],p:[]};$$('input[type=checkbox]',b).forEach(c=>{if(c.checked)W[c.dataset.g].push(c.value);});
+      if(ex){const tt=fromInput($('#wT',b).value);if(tt)t=Math.min(tt,Date.now());}
+      const stage=stageOf(W.e.length,W.m.length,W.p.length>0);
+      const rec={id:ex?ex.id:uid(),t,e:W.e,m:W.m,p:W.p,stage,u:Date.now()};S.warn[rec.id]=rec;save();render();
+      showWarnResult(b,rec);sheetScrollTop();
+    };
+    if(ex)$('#wDel',b).onclick=()=>confirmSheet({title:'Delete this check?',ok:'Delete',danger:true,onOk:()=>{S.warn[ex.id]=Object.assign({},ex,{del:true,u:Date.now()});save();render();toast('Check deleted.');}});
+  },{label:'Warning-signs check'});
+}
+function showWarnResult(b,rec){
+  const st=STAGES[rec.stage];
+  b.innerHTML='<div><p class="step">'+esc(fmtDT(rec.t))+'</p><h2>'+esc(st.t)+'</h2></div><span class="pill '+st.cls+'" style="align-self:flex-start"><span class="dot"></span>'+rec.e.length+' self-care signs · '+rec.m.length+' thought signs'+(rec.p.length?' · action taken':'')+'</span>'+
+  '<p class="lede">'+esc(st.d)+'</p><div class="note-box"><h3>What helps at this stage</h3><ul style="margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px">'+st.acts.map(a=>'<li>'+esc(a)+'</li>').join('')+'</ul></div>'+
+  '<p class="fine">This is a self-check based on the stages of relapse described by Melemis (2015). It isn’t a diagnosis.</p>'+
+  '<div class="actions">'+(rec.stage==='act'||rec.stage==='mental'?'<button class="btn btn-primary btn-block" data-act="sos">Reach out now</button><button class="btn btn-quiet btn-block" data-act="craving">Ride out an urge</button>':'')+(rec.stage!=='steady'?'<button class="btn btn-quiet btn-block" data-act="phhelp">Treatment options in the Philippines</button>':'')+'<button class="btn btn-line btn-block" data-act="sheet-close">Done</button></div>';
+}
+
+function openSOS(){
+  let reg=S.settings.region||defaultRegion();
+  openSheet(b=>{
+    const draw=()=>{
+      const R=LINES[reg]||LINES.ph;const mine=S.plan.lines.filter(l=>l.name||l.phone);
+      b.innerHTML='<h2>Help now</h2>'+
+      '<div class="safety"><h3>'+I.shield+'Possible overdose? Call 911</h3><p>After shabu: chest pain, a seizure, a very hot body, or severe confusion. After alcohol, opioids or sedatives: can’t be woken, or breathing slowly or not at all. Call 911 and stay with them.</p><a class="btn btn-danger" href="tel:911">'+I.phone+'Call 911</a></div>'+
+      '<div class="row"><button class="btn btn-primary" data-act="craving">'+I.wave+'Ride it out</button><button class="btn btn-quiet" data-act="breathe">'+I.breath+'Breathe</button></div>'+
+      '<div class="card soft"><div class="card-h"><h3>My people</h3><button class="linkbtn" data-act="edit-contacts">Edit</button></div>'+contactsHTML()+'</div>'+
+      '<div class="card soft"><div class="card-h"><h3>My saved numbers</h3><button class="linkbtn" data-act="edit-lines">'+(mine.length?'Edit':'Add')+'</button></div>'+(mine.length?linesHTML():'<p class="fine">Save your barangay health center, rural health unit, doctor or rehab center here.</p>')+'</div>'+
+      '<div class="field"><span class="flabel">Helplines</span>'+segHTML('reg',[{v:'ph',l:'Philippines'},{v:'other',l:'Abroad'},{v:'us',l:'U.S.'}],reg)+'</div>'+
+      '<div>'+R.items.map(it=>'<div class="line"><b>'+esc(it.n)+'</b><span class="fine">'+esc(it.d)+'</span>'+(it.nums&&it.nums.length?'<div class="nums">'+it.nums.map(n=>'<a href="'+telHref(n)+'">'+I.phone+esc(n)+'</a>').join('')+'</div>':'')+(it.link?'<a href="'+it.link+'" target="_blank" rel="noopener">'+esc(it.link.replace('https://',''))+'</a>':'')+'</div>').join('')+'</div>'+
+      (reg==='ph'?'<button class="btn btn-quiet btn-block" data-act="phhelp">'+I.home+'Treatment options in the Philippines</button>':'')+
+      '<p class="fine">If a call button doesn’t open your phone app, dial the number shown.</p>';
+      bindChips(b,'reg',v=>{if(v){reg=v;S.settings.region=v;touchCore();save();draw();}});
+    };
+    draw();
+  },{label:'Help now'});
+}
+function hotlinesInline(){const R=LINES[S.settings.region||defaultRegion()]||LINES.ph;const items=R.items.filter(it=>it.nums&&it.nums.length).slice(1,3);return items.length?'<div>'+items.map(it=>'<div class="line"><b>'+esc(it.n)+'</b><div class="nums">'+it.nums.slice(0,2).map(n=>'<a href="'+telHref(n)+'">'+I.phone+esc(n)+'</a>').join('')+'</div></div>').join('')+'</div>':'';}
+function defaultRegion(){return 'ph';}
+function openPHHelp(){
+  openSheet(b=>{
+    b.innerHTML='<div><p class="step">Philippines</p><h2>Getting treatment</h2></div><p class="lede">Help is available close to home. Outpatient programs let you keep working and stay with family.</p>'+
+    '<div class="ph-sec" style="border-top:0"><h3>Start with your local health office</h3><p>Many cities and municipalities run community-based drug rehabilitation programs (CBDRP) that follow DOH guidelines, usually through the city or municipal health office or the rural health unit. They are meant for people with mild to moderate drug use.</p>'+cite('cbdrp')+'</div>'+
+    '<div class="ph-sec"><h3>Residential or intensive treatment</h3><p>DOH Treatment and Rehabilitation Centers (TRCs) offer residential care, and some have outpatient and aftercare services. Not every province has one, but they refer to each other.</p>'+
+      '<div class="line" style="border-top:0;padding:4px 0"><b>DOH TRC Bicutan, Taguig</b><div class="nums"><a href="tel:0284019056">'+I.phone+'(02) 8401 9056</a><a href="tel:09184866614">'+I.phone+'0918 486 6614</a></div></div>'+
+      '<div class="line" style="padding:8px 0"><b>DOH TRC Tagaytay, in Trece Martires, Cavite</b><div class="nums"><a href="tel:0464831334">'+I.phone+'(046) 483 1334</a></div></div>'+
+      '<p class="fine">For centers in your region, see PhilHealth’s list of accredited treatment centers.</p>'+cite('datrc')+'</div>'+
+    '<div class="ph-sec"><h3>PhilHealth coverage</h3><p>PhilHealth has a medical detoxification package for members and dependents, set at ₱10,000 when it launched in 2016. It covers detox, the first stage of treatment, at accredited government hospitals and DOH-licensed treatment centers. Ask the facility’s PhilHealth desk what applies to you today.</p>'+cite('philhealth')+'</div>'+
+    '<div class="ph-sec"><h3>Your rights under RA 9165</h3><p>Under Section 54 of the Comprehensive Dangerous Drugs Act, you, or your parent, spouse, guardian or a close relative, can apply for voluntary treatment through the Dangerous Drugs Board. Judicial and medical records under voluntary submission are confidential (Section 60). People who complete it may be exempt from criminal liability for drug use (Section 55), subject to conditions.</p><p class="fine">This is general information, not legal advice. Procedures change, so ask the DDB or a lawyer about your situation.</p>'+cite('ddb')+cite('ra9165')+'</div>'+
+    '<div class="ph-sec"><h3>Peer support</h3><p>Narcotics Anonymous meetings are free and open to anyone who wants to stop using, and some NA literature is available in Filipino.</p><a class="btn btn-quiet" href="https://www.na.org/meetingsearch/" target="_blank" rel="noopener">Find an NA meeting</a></div>'+
+    '<div class="ph-sec"><h3>Talk to someone today</h3><p>DOH Substance Abuse Helpline 1550, weekdays 8 AM to 5 PM. NCMH Crisis Hotline 1553, open 24/7.</p><div class="row"><a class="btn btn-primary" href="tel:1550">'+I.phone+'1550</a><a class="btn btn-quiet" href="tel:1553">'+I.phone+'1553</a></div></div>'+
+    '<button class="btn btn-line btn-block" data-act="edit-lines">Save your local health office or rehab number</button>';
+  },{label:'Treatment in the Philippines'});
+}
+function openRewards(){
+  const R=Object.assign({},S.plan.rewards||{});const s=stats();
+  openSheet(b=>{
+    b.innerHTML='<div><p class="step">Something to look forward to</p><h2>Milestone rewards</h2></div><p class="lede">Pick a healthy reward for each milestone, like a family meal, new rubber shoes or a trip. The money you’re not spending can pay for it.</p>'+
+    '<div class="note-box"><p>Contingency management, which rewards staying drug-free, has the strongest evidence of any treatment for stimulants like shabu. Clinic programs confirm abstinence with drug tests. Planning your own rewards borrows the idea.</p>'+cite('tip33')+'</div>'+
+    MILES.map(m=>{const got=s.streakMs>=m.h*HOUR;return '<div class="field"><label for="rw'+m.h+'">'+m.l+(got?' (reached this stretch)':'')+'</label><input type="text" id="rw'+m.h+'" value="'+esc(R[m.h]||'')+'" placeholder="Reward for '+m.l+'"></div>';}).join('')+
+    '<div class="actions"><button class="btn btn-primary btn-block" id="rwS">Save rewards</button></div>';
+    $('#rwS',b).onclick=()=>{const o={};MILES.forEach(m=>{const v=$('#rw'+m.h,b).value.trim().slice(0,120);if(v)o[m.h]=v;});S.plan.rewards=o;touchCore();save();closeSheet();render();toast('Rewards saved.');};
+  },{label:'Milestone rewards'});
+}
+function openPrefs(){
+  openSheet(b=>{
+    b.innerHTML='<h2>Name and daily spend</h2><div class="field"><label for="pN">What should Ebb call you?</label><input type="text" id="pN" value="'+esc(S.plan.name||'')+'" placeholder="Optional nickname" autocomplete="nickname"></div>'+
+    '<div class="field"><label for="pS">About how much did you spend on using each day? (₱)</label><input type="text" inputmode="decimal" id="pS" value="'+(S.plan.spend||'')+'" placeholder="For example: 300"><p class="fine">Used only to show the money you keep. A rough guess is fine. You can include related costs like transport or drinks.</p></div>'+
+    '<div class="actions"><button class="btn btn-primary btn-block" id="pSave">Save</button></div>';
+    $('#pSave',b).onclick=()=>{S.plan.name=$('#pN',b).value.trim().slice(0,40);const v=parseFloat(String($('#pS',b).value).replace(/[^\d.]/g,''));S.plan.spend=isNaN(v)?0:clamp(v,0,1e6);touchCore();save();closeSheet();render();toast('Saved.');};
+  },{label:'Name and daily spend'});
+}
+function openBreathe(){
+  let tmr=0,el=0,total=180,on=true,st0=0;
+  openSheet(b=>{
+    b.innerHTML='<div><p class="step">Three minutes</p><h2>Slow breathing</h2></div><p class="lede">Breathe in through your nose for 4, out slowly for 6. A longer out-breath helps your body settle.</p>'+
+    '<div class="bcircle-wrap"><div class="bcircle" id="bc"><span id="bt">Ready</span></div></div><p class="bnum num" id="bn" style="text-align:center;font-family:var(--font-display)">3:00</p>'+
+    '<div class="row"><button class="btn btn-quiet" id="bP">Pause</button><button class="btn btn-primary" data-act="sheet-close">Finish</button></div>'+cite('melemis');
+    const bc=$('#bc',b),bt=$('#bt',b),bn=$('#bn',b);let phase='';
+    const step=()=>{if(on)el+=.25;const cyc=el%10;const p=cyc<4?'in':'out';if(p!==phase){phase=p;bc.style.transitionDuration=(p==='in'?4:6)+'s';bc.classList.toggle('big',p==='in');}
+      bt.textContent=(p==='in'?'In ':'Out ')+(p==='in'?4-Math.floor(cyc):6-Math.floor(cyc-4));const left=Math.max(0,total-el);bn.textContent=Math.floor(left/60)+':'+pad(Math.floor(left%60));
+      if(left<=0){clearInterval(tmr);bt.textContent='Done';bc.classList.remove('big');}};
+    st0=setTimeout(()=>{tmr=setInterval(step,250);step();},400);
+    $('#bP',b).onclick=e=>{on=!on;e.currentTarget.textContent=on?'Pause':'Resume';};
+  },{label:'Slow breathing',full:true});
+  Sheet.cleanup=()=>{clearTimeout(st0);clearInterval(tmr);};
+}
+function openGround(){
+  const steps=[['5','things you can see','Look around slowly. Name them out loud or in your head.'],['4','things you can feel','Your feet on the floor, the chair, your clothes, the air.'],['3','things you can hear','Near and far. Traffic, a fan, your own breathing.'],['2','things you can smell','Or two smells you like, if nothing’s around.'],['1','thing you can taste','Or one kind thing you can say to yourself.']];
+  let i=0;
+  openSheet(b=>{
+    const draw=()=>{const s=steps[i];b.innerHTML='<div><p class="step">'+(i+1)+' of 5</p><h2>5-4-3-2-1 grounding</h2></div><div class="note-box" style="padding:26px 20px"><p style="font-family:var(--font-display);font-size:64px;line-height:1">'+s[0]+'</p><p style="font-family:var(--font-display);font-size:26px">'+s[1]+'</p><p class="fine">'+s[2]+'</p></div>'+
+      '<div class="actions">'+(i<4?'<button class="btn btn-primary btn-block" id="gN">Next</button>':'<p>Notice how you feel now compared with a minute ago.</p><button class="btn btn-primary btn-block" data-act="sheet-close">Finish</button>')+(i>0?'<button class="btn btn-line btn-block" id="gB">Back</button>':'')+'</div>';
+      const n=$('#gN',b);if(n)n.onclick=()=>{i++;draw();};const bk=$('#gB',b);if(bk)bk.onclick=()=>{i--;draw();};};
+    draw();
+  },{label:'Grounding'});
+}
+function openHaltTool(){
+  const tips={h:['Eat something with protein, and drink some water.','Plan regular meals so hunger doesn’t sneak up.'],a:['Name what’s under the anger: hurt, fear, embarrassment?','Move your body, write it out, or talk to someone before you act.'],l:['Message or call someone from your list.','Go to a meeting or anywhere safe with people around.'],t:['Rest if you can. If not, take a 10-minute break with water and fresh air.','Protect tonight’s sleep: screens off, same bedtime.']};
+  openSheet(b=>{
+    b.innerHTML='<div><p class="step">Thirty seconds</p><h2>HALT check</h2></div><p class="lede">Before you decide anything, ask: am I hungry, angry, lonely or tired? Each one makes urges harder to resist.</p>'+chipsHTML('halt',HALT,[])+'<div id="hOut" class="stack"></div>'+cite('kretchman');
+    bindChips(b,'halt',vals=>{$('#hOut',b).innerHTML=vals.map(k=>'<div class="note-box"><h3>'+HALT.find(x=>x.k===k).l+'</h3><ul style="margin:0;padding-left:20px">'+tips[k].map(t=>'<li>'+esc(t)+'</li>').join('')+'</ul></div>').join('')||'';});
+  },{label:'HALT check'});
+}
+function openTape(){
+  const T=clone(S.plan.tape);
+  openSheet(b=>{
+    b.innerHTML='<div><p class="step">Write it once, read it during cravings</p><h2>Play the tape forward</h2></div><p class="lede">Cravings show you the first few minutes. This shows you the rest of the story. Your answers appear on screen while you ride out a craving.</p>'+
+    [['hour','If I use now, the next hour goes like this…','I’d feel good for a while, then…'],['tomorrow','Tomorrow morning I’d…','Wake up feeling…'],['week','Next week…','Back to…'],['sober','If I don’t use, tonight and tomorrow go like this…','Hard tonight, but tomorrow I…']].map(f=>'<div class="field"><label for="tp-'+f[0]+'">'+f[1]+'</label><textarea id="tp-'+f[0]+'" rows="2" placeholder="'+esc(f[2])+'">'+esc(T[f[0]])+'</textarea></div>').join('')+
+    '<div class="actions"><button class="btn btn-primary btn-block" id="tpS">Save</button></div>'+cite('melemis');
+    $('#tpS',b).onclick=()=>{['hour','tomorrow','week','sober'].forEach(k=>T[k]=$('#tp-'+k,b).value.trim());S.plan.tape=T;touchCore();save();closeSheet();toast('Saved. It will show up when you ride out a craving.');};
+  },{label:'Play the tape forward'});
+}
+function openDelay(){
+  let tmr=0,left=1800;
+  const ideas=['Take a shower','Go for a walk','Call or text someone','Eat something','Clean one small area','Put on music you like','Stretch or do push-ups','Go somewhere public and safe','Make tea or coffee','Write down what you’re feeling'];
+  openSheet(b=>{
+    b.innerHTML='<div><p class="step">Delay and distract</p><h2>Wait 30 minutes</h2></div><p class="lede">Tell yourself you won’t use for the next 30 minutes. Most urges last less than 15 to 30 minutes. Keep busy until this one passes.</p>'+
+    '<p class="clock num" id="dC" style="text-align:center">30:00</p><div class="row"><button class="btn btn-primary" id="dS">Start</button><button class="btn btn-line" data-act="sheet-close">Done</button></div>'+
+    '<div class="field"><span class="flabel">Pick something to do</span>'+chipsHTML('ideas',ideas.map(x=>({k:x,l:x})),[])+'</div>'+cite('melemis');
+    const c=$('#dC',b);bindChips(b,'ideas',()=>{});
+    $('#dS',b).onclick=e=>{if(tmr){clearInterval(tmr);tmr=0;e.currentTarget.textContent='Resume';return;}e.currentTarget.textContent='Pause';const t0=Date.now(),l0=left;tmr=setInterval(()=>{left=Math.max(0,l0-(Date.now()-t0)/1000);c.textContent=Math.floor(left/60)+':'+pad(Math.floor(left%60));if(left<=0){clearInterval(tmr);tmr=0;c.textContent='Done';toast('30 minutes. You waited it out.');}},500);};
+  },{label:'Wait 30 minutes'});
+  Sheet.cleanup=()=>clearInterval(tmr);
+}
+function openRules(){
+  const R=[['Change your life','Recovery means creating a new life where it’s easier not to use. Change the routines, people and places that made using easy.'],['Be completely honest','Lying keeps addiction going. Honesty with yourself, your supports and your doctor keeps recovery going.'],['Ask for help','Support groups, counseling, and people you trust make recovery more likely. You don’t have to do it alone.'],['Practice self-care','People often use to escape, relax or reward themselves. Find other ways to do those things: rest, food, movement, fun.'],['Don’t bend the rules','Watch for bargaining: “just once”, “a different drug is fine”. Bending the rules is often where relapse begins.']];
+  openSheet(b=>{b.innerHTML='<div><p class="step">From Melemis, 2015</p><h2>The five rules of recovery</h2></div><ol class="miles">'+R.map((r,i)=>'<li><span class="node" aria-hidden="true" style="font-weight:700">'+(i+1)+'</span><div><b>'+esc(r[0])+'</b><p class="when" style="margin-top:4px">'+esc(r[1])+'</p></div></li>').join('')+'</ol>'+cite('melemis');},{label:'Five rules of recovery'});
+}
+function openSafety(){
+  openSheet(b=>{b.innerHTML='<h2>Safety if you use</h2>'+safetyHTML()+'<div class="note-box"><h3>Withdrawal can be dangerous too</h3><p>Stopping alcohol or benzodiazepines suddenly after heavy use can cause seizures. Talk to a doctor before stopping, and get medical help if withdrawal feels severe.</p></div><button class="btn btn-primary btn-block" data-act="sos">See helplines</button>';},{label:'Safety if you use'});
+}
+
+function openDay(k){
+  const s=stats();const ci=checkin(k);const cr=dayCravings(k);const ls=live(S.lapses).filter(l=>dk(l.t)===k);const ws=live(S.warn).filter(w=>dk(w.t)===k);
+  const inRange=k>=s.startK&&k<=s.todayK;
+  openSheet(b=>{
+    b.innerHTML='<div><p class="step">'+(k<s.startK?'Before you started tracking':k===s.startK?'Recovery start':s.useDays.has(k)?'Used this day':'Substance-free')+'</p><h2>'+esc(fmtD(parseDk(k).getTime(),{weekday:'long',month:'long',day:'numeric'}))+'</h2></div>'+
+    (ci?'<div class="card"><div class="card-h"><h3>Check-in</h3><button class="linkbtn" data-act="checkin" data-k="'+k+'">Edit</button></div><div class="kv"><div><b>'+esc((MOODS.find(x=>x.v==ci.mood)||{l:'–'}).l)+'</b><span>Mood</span></div><div><b>'+(ci.craving!=null?ci.craving:'–')+'</b><span>Craving</span></div><div><b>'+(ci.sleep!=null?ci.sleep+'h':'–')+'</b><span>Sleep</span></div><div><b>'+(HALT.filter(x=>ci.halt&&ci.halt[x.k]).map(x=>x.l[0]).join(' ')||'None')+'</b><span>HALT</span></div></div>'+(ci.note?'<p>'+esc(ci.note)+'</p>':'')+'</div>':'')+
+    (inRange?'<div class="field"><span class="flabel">Add for this day</span><div class="addrow">'+(ci?'':'<button class="btn btn-quiet" data-act="checkin" data-k="'+k+'">Check-in</button>')+'<button class="btn btn-quiet" data-act="addcrav" data-k="'+k+'">Craving</button><button class="btn btn-quiet" data-act="addslip" data-k="'+k+'">Slip</button></div></div>':'')+
+    (cr.length?'<div class="card"><h3>Cravings</h3><ul class="feed">'+cr.sort((a,c)=>a.t-c.t).map(c=>'<li><button type="button" data-act="entry" data-type="craving" data-id="'+esc(c.id)+'"><span class="ic c">'+I.wave+'</span><span><b>'+c.i+'/10 at '+esc(fmtT(c.t))+'</b><span>'+esc((c.trig||[]).map(x=>trigL(x)).filter(Boolean).join(', ')||'No trigger noted')+'</span></span><time>Edit</time></button></li>').join('')+'</ul></div>':'')+
+    (ls.length?'<div class="card"><h3>Slips</h3><ul class="feed">'+ls.map(l=>'<li><button type="button" data-act="entry" data-type="lapse" data-id="'+esc(l.id)+'"><span class="ic l">'+I.drop+'</span><span><b>'+esc(fmtT(l.t))+'</b><span>'+esc(l.diff||l.before||'Tap to add reflections')+'</span></span><time>Edit</time></button></li>').join('')+'</ul></div>':'')+
+    (ws.length?'<div class="card"><h3>Warning-signs checks</h3><ul class="feed">'+ws.map(w=>'<li><button type="button" data-act="entry" data-type="warn" data-id="'+esc(w.id)+'"><span class="ic">'+I.pulse+'</span><span><b>'+esc(STAGES[w.stage].t)+'</b><span>'+esc(fmtT(w.t))+'</span></span><time>Edit</time></button></li>').join('')+'</ul></div>':'')+
+    (!ci&&!cr.length&&!ls.length&&!inRange?'<p class="fine">Nothing logged.</p>':'');
+  },{label:'Day details'});
+}
+function openEntry(type,id){
+  if(type==='checkin')return openCheckin(id);
+  if(type==='lapse')return openLapse({id});
+  if(type==='warn')return openWarn(id);
+  return openCravingEdit(id);
+}
+function openCravingEdit(id,k){
+  const ex=id&&S.cravings[id]&&!S.cravings[id].del?S.cravings[id]:null;
+  const isToday=!k||k===dk(Date.now());
+  const C=ex?clone(ex):{id:uid(),t:isToday?Date.now():parseDk(k).getTime()+19*HOUR,i:5,after:null,trig:[],halt:{},mins:0,out:'passed',note:''};
+  if(!C.halt)C.halt={};let hasAfter=C.after!=null;
+  openSheet(b=>{
+    b.innerHTML='<div><p class="step">'+(ex?'Edit craving':'Add a craving')+'</p><h2>'+(ex?'Craving details':'Log a craving')+'</h2></div>'+
+    '<div class="field"><label for="ceT">When</label><input type="datetime-local" id="ceT" value="'+toInput(C.t)+'"></div>'+
+    sliderHTML('ceI','How strong was it at first?',C.i)+
+    '<div class="field"><span class="flabel">Did you rate it again afterward?</span>'+segHTML('ceHas',[{v:'yes',l:'Yes'},{v:'no',l:'No'}],hasAfter?'yes':'no')+'</div>'+
+    '<div id="ceAfterWrap"'+(hasAfter?'':' hidden')+'>'+sliderHTML('ceA','Strength afterward',hasAfter?C.after:Math.max(0,C.i-3))+'</div>'+
+    '<div class="field"><label for="ceM">Minutes you rode it out</label><input type="text" inputmode="numeric" id="ceM" value="'+(C.mins||'')+'" placeholder="Optional"></div>'+
+    '<div class="field"><span class="flabel">What set it off?</span>'+chipsHTML('trig',trigList(),C.trig)+'</div>'+
+    '<div class="field"><span class="flabel">I was…</span>'+chipsHTML('halt',HALT,HALT.filter(x=>C.halt[x.k]).map(x=>x.k))+'</div>'+
+    '<div class="field"><span class="flabel">What happened?</span>'+chipsHTML('out',[{k:'passed',l:'It passed or eased'},{k:'strong',l:'It stayed strong'},{k:'used',l:'I used'},{k:'logged',l:'Not sure'}],C.out||'passed',false)+'</div>'+
+    '<div class="field"><label for="ceN">Note</label><textarea id="ceN" rows="2" placeholder="What helped, where you were">'+esc(C.note||'')+'</textarea></div>'+
+    '<div class="actions"><button class="btn btn-primary btn-block" id="ceS">Save</button>'+(ex?'<button class="btn btn-line btn-block" id="ceD" style="color:var(--berry)">Delete this craving</button>':'')+'</div>';
+    bindSlider(b,'ceI',v=>C.i=v);bindSlider(b,'ceA',()=>{});
+    bindChips(b,'ceHas',v=>{hasAfter=v==='yes';$('#ceAfterWrap',b).hidden=!hasAfter;});
+    bindChips(b,'trig',v=>C.trig=v);bindChips(b,'halt',vals=>{C.halt={};HALT.forEach(x=>C.halt[x.k]=vals.includes(x.k));});bindChips(b,'out',v=>C.out=v||'passed');
+    $('#ceS',b).onclick=()=>{
+      const t=fromInput($('#ceT',b).value);if(t)C.t=Math.min(t,Date.now());
+      C.after=hasAfter?+$('#ceA',b).value:null;
+      const mm=parseInt($('#ceM',b).value,10);C.mins=isNaN(mm)?0:clamp(mm,0,600);C.note=$('#ceN',b).value.trim();C.u=Date.now();
+      S.cravings[C.id]=C;save();closeSheet();render();toast(ex?'Craving updated.':'Craving added.');
+    };
+    if(ex)$('#ceD',b).onclick=()=>confirmSheet({title:'Delete this craving?',ok:'Delete',danger:true,onOk:()=>{S.cravings[C.id]=Object.assign({},ex,{del:true,u:Date.now()});save();render();toast('Deleted.');}});
+  },{label:ex?'Edit craving':'Add a craving'});
+}
+function openListEditor(o){
+  let rows=o.items.map(x=>Object.assign({},x));const blankRow=()=>{const r={id:uid()};o.fields.forEach(f=>r[f.k]='');return r;};
+  if(!rows.length)rows.push(blankRow());
+  openSheet(b=>{
+    const read=()=>{$$('.ed-row',b).forEach(el=>{const i=+el.dataset.i;o.fields.forEach(f=>{rows[i][f.k]=$('[data-k="'+f.k+'"]',el).value;});});};
+    const draw=()=>{
+      b.innerHTML='<h2>'+esc(o.title)+'</h2>'+(o.intro?'<p class="lede">'+esc(o.intro)+'</p>':'')+'<div class="ed-rows">'+rows.map((r,i)=>'<div class="ed-row" data-i="'+i+'">'+o.fields.map(f=>{const id='f'+i+f.k;return (o.fields.length>1?'<label class="flabel" for="'+id+'">'+esc(f.l)+'</label>':'<label class="sr" for="'+id+'">'+esc(f.l)+'</label>')+(f.multi?'<textarea id="'+id+'" data-k="'+f.k+'" rows="2" placeholder="'+esc(f.ph||'')+'">'+esc(r[f.k])+'</textarea>':'<input id="'+id+'" data-k="'+f.k+'" type="'+(f.type||'text')+'"'+(f.type==='tel'?' inputmode="tel" autocomplete="tel"':'')+' placeholder="'+esc(f.ph||'')+'" value="'+esc(r[f.k])+'">');}).join('')+'<button type="button" class="rm" data-rm="'+i+'">Remove</button></div>').join('')+'</div>'+
+      (rows.length<(o.max||10)?'<button type="button" class="btn btn-line btn-block" id="edAdd">Add another</button>':'')+'<div class="actions"><button class="btn btn-primary btn-block" id="edSave">Save</button></div>'+(o.after||'');
+      $$('[data-rm]',b).forEach(x=>x.onclick=()=>{read();rows.splice(+x.dataset.rm,1);if(!rows.length)rows.push(blankRow());draw();});
+      const ad=$('#edAdd',b);if(ad)ad.onclick=()=>{read();rows.push(blankRow());draw();const last=$$('.ed-row',b).pop();if(last)$('input,textarea',last).focus();};
+      if(o.wire)o.wire(b);
+      $('#edSave',b).onclick=()=>{read();const clean=rows.map(r=>{const c=Object.assign({},r);o.fields.forEach(f=>c[f.k]=String(c[f.k]||'').trim());return c;}).filter(r=>o.fields.some(f=>r[f.k]));o.onSave(clean);touchCore();save();closeSheet();render();toast('Saved.');};
+    };
+    draw();
+  },{label:o.title});
+}
+function openRecoveryEditor(){
+  const P={subs:S.profile.substances.slice(),start:S.profile.start};
+  const items=Array.from(new Set(SUBSTANCES.concat(P.subs))).map(x=>({k:x,l:x}));
+  openSheet(b=>{
+    b.innerHTML='<h2>Recovery details</h2><div class="field"><span class="flabel">What are you recovering from?</span>'+chipsHTML('subs',items,P.subs)+'</div><div class="field"><label for="rOther">Something else</label><input type="text" id="rOther" placeholder="Type and save to add"></div>'+
+    '<div class="field"><label for="rStart">Recovery start (when you last used before starting)</label><input type="datetime-local" id="rStart" value="'+toInput(P.start)+'"><p class="fine">Changing this recalculates your streak and totals. Slips you’ve logged after this time still count.</p></div>'+
+    '<div class="actions"><button class="btn btn-primary btn-block" id="rSave">Save</button></div>';
+    bindChips(b,'subs',v=>P.subs=v);
+    $('#rSave',b).onclick=()=>{const o=$('#rOther',b).value.trim();if(o&&!P.subs.includes(o))P.subs.push(o);const t=fromInput($('#rStart',b).value);if(t)P.start=Math.min(t,Date.now());S.profile.substances=P.subs;S.profile.start=P.start;touchCore();save();closeSheet();render();toast('Saved.');};
+  },{label:'Recovery details'});
+}
+
+/* ============ Backup code ============ */
+function backupCode(){return JSON.stringify({app:'ebb',v:1,at:Date.now(),data:Object.assign({},S,{settings:Object.assign({},S.settings,{sync:false})})});}
+function markBackup(msg){S.settings.lastBackup=Date.now();saveLocal();toast(msg||'Backup saved. Keep it somewhere private.');}
+async function backupFile(){
+  const code=backupCode();const name='ebb-backup-'+dk(Date.now())+'.json';
+  try{const f=new File([code],name,{type:'application/json'});if(navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({files:[f],title:'Ebb backup'});markBackup('Backup saved. Keep it in Files or Notes.');return;}}catch(e){if(e&&e.name==='AbortError')return;}
+  try{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([code],{type:'application/json'}));a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},3000);markBackup();}catch(e){backupCopy();}
+}
+function installSteps(){
+  return '<ol>'+
+  '<li><div><b>Tap Share</b><span class="fine">The square with an arrow <span class="ico"><svg class="i" viewBox="0 0 24 24"><path d="M12 3v12M8 7l4-4 4 4"/><path d="M6 11v9h12v-9"/></svg></span> in Safari’s toolbar. If you don’t see it, tap ••• first.</span></div></li>'+
+  '<li><div><b>Tap Add to Home Screen</b><span class="fine">Scroll down the list if you need to.</span></div></li>'+
+  '<li><div><b>Keep “Open as Web App” on, then tap Add</b><span class="fine">Older iPhones just show Add.</span></div></li>'+
+  '<li><div><b>Open Ebb from your Home Screen</b><span class="fine">Use that icon from now on. It opens full screen and works offline.</span></div></li></ol>';
+}
+function openInstall(){
+  openSheet(b=>{
+    b.innerHTML='<div><p class="step">About 30 seconds</p><h2>Install Ebb on your iPhone</h2></div><div class="install">'+installSteps()+'</div>'+
+    '<div class="note-box"><h3>Install before you start logging</h3><p>The Home Screen app keeps its own storage, separate from Safari. If you already made entries here in Safari, copy a backup code first, then restore it inside the installed app.</p><button class="btn btn-quiet" data-act="backup-copy">Copy backup code</button></div>';
+  },{label:'Install Ebb'});
+}
+function backupCopy(){
+  const code=backupCode();
+  openSheet(b=>{
+    b.innerHTML='<h2>Backup code</h2><p class="lede">This code contains all your entries. Keep it somewhere private, such as a note only you can open. Paste it into Restore on any device.</p><textarea id="bc" rows="6" readonly style="font-size:13px">'+esc(code)+'</textarea><div class="actions"><button class="btn btn-primary btn-block" id="bcC">Copy to clipboard</button></div><p class="fine" id="bcM"></p>';
+    $('#bcC',b).onclick=async()=>{const ta=$('#bc',b);try{await navigator.clipboard.writeText(code);$('#bcM',b).textContent='Copied. Paste it somewhere private.';S.settings.lastBackup=Date.now();saveLocal();}catch(e){ta.focus();ta.select();try{ta.setSelectionRange(0,code.length);}catch(_){}$('#bcM',b).textContent='Couldn’t copy automatically. The code is selected: use Copy from your phone’s menu.';}};
+  },{label:'Backup code'});
+}
+function backupRestore(){
+  openSheet(b=>{
+    b.innerHTML='<h2>Restore from a backup</h2><p class="lede">Paste a backup code, or choose a saved backup file. This replaces what’s on this device.</p><div class="field"><label for="rc">Backup code</label><textarea id="rc" rows="5" placeholder="Paste your code here" style="font-size:14px"></textarea></div><div class="field"><label for="rf">Or a backup file</label><input type="file" id="rf" accept=".json,.txt,application/json,text/plain"></div><p class="fine" id="rM"></p><div class="actions"><button class="btn btn-primary btn-block" id="rGo">Restore</button></div>';
+    $('#rf',b).onchange=e=>{const f=e.target.files&&e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{$('#rc',b).value=String(r.result||'');};r.readAsText(f);};
+    $('#rGo',b).onclick=()=>{
+      let obj=null;try{obj=JSON.parse($('#rc',b).value.trim());}catch(e){}
+      if(!obj||obj.app!=='ebb'||!obj.data||!obj.data.profile){$('#rM',b).textContent='That code isn’t a valid Ebb backup. Check that you copied all of it.';return;}
+      const keepSync=S.settings.sync;const nd=normalize(obj.data);const now=Date.now();
+      ['checkins','cravings','lapses','warn'].forEach(k=>Object.values(nd[k]).forEach(x=>{if(x)x.u=now;}));
+      nd.coreU=now;nd.demo=false;nd.settings.sync=keepSync&&!S.demo;S=nd;Cloud.hash={};save();closeSheet();hideOnboarding();render();toast('Backup restored.');
+    };
+  },{label:'Restore'});
+}
+
+/* ============ Demo data ============ */
+function mulberry(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+function makeDemo(){
+  const R=mulberry(11);const pick=a=>a[Math.floor(R()*a.length)];
+  const st=blank();st.demo=true;const now=Date.now();
+  const startK=addDays(dk(now),-64);const start=parseDk(startK).getTime()+21.5*HOUR;
+  st.profile={substances:['Shabu (methamphetamine)','Alcohol (alak)'],start,created:start};
+  st.plan.name='Migs';st.plan.spend=350;
+  st.plan.reasons=[{id:uid(),text:'Hatid-sundo my daughter to school every day'},{id:uid(),text:'Keep my job and rebuild my savings'},{id:uid(),text:'Earn back Nanay’s trust'}];
+  st.plan.contacts=[{id:uid(),name:'Kuya Jun, my sponsor',phone:'0900 000 0000'},{id:uid(),name:'Ate Mae',phone:'0900 000 0001'}];
+  st.plan.lines=[{id:uid(),name:'City Health Office CBDRP',phone:'0900 000 0002',note:'Tuesday group, 2 PM. Ask for Nurse Joy.'}];
+  st.plan.risks=[{id:uid(),situation:'Sweldo Friday with cash in my pocket',plan:'Send most of it to GCash savings before leaving work and go straight home.'},{id:uid(),situation:'Inuman with old barkada at the corner store',plan:'Use the other store. If I run into them, leave and text Kuya Jun.'}];
+  st.plan.signs=[{id:uid(),text:'Staying up past 2 AM on my phone'},{id:uid(),text:'Skipping the Tuesday group'}];
+  st.plan.rewards={720:'Merienda date with my daughter',2160:'New rubber shoes for jogging',8760:'Family weekend in Tagaytay'};
+  st.plan.tape={hour:'I’d feel great for a bit, then start planning how to get more.',tomorrow:'No sleep, late for work, lying to my daughter about where I was.',week:'Borrowing money again and hiding it. Back to day one.',sober:'A rough night, but I wake up clear and take her to school like I promised.'};
+  const lapseD=31;const lapseT=parseDk(addDays(startK,lapseD)).getTime()+22*HOUR;
+  st.lapses.l1={id:'l1',t:lapseT,kind:'lapse',subs:['Shabu (methamphetamine)'],trig:['money','people'],before:'Got my sweldo and ran into an old barkada outside the store.',thought:'“Just tonight. I’ve earned it.”',diff:'Send my pay to savings first and call Kuya Jun right after work.',next:['tell','meet'],u:lapseT};
+  const total=daysBetween(startK,dk(now));
+  const tw=[['stress',5],['bored',4],['lonely',3],['family',2],['people',2],['party',1],['money',2],['tired',3],['work',2],['cue',1]];
+  const wpick=()=>{const s=tw.reduce((a,b)=>a+b[1],0);let r=R()*s;for(const x of tw){if((r-=x[1])<0)return x[0];}return 'stress';};
+  for(let d=1;d<=total;d++){
+    const k=addDays(startK,d);const prog=d/total;const near=d>=lapseD-5&&d<=lapseD+2;
+    const sleepH=clamp(Math.round(((near?5.2:6.4+prog*1.2)+(R()-.5)*2.6)*2)/2,3,10);
+    let base=7-4.4*prog+(near?2.4*(1-Math.abs(d-lapseD)/7):0)+(sleepH<6?1.2:0);
+    const cr=clamp(Math.round(base+(R()-.5)*2.2),0,10);
+    const nAct=clamp(Math.round((10-cr)/3+(R()-.5)*2),0,5);const acts=ACTIONS.map(a=>a.k).sort(()=>R()-.5).slice(0,nAct);
+    if(R()>.13||d===lapseD||d===total){
+      st.checkins[k]={id:k,d:k,mood:String(clamp(Math.round(4.9-cr*.36+(R()-.5)*1.3),1,5)),craving:cr,halt:{h:R()<.15,a:R()<(near?.4:.12),l:R()<(near?.5:.2),t:sleepH<6||R()<.15},sleep:sleepH,used:d===lapseD,actions:acts,note:'',u:now};
+    }
+    const nc=(R()<(.95-.6*prog+(near?.5:0))?1:0)+(R()<(near?.5:.12)?1:0);
+    for(let j=0;j<nc;j++){
+      const hr=pick([8,12,14,16,17,18,19,19,20,20,21,21,22,22,23,1]);const t=parseDk(k).getTime()+hr*HOUR+Math.floor(R()*50)*MIN;if(t>now)continue;
+      const i=clamp(cr+Math.round((R()-.2)*2),2,10);const id='c'+d+'_'+j;const tr=[wpick()];if(R()<.3)tr.push(wpick());
+      st.cravings[id]={id,t,i,trig:Array.from(new Set(tr)),halt:{h:R()<.18,a:R()<.2,l:R()<.3,t:R()<.35},mins:pick([10,15,15,15,20]),after:Math.max(0,i-2-Math.floor(R()*4)),out:'passed',note:'',u:now};
+    }
+  }
+  st.cravings.cL={id:'cL',t:lapseT-40*MIN,i:9,trig:['money','people'],halt:{h:false,a:false,l:true,t:true},mins:3,after:9,out:'used',note:'',u:now};
+  [6,13,20,27,34,41,48,55,62].forEach(d=>{if(d>total)return;const t=parseDk(addDays(startK,d)).getTime()+19*HOUR;let e=[],m=[];
+    if(d===27){e=['iso','sleep','mood'];m=['glam','bargain'];}else if(d===20){e=['sleep','nofun','bottle'];}else if(d===34){e=['bottle','mood'];m=['crave'];}else if(d<20){e=R()<.5?['sleep']:[];}else{e=R()<.4?['nofun']:[];}
+    const id='w'+d;st.warn[id]={id,t,e,m,p:[],stage:stageOf(e.length,m.length,false),u:now};});
+  st.settings.lastMile=start+':0';
+  return st;
+}
+
+/* ============ Onboarding ============ */
+let OB=null;
+function showOnboarding(){
+  OB={step:0,subs:[],other:'',name:'',spend:'',start:Date.now(),reasons:['','',''],cname:'',cphone:'',sync:false,found:false};
+  $('#onboard').hidden=false;document.body.classList.add('locked');renderOB();
+  CloudReady.then(async()=>{if(Cloud.status!=='ready'||!OB)return;try{const d=await withTimeout(userCol().doc('core').get(),10000);if(d.exists&&d.data()&&d.data().profile&&OB){OB.found=true;if(OB.step===0)renderOB();}}catch(e){}});
+}
+function hideOnboarding(){const el=$('#onboard');el.hidden=true;el.innerHTML='';OB=null;if(!$('#sheetRoot').classList.contains('open'))document.body.classList.remove('locked');}
+function renderOB(){
+  const el=$('#onboard');if(!OB)return;const st=OB.step;
+  if(st===0){
+    el.innerHTML='<div class="ob ob-welcome"><canvas class="tide" aria-hidden="true"></canvas><div class="in">'+
+    '<div class="wordmark">'+$('.topbar .wordmark svg').outerHTML+'<span>Ebb</span></div>'+
+    '<h1>Every craving passes.</h1><p class="tl" lang="fil">Lilipas din ito.</p>'+
+    '<p class="lede">A private recovery tracker built on relapse-prevention research and made for the Philippines. Ride out cravings with a guided timer, catch warning signs early, and keep every substance-free day, even after a slip.</p>'+
+    (NEEDS_INSTALL?'<div class="install"><h3>Install Ebb first</h3>'+installSteps()+'</div><button class="linkbtn" data-ob="next" style="align-self:center">Continue in Safari instead</button>':'')+
+    '<div class="actions"'+(NEEDS_INSTALL?' hidden':'')+'>'+(OB.found?'<button class="btn btn-primary btn-block" data-ob="restore">Restore my private backup</button>':'')+
+    '<button class="btn '+(OB.found?'btn-quiet':'btn-primary')+' btn-block" data-ob="next">Start my tracker</button>'+
+    '<button class="btn btn-line btn-block" data-ob="demo" style="background:var(--surface)">Explore with sample data</button>'+
+    '<button class="linkbtn" data-ob="code" style="align-self:center">Restore from a backup code</button>'+
+    '<p class="fine">Your entries stay on this device unless you choose private backup. Ebb supports treatment. It doesn’t replace it.</p></div></div></div>';
+    makeTide($('canvas',el),tt=>({level:.34+Math.sin(tt*.35)*.03,amp:1.1}));
+  }else{
+    const head='<div class="ob-head"><button class="btn-icon" data-ob="back" aria-label="Back"><svg class="i" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button><div class="ob-prog" aria-hidden="true">'+[1,2,3,4,5].map(i=>'<i class="'+(i<=st?'on':'')+'"></i>').join('')+'</div><span class="step">Step '+st+' of 5</span></div>';
+    let body='';
+    if(st===1){body='<h1>What are you recovering from?</h1><p class="lede">Pick all that apply. You can change this later.</p>'+chipsHTML('subs',SUBSTANCES.map(x=>({k:x,l:x})),OB.subs)+'<div class="field"><label for="obO">Something else</label><input type="text" id="obO" value="'+esc(OB.other)+'" placeholder="Optional"></div><div class="field"><label for="obNm">What should Ebb call you?</label><input type="text" id="obNm" value="'+esc(OB.name)+'" placeholder="Optional nickname" autocomplete="nickname"></div>';}
+    if(st===2){const dep=OB.subs.some(x=>DEPRESSANTS.test(x));body='<h1>When did you last use?</h1><p class="lede">If you’re starting again after a relapse, that counts. Pick the time you last used, or now if you’re starting today.</p><div class="field"><label for="obT">Last use</label><input type="datetime-local" id="obT" value="'+toInput(OB.start)+'"></div><button type="button" class="btn btn-quiet" data-ob="now" style="align-self:flex-start">Set to right now</button>'+
+      '<div class="field"><label for="obSp">About how much did you spend on using each day? (₱)</label><input type="text" inputmode="decimal" id="obSp" value="'+esc(OB.spend)+'" placeholder="Optional, for example 300"><p class="fine">Ebb shows you the money you keep. You can change it later.</p></div>'+
+      (dep?'<div class="safety"><h3>'+I.shield+'Withdrawal safety</h3><p>Stopping alcohol, sleeping pills or opioids can cause withdrawal that needs medical care. With alcohol and sedatives it can be dangerous. Talk to a doctor, your rural health unit, or the DOH helpline 1550 about stopping safely.</p></div>':'');}
+    if(st===3){body='<h1>Why do you want to recover?</h1><p class="lede">Your reasons show up during cravings. Write them in your own words, in English or Filipino.</p>'+['Be there for my kids','Keep my job','Earn back my family’s trust'].map((ph,i)=>'<div class="field"><label class="sr" for="obR'+i+'">Reason '+(i+1)+'</label><input type="text" id="obR'+i+'" value="'+esc(OB.reasons[i])+'" placeholder="'+esc(ph)+'"></div>').join('');}
+    if(st===4){body='<h1>Who can you call when it’s hard?</h1><p class="lede">A sponsor, friend, family member or counselor. Optional, and you can add more later.</p><div class="field"><label for="obCn">Name</label><input type="text" id="obCn" value="'+esc(OB.cname)+'" autocomplete="name" placeholder="For example: Ate Mae"></div><div class="field"><label for="obCp">Phone</label><input type="tel" id="obCp" value="'+esc(OB.cphone)+'" inputmode="tel" autocomplete="tel" placeholder="09XX XXX XXXX"></div>';}
+    if(st===5&&APP_BUILD){
+      OB.sync=false;
+      body='<h1>Your entries stay on this '+(IS_IOS?'iPhone':'device')+'</h1><p class="lede">Ebb doesn\u2019t send your entries anywhere. They\u2019re saved inside the app.</p>'+
+      '<div class="note-box"><h3>Protect them with backups</h3><p>Removing the app deletes its entries. Every couple of weeks, save a backup file from My plan to Files or Notes. Ebb will remind you.</p></div>'+
+      (!LOCAL_OK?'<div class="safety"><p>This browser isn\u2019t letting Ebb save. Install Ebb to your Home Screen, or save backup files often.</p></div>':'');
+    }
+    else if(st===5){
+      const ready=Cloud.status==='ready',checking=Cloud.status==='checking';
+      if(!ready)OB.sync=false;
+      body='<h1>Where should your entries be saved?</h1><p class="lede">Either way, nobody else who opens this page can see your entries.</p>'+
+      '<label class="option"><input type="radio" name="obS" value="local"'+(!OB.sync?' checked':'')+'><div><b>Only on this device</b><span>Most private. Clearing your browser deletes your entries, so copy a backup code now and then from My plan.</span></div></label>'+
+      '<label class="option'+(ready?'':' dis')+'"><input type="radio" name="obS" value="cloud"'+(OB.sync?' checked':'')+(ready?'':' disabled')+'><div><b>This device plus private backup</b><span>'+(ready?'Also saved to your own Claude account, so entries survive a cleared browser and show up on your other devices.':checking?'Checking whether backup is available here…':'Not available in this view. Open Ebb while signed in to Claude to turn it on later.')+'</span></div></label>'+
+      (!LOCAL_OK?'<div class="safety"><p>This browser isn’t letting Ebb save on this device. Private backup or backup codes will keep your entries.</p></div>':'');
+    }
+    el.innerHTML='<div class="ob">'+head+'<div class="ob-body">'+body+'</div><div class="actions"><button class="btn btn-primary btn-block" data-ob="'+(st===5?'finish':'next')+'">'+(st===5?'Start tracking':st===4||st===3?'Continue':'Next')+'</button>'+(st===3||st===4?'<button class="btn btn-line btn-block" data-ob="skip">Skip for now</button>':'')+'</div></div>';
+    if(st===1)bindChips(el,'subs',v=>OB.subs=v);
+    $$('input[name=obS]',el).forEach(r=>r.onchange=()=>{OB.sync=r.value==='cloud'&&r.checked;});
+  }
+  el.scrollTop=0;
+  const h=$('h1',el);if(h&&st>0){h.setAttribute('tabindex','-1');h.focus({preventScroll:true});}
+}
+function obRead(){
+  const el=$('#onboard');const st=OB.step;
+  if(st===1){OB.other=($('#obO',el)||{value:''}).value.trim();OB.name=($('#obNm',el)||{value:''}).value.trim();}
+  if(st===2){const t=fromInput($('#obT',el).value);if(t)OB.start=Math.min(t,Date.now());OB.spend=($('#obSp',el)||{value:''}).value.trim();}
+  if(st===3){OB.reasons=[0,1,2].map(i=>$('#obR'+i,el).value.trim());}
+  if(st===4){OB.cname=$('#obCn',el).value.trim();OB.cphone=$('#obCp',el).value.trim();}
+}
+$('#onboard').addEventListener('click',async e=>{
+  const b=e.target.closest('[data-ob]');if(!b||!OB)return;const a=b.dataset.ob;
+  if(a==='demo'){S=makeDemo();saveLocal();hideOnboarding();ROUTE='today';try{history.replaceState(null,'','#today');}catch(_){}render();toast('Sample data loaded. Tap “Start my own” anytime.');return;}
+  if(a==='restore'){b.disabled=true;b.textContent='Restoring…';S=blank();S.settings.sync=true;await pull();if(S.profile){saveLocal();hideOnboarding();render();toast('Your backup is restored.');}else{b.disabled=false;b.textContent='Couldn’t restore. Try again';}return;}
+  if(a==='code'){backupRestore();return;}
+  if(a==='now'){OB.start=Date.now();$('#obT').value=toInput(OB.start);return;}
+  if(a==='back'){obRead();OB.step=Math.max(0,OB.step-1);renderOB();return;}
+  if(a==='next'||a==='skip'){if(OB.step>0&&a==='next')obRead();if(a==='skip'){if(OB.step===3)OB.reasons=['','',''];if(OB.step===4){OB.cname='';OB.cphone='';}}OB.step++;renderOB();return;}
+  if(a==='finish'){
+    const now=Date.now();const subs=OB.subs.slice();if(OB.other&&!subs.includes(OB.other))subs.push(OB.other);
+    S=blank();S.profile={substances:subs,start:OB.start,created:now};
+    S.plan.reasons=OB.reasons.filter(Boolean).map(t=>({id:uid(),text:t}));
+    S.plan.name=OB.name.slice(0,40);const sp=parseFloat(String(OB.spend).replace(/[^\d.]/g,''));S.plan.spend=isNaN(sp)?0:clamp(sp,0,1e6);
+    if(OB.cname||OB.cphone)S.plan.contacts=[{id:uid(),name:OB.cname,phone:OB.cphone}];
+    S.settings.sync=!!OB.sync;S.settings.region=defaultRegion();touchCore();S.settings.lastMile=OB.start+':0';
+    save();hideOnboarding();ROUTE='today';try{history.replaceState(null,'','#today');}catch(_){}render();
+    if(S.settings.sync)pull();
+    toast('Your tracker is ready.');
+  }
+});
+
+/* ============ Global actions ============ */
+function shiftCal(n){let m=CAL.m+n,y=CAL.y;if(m<0){m=11;y--;}if(m>11){m=0;y++;}CAL={y,m};render();}
+const ACTS={
+  tab:a=>go(a.dataset.tab),
+  sos:()=>openSOS(),craving:()=>openCraving(),checkin:a=>openCheckin(a.dataset.k),lapse:()=>openLapse(),warn:()=>openWarn(),
+  breathe:()=>openBreathe(),ground:()=>openGround(),halt:()=>openHaltTool(),tape:()=>openTape(),delay:()=>openDelay(),rules:()=>openRules(),safety:()=>openSafety(),
+  day:a=>openDay(a.dataset.k),calprev:()=>shiftCal(-1),calnext:()=>shiftCal(1),entry:a=>openEntry(a.dataset.type,a.dataset.id),
+  'sheet-close':()=>closeSheet(),
+  'edit-reasons':()=>openListEditor({title:'Why I’m doing this',intro:'Short and personal works best. These show up on your Today screen and during cravings.',items:S.plan.reasons,fields:[{k:'text',l:'Reason',ph:'For example: be there for my kids'}],onSave:r=>S.plan.reasons=r}),
+  'edit-contacts':()=>openListEditor({title:'My people',intro:'People you can call or text when it’s hard.',items:S.plan.contacts,fields:[{k:'name',l:'Name',ph:'Name'},{k:'phone',l:'Phone',ph:'Phone number',type:'tel'}],onSave:r=>S.plan.contacts=r}),
+  'edit-risks':()=>openListEditor({title:'High-risk situations',intro:'Name a situation where using feels likely, then a specific way out.',items:S.plan.risks,fields:[{k:'situation',l:'When',ph:'For example: payday with cash on me',multi:true},{k:'plan',l:'My exit plan',ph:'For example: send money to savings, go straight home',multi:true}],onSave:r=>S.plan.risks=r}),
+  'edit-signs':()=>openListEditor({title:'My early warning signs',intro:'Things you notice in yourself before things slide.',items:S.plan.signs,fields:[{k:'text',l:'Warning sign',ph:'For example: skipping meals'}],onSave:r=>S.plan.signs=r}),
+  'edit-recovery':()=>openRecoveryEditor(),
+  phhelp:()=>openPHHelp(),'backup-file':()=>backupFile(),install:()=>openInstall(),rewards:()=>openRewards(),prefs:()=>openPrefs(),
+  addcrav:a=>openCravingEdit(null,a.dataset.k),
+  addslip:a=>{const k=a.dataset.k;openLapse({t:k===dk(Date.now())?Date.now():parseDk(k).getTime()+20*HOUR});},
+  'edit-triggers':()=>openListEditor({title:'Trigger list',intro:'Rename, remove or add triggers. They appear when you log cravings and slips. Past entries keep their labels.',items:trigList().map(t=>({id:t.k,l:t.l})),fields:[{k:'l',l:'Trigger',ph:'For example: passing the old tambayan'}],max:30,
+    onSave:r=>{const old=S.plan.trigOld||{};trigList().forEach(t=>{if(!r.some(x=>x.id===t.k))old[t.k]=t.l;});S.plan.trigOld=old;S.plan.triggers=r.map(x=>({k:x.id,l:x.l}));},
+    after:'<button type="button" class="btn btn-line btn-block" id="edReset">Restore the default list</button>',
+    wire:b=>{const x=$('#edReset',b);if(x)x.onclick=()=>{S.plan.triggers=null;touchCore();save();closeSheet();render();toast('Default triggers restored.');};}}),
+  'edit-actions':()=>openListEditor({title:'Recovery actions',intro:'The things you can tick in your daily check-in. Add what helps you, like jogging, a hobby or a church group.',items:actList().map(t=>({id:t.k,l:t.l})),fields:[{k:'l',l:'Action',ph:'For example: basketball with my cousins'}],max:30,
+    onSave:r=>{S.plan.actions=r.map(x=>({k:x.id,l:x.l}));},
+    after:'<button type="button" class="btn btn-line btn-block" id="edReset">Restore the default list</button>',
+    wire:b=>{const x=$('#edReset',b);if(x)x.onclick=()=>{S.plan.actions=null;touchCore();save();closeSheet();render();toast('Default actions restored.');};}}),
+  'edit-lines':()=>openListEditor({title:'My saved numbers',intro:'Numbers you might need: your barangay health center, rural health unit, doctor, counselor or rehab center.',items:S.plan.lines,fields:[{k:'name',l:'Name',ph:'For example: Barangay health center'},{k:'phone',l:'Phone',ph:'Number',type:'tel'},{k:'note',l:'Note',ph:'Hours, address or who to ask for'}],onSave:r=>S.plan.lines=r}),
+  'sync-on':async()=>{S.settings.sync=true;save();refreshSyncUI();await pull();toast(Cloud.sync==='ok'?'Private backup is on.':'Backup will retry shortly.');},
+  'sync-now':()=>pull(),
+  'sync-off':()=>confirmSheet({title:'Turn off private backup?',body:'New entries will only be saved on this device. You can also delete the copy in your Claude account.',ok:'Turn off and delete the backup copy',danger:true,onOk:async()=>{S.settings.sync=false;save();const ok=await deleteCloud();refreshSyncUI();toast(ok?'Backup turned off and deleted.':'Backup turned off. The copy couldn’t be deleted right now.');}}),
+  'backup-copy':()=>backupCopy(),'backup-restore':()=>backupRestore(),
+  wipe:()=>confirmSheet({title:'Delete all your data?',body:'This erases every entry on this device'+(S.settings.sync?' and in your private backup':'')+'. It can’t be undone. Copy a backup code first if you might want it later.',ok:'Delete everything',danger:true,onOk:async()=>{if(S.settings.sync&&!S.demo)await deleteCloud();S=blank();saveLocal();showOnboarding();}}),
+  'demo-exit':()=>{S=blank();saveLocal();showOnboarding();}
+};
+document.addEventListener('click',e=>{const a=e.target.closest('[data-act]');if(!a||a.disabled)return;const f=ACTS[a.dataset.act];if(!f)return;e.preventDefault();
+  const inSheet=a.closest('#sheetRoot');const act=a.dataset.act;
+  if(inSheet&&act!=='sheet-close')closeSheet(true);
+  f(a,e);});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&$('#sheetRoot').classList.contains('open'))closeSheet();});
+
+/* ============ Boot ============ */
+function boot(){
+  LOCAL_OK=testLocal();
+  S=normalize(loadLocal());
+  readRoute();
+  if(!S.profile)showOnboarding();else render();
+  initCloud();
+  if(APP_BUILD&&'serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost'||location.hostname==='127.0.0.1')){navigator.serviceWorker.register('sw.js').catch(()=>{});}
+  if(APP_BUILD&&IS_STANDALONE&&navigator.storage&&navigator.storage.persist){navigator.storage.persist().catch(()=>{});}
+  setInterval(()=>{if(!document.hidden&&ROUTE==='today')tick();},30000);
+}
+boot();
+</script>
+</body>
+</html>
