@@ -1,5 +1,5 @@
-/* Ebb service worker: keeps the app working offline. Build 1f1d7c1c */
-const CACHE='ebb-shell-1f1d7c1c';
+/* Ebb service worker: keeps the app working offline. Build 6b04a487 */
+const CACHE='ebb-shell-6b04a487';
 const FONTS='ebb-fonts';
 const LEGACY=['ebb-shell-b1e07f91'];
 const SHELL=['./','./index.html','./manifest.webmanifest','./apple-touch-icon.png','./icon-192.png','./icon-512.png','./icon-maskable-512.png'];
@@ -15,6 +15,8 @@ self.addEventListener('activate',e=>{e.waitUntil((async()=>{
 self.addEventListener('fetch',e=>{
   const req=e.request;if(req.method!=='GET')return;
   const url=new URL(req.url);
+  // Calm sounds stream straight from the site so iOS can keep them playing in the background.
+  if(url.origin===self.location.origin&&url.pathname.indexOf('/sounds/')>=0)return;
   if(url.origin===self.location.origin){
     const key=req.mode==='navigate'?'./index.html':req;
     e.respondWith(caches.open(CACHE).then(c=>c.match(key,{ignoreSearch:true}).then(hit=>{

@@ -41,6 +41,7 @@ Existing entries from version 1 carry over automatically.
 - `index.html`: the whole app
 - `sw.js`: service worker for offline use
 - `manifest.webmanifest`: install settings and Home Screen shortcuts
-- `ebb-app.zip`: the same files, zipped
+- `sounds/`: the seven calm sounds as seamless 60-second WAV loops, streamed so iOS keeps them playing in the background (the app can also generate them offline)
+- `ebb-app.zip`: the app files, zipped (without `sounds/`; the app generates the sounds itself when the files aren't there)
 
 Every health claim in the app links to its source under My plan, Research behind Ebb. Ebb supports treatment. It doesn't replace it.
