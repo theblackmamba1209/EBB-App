@@ -552,6 +552,22 @@ details.tbl td,details.tbl th{padding:6px 4px;border-top:1px solid var(--line);t
 .medal .num b{font-weight:400;font-size:62px;line-height:.95}
 .medal .num span{font-size:20px}
 .celebrate h2,.celebrate>.src{text-align:center}
+/* Mini player: stays above the tab bar while Calm sounds play */
+.player{position:fixed;z-index:39;left:50%;transform:translateX(-50%);bottom:calc(74px + env(safe-area-inset-bottom));width:calc(100% - 20px);max-width:540px;display:flex;align-items:center;gap:6px;padding:6px;border-radius:18px;background:var(--ink);color:var(--bg);box-shadow:0 14px 30px -14px rgba(0,0,0,.55)}
+.player[hidden]{display:none}
+.player .pl-main{flex:1;min-width:0;display:flex;align-items:center;gap:12px;border:0;background:none;color:inherit;text-align:left;padding:6px 8px}
+.player .pl-t{display:flex;flex-direction:column;min-width:0}
+.player .pl-t b{font-size:15px;line-height:1.2}
+.player .pl-t span{font-size:13px;opacity:.78;font-variant-numeric:tabular-nums}
+.player .pl-btn{width:44px;height:44px;flex:none;border-radius:12px;border:0;display:grid;place-items:center;background:color-mix(in srgb,var(--bg) 14%,transparent);color:inherit}
+.player .pl-btn svg{width:20px;height:20px}
+.eq{display:flex;align-items:flex-end;gap:3px;width:20px;height:18px;flex:none}
+.eq i{flex:1;height:30%;border-radius:2px;background:currentColor}
+.eq.on i{animation:eq 1.1s ease-in-out infinite}
+.eq.on i:nth-child(2){animation-delay:-.45s}.eq.on i:nth-child(3){animation-delay:-.8s}
+@keyframes eq{0%,100%{height:25%}50%{height:100%}}
+body.has-player main{padding-bottom:calc(172px + env(safe-area-inset-bottom))}
+body.has-player .toast{bottom:calc(150px + env(safe-area-inset-bottom))}
 .wn{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:16px}
 .wn li{display:grid;grid-template-columns:42px 1fr;gap:12px;align-items:start}
 .wn .ic{width:42px;height:42px;border-radius:13px;display:grid;place-items:center;background:var(--foam);color:var(--tide)}
@@ -596,6 +612,7 @@ main#view{view-transition-name:view}
     <button type="button" data-act="tab" data-tab="plan"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="4" width="14" height="17" rx="2.5"/><path d="M9 4.5V3h6v1.5"/><path d="M8.5 10h7M8.5 13.5h7M8.5 17h4"/></svg>My plan</button>
   </nav>
 </div>
+<div id="player" class="player" hidden></div>
 <div id="onboard" hidden></div>
 <div id="lock" hidden role="dialog" aria-modal="true" aria-label="Ebb is locked"></div>
 <div id="sheetRoot"></div>
@@ -614,7 +631,7 @@ const avg=a=>a.length?a.reduce((x,y)=>x+y,0)/a.length:0;
 const RM=window.matchMedia?matchMedia('(prefers-reduced-motion: reduce)'):{matches:false};
 const pad=n=>String(n).padStart(2,'0');
 const LOC='en-PH';
-const APP_BUILD=true, APP_VERSION='2.0';
+const APP_BUILD=true, APP_VERSION='2.1';
 const IS_IOS=/iPhone|iPad|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
 const IS_STANDALONE=(window.matchMedia&&matchMedia('(display-mode: standalone)').matches)||navigator.standalone===true;
 const NEEDS_INSTALL=APP_BUILD&&IS_IOS&&!IS_STANDALONE;
@@ -682,20 +699,20 @@ const TIPS=[
   {t:'Many cities and municipalities run DOH-guided community-based drug rehabilitation. Ask your city or municipal health office or rural health unit.',s:'cbdrp'},
   {t:'In a Cochrane review of 21 studies, music therapy added to treatment likely reduced cravings and raised motivation for treatment. Try Calm sounds in the Toolkit while an urge passes.',s:'ghetti'}
 ];
-/* Ebb’s reward picks: small and soon at first, bigger as the stretch grows. Rough 2026 prices for a Filipino middle-class budget. */
+/* Ebb’s reward picks: small and soon at first, bigger as the stretch grows. Rough 2026 Philippine prices for a working professional. */
 const REWARD_PICKS={
-  24:['Halo-halo or your favorite merienda (about ₱150)','Lechon manok for dinner at home (about ₱400)','A long merienda with someone who supports you'],
-  72:['A large milk tea and a movie night at home (about ₱200)','A month of music streaming (about ₱170)','A new shirt from the ukay-ukay (about ₱200)'],
-  168:['Samgyup or unli-wings with a sober friend (about ₱500)','A movie at the mall cinema (about ₱400)','Your favorite ulam, takeout for the whole family'],
-  336:['A full-body massage or hilot (about ₱600)','A fresh haircut at a good barbershop or salon (about ₱400)','A board game or a new book for the family'],
-  720:['New rubber shoes for walking or jogging (about ₱3,000)','A family buffet dinner (about ₱1,200 per person)','Wireless earbuds for your calm music (about ₱1,500)'],
-  1440:['A one-night staycation in Tagaytay or the city (about ₱4,000)','A resort pool day with the family (about ₱2,500)','A month of gym or badminton (about ₱1,500)'],
-  2160:['A family beach day in Batangas or Zambales (about ₱5,000)','A smartwatch to track sleep and steps (about ₱3,000)','Lechon belly and a family celebration at home, no alcohol'],
-  4392:['A weekend in Baguio, La Union or Ilocos with family (about ₱12,000)','A bike for weekend rides (about ₱8,000)','Open Pag-IBIG MP2 savings with the money you’ve kept'],
-  8760:['A flight trip for two to Bohol, Siargao, Palawan or Boracay (about ₱25,000)','A new phone or laptop for work or study','A big family celebration at home, no alcohol'],
-  13140:['Something lasting for home, like an inverter aircon (about ₱30,000)','A TESDA course or certificate for a better job','An emergency fund worth three months of expenses'],
-  17520:['A trip abroad to Japan, Korea or Vietnam (about ₱50,000 per person)','A room makeover or home repairs','A thank-you dinner for the people who stood by you'],
-  43824:['A down payment on a car or motorcycle','A home renovation or a down payment on a lot','The family trip you’ve always talked about']
+  24:['Specialty coffee and a pastry at a café you like (about ₱350)','A proper dinner delivered, your pick (about ₱600)','A full night of sleep, phone off by 10'],
+  72:['A book you’ve been meaning to read (about ₱800)','A long walk somewhere green, then lunch somewhere good','A month of a streaming service you’ll actually use (about ₱400)'],
+  168:['A massage at a proper spa (about ₱1,200)','Dinner at a restaurant you’ve wanted to try (about ₱1,500)','A haircut at a good barber or salon (about ₱600)'],
+  336:['Noise-cancelling earbuds for the commute and long shifts (about ₱4,000)','A good pair of running shoes (about ₱4,000)','A quality pen and notebook for interpreting notes (about ₱1,500)'],
+  720:['A weekend staycation at a good hotel (about ₱6,000)','Over-ear noise-cancelling headphones (about ₱8,000)','A month of gym, climbing or pilates (about ₱3,000)'],
+  1440:['A weekend out of town: Tagaytay, Batangas or La Union (about ₱8,000)','A short course in a new language or interpreting skills (about ₱5,000)','An upgrade for your desk or reading corner (about ₱5,000)'],
+  2160:['A flight weekend to Siargao, Bohol or El Nido (about ₱15,000)','A smartwatch for sleep and fitness (about ₱10,000)','Open an investment account or Pag-IBIG MP2 with the money you’ve kept'],
+  4392:['A short trip abroad to Taiwan or Vietnam (about ₱35,000)','A professional certification in interpreting or another field you care about','A work wardrobe refresh (about ₱15,000)'],
+  8760:['A real vacation abroad, a week or longer (about ₱60,000)','Tuition toward going back to school, law or anything else','The laptop or phone you’ve been putting off'],
+  13140:['An emergency fund worth three months of expenses','A course or degree that moves your career forward','A good mattress or something lasting for home (about ₱30,000)'],
+  17520:['The trip you’ve always wanted: Seoul, Kyoto or further','Dinner for the people who stood by you, your treat','A down payment toward something big: a car, a condo or more school'],
+  43824:['A down payment on a home or a car','Finishing the degree or career move you set aside','The trip of a lifetime, wherever that is for you']
 };
 function rewardFor(h){const mine=S&&S.plan.rewards&&S.plan.rewards[h];if(mine)return {t:mine,mine:true};const p=REWARD_PICKS[h];return p?{t:p[0],mine:false}:null;}
 const SRC={
@@ -1461,8 +1478,9 @@ function openCheckin(k){
 function openCraving(){
   const C={id:uid(),t:Date.now(),i:6,trig:[],halt:{h:false,a:false,l:false,t:false},dur:15};
   let raf=0,tmr=0,paused=false,elapsed=0,lastT=0,tide=null;
+  Snd.prepare('ocean');
   openSheet(b=>stepA(b),{label:'Ride out a craving',full:true});
-  Sheet.cleanup=()=>{cancelAnimationFrame(raf);clearInterval(tmr);if(tide)tide.destroy();Snd.stop();};
+  Sheet.cleanup=()=>{cancelAnimationFrame(raf);clearInterval(tmr);if(tide)tide.destroy();};
   function stepA(b){
     b.innerHTML='<div><p class="step">Step 1 of 3</p><h2>Name the craving</h2></div><p class="lede">Noticing it is the first step. You don’t have to act on it or fight it.</p>'+
     sliderHTML('crI','How strong is it right now?',C.i,'None','Intense')+
@@ -1478,16 +1496,16 @@ function openCraving(){
     const tape=S.plan.tape;const hasTape=tape.hour||tape.tomorrow||tape.week;
     b.innerHTML='<div class="surf"><canvas class="tide" aria-hidden="true"></canvas><div class="in"><p class="step">Step 2 of 3 · Riding it out</p><p class="clock" id="sClock" aria-live="off">'+C.dur+':00</p><p class="phase" id="sPhase" aria-live="polite">Notice the urge. You don’t have to act on it or fight it.</p><p class="breath" id="sBreath" aria-hidden="true">Breathe in<small>4</small></p></div></div>'+
     '<div class="wavetrack" aria-hidden="true"><svg viewBox="0 0 300 56"><path class="wv" d="'+WAVE_D+'"/><path class="wd" id="sWd" d="'+WAVE_D+'" pathLength="100" stroke-dasharray="100" stroke-dashoffset="100"/><circle id="sDot" r="6" cx="0" cy="'+wavePt(0)[1]+'"/></svg><div class="lb"><span style="left:0">Rising</span><span style="left:35%;transform:translateX(-50%)">Peak</span><span style="right:0">Easing</span></div></div>'+
-    '<div class="row"><button class="btn btn-quiet" id="sPause">Pause</button><button class="btn btn-quiet" id="sPlus">+5 min</button><button class="btn btn-quiet soundbtn" id="sSnd" aria-pressed="'+(!!S.settings.sound)+'" aria-label="Ocean sound">'+I.sound+'</button></div>'+
+    '<div class="row"><button class="btn btn-quiet" id="sPause">Pause</button><button class="btn btn-quiet" id="sPlus">+5 min</button><button class="btn btn-quiet soundbtn" id="sSnd" aria-pressed="false" aria-label="Calm sounds">'+I.sound+'</button></div>'+
     '<button class="btn btn-primary btn-block" id="sDone">It’s eased. Finish</button>'+
     needsHTML(C.halt)+
     '<div class="card soft"><h3>Play the tape forward</h3>'+(hasTape?'<ul class="plist">'+(tape.hour?'<li><small>In the next hour</small>'+esc(tape.hour)+'</li>':'')+(tape.tomorrow?'<li><small>Tomorrow</small>'+esc(tape.tomorrow)+'</li>':'')+(tape.week?'<li><small>Next week</small>'+esc(tape.week)+'</li>':'')+(tape.sober?'<li><small>If I don’t use</small>'+esc(tape.sober)+'</li>':'')+'</ul>':'<p>Picture past the first few minutes. How does tonight end if you use? How do you feel tomorrow morning? Next week?</p>')+'</div>'+
     exitPlansHTML()+
     '<div class="card soft"><h3>My reasons</h3>'+reasonsHTML()+'</div>'+
     '<div class="card soft"><h3>Call someone</h3>'+contactsHTML()+hotlinesInline()+'</div>';
-    const sb=$('#sSnd',b);const setSnd=on=>{sb.setAttribute('aria-pressed',String(on));if(on){if(!Snd.play('ocean')){sb.setAttribute('aria-pressed','false');toast('Sound isn’t available on this device.');}}else Snd.stop();};
-    if(S.settings.sound)setSnd(true);
-    sb.onclick=()=>{const on=sb.getAttribute('aria-pressed')!=='true';S.settings.sound=on;saveLocal();setSnd(on);};
+    const sb=$('#sSnd',b);const paintSnd=()=>sb.setAttribute('aria-pressed',String(Player.state==='playing'));
+    if(S.settings.sound&&Player.state==='off'){Snd.prepare('ocean');Player.start('ocean',20);}paintSnd();
+    sb.onclick=()=>{if(Player.state==='playing'){Player.stop();S.settings.sound=false;}else{if(!Player.start(Player.mode||'ocean',20)){toast('Sound isn’t available on this device.');return;}S.settings.sound=true;}saveLocal();paintSnd();};
     const wd=$('#sWd',b),dot=$('#sDot',b);
     let total=C.dur*60;const cl=$('#sClock',b),ph=$('#sPhase',b),br=$('#sBreath',b);let lastPhase='';
     const PH=[[.15,'Notice the urge. You don’t have to act on it or fight it.'],[.35,'Where do you feel it? Chest, stomach, hands, mouth? Breathe into that spot.'],[.6,'Urges rise like a wave, peak, then fall. Ride the crest with your breath.'],[.85,'Notice any change in strength, even a small one.'],[1.01,'It’s passing. You’re riding it out.']];
@@ -1504,7 +1522,7 @@ function openCraving(){
     $('#sPause',b).onclick=e=>{paused=!paused;e.currentTarget.textContent=paused?'Resume':'Pause';};
     $('#sPlus',b).onclick=()=>{total+=300;};
     $('#sDone',b).onclick=()=>finish(false);
-    function finish(timeUp){clearInterval(tmr);Snd.stop();if(tide){tide.destroy();tide=null;}C.mins=Math.max(1,Math.round(elapsed/60));stepC(b,timeUp);sheetScrollTop();}
+    function finish(timeUp){clearInterval(tmr);if(tide){tide.destroy();tide=null;}C.mins=Math.max(1,Math.round(elapsed/60));stepC(b,timeUp);sheetScrollTop();}
   }
   function stepC(b,timeUp){
     C.after=Math.max(0,C.i-3);C.out='passed';
@@ -1655,24 +1673,24 @@ function openPrefs(){
 const BREATH={calm:{l:'Calm',d:'In for 4, out for 6. A longer out-breath helps your body settle.',seq:[['in',4],['out',6]]},box:{l:'Box',d:'In 4, hold 4, out 4, hold 4. Even and steady.',seq:[['in',4],['hold',4],['out',4],['rest',4]]},relax:{l:'4-7-8',d:'In 4, hold 7, out 8. Slower, for winding down before sleep.',seq:[['in',4],['hold',7],['out',8]]}};
 const BWORD={in:'Breathe in',hold:'Hold',out:'Breathe out',rest:'Hold'};
 function openBreathe(){
-  let pat=BREATH[S.settings.breath]?S.settings.breath:'calm';
+  let pat=BREATH[S.settings.breath]?S.settings.breath:'calm';Snd.prepare('ocean');
   let tmr=0,el=0,off=0,total=180,on=true,counted=false,phase='',st0=0;
   openSheet(b=>{
     b.innerHTML='<div><p class="step">Three minutes</p><h2>Slow breathing</h2></div>'+segHTML('bpat',Object.keys(BREATH).map(k=>({v:k,l:BREATH[k].l})),pat)+'<p class="lede" id="bDesc">'+esc(BREATH[pat].d)+'</p>'+
     '<div class="orb-wrap"><div class="orb" id="orb"><span class="halo"></span><span class="glow"></span><svg class="pr" viewBox="0 0 100 100" aria-hidden="true"><circle class="tr" cx="50" cy="50" r="48"/><circle class="fl" id="orbP" cx="50" cy="50" r="48" pathLength="100" stroke-dasharray="100" stroke-dashoffset="100"/></svg><p class="lbl"><span id="bt">Ready</span><small id="bc"></small></p></div></div>'+
     '<span class="sr" id="bLive" aria-live="polite"></span>'+
     '<p class="bnum" id="bn" style="text-align:center;font-family:var(--font-display)">3:00</p>'+
-    '<div class="row"><button class="btn btn-quiet" id="bP">Pause</button><button class="btn btn-quiet soundbtn" id="bS" aria-pressed="false">'+I.sound+'Ocean</button></div><button class="btn btn-primary btn-block" id="bF">Finish</button>'+cite('melemis');
+    '<div class="row"><button class="btn btn-quiet" id="bP">Pause</button><button class="btn btn-quiet soundbtn" id="bS" aria-pressed="false">'+I.sound+'Sound</button></div><button class="btn btn-primary btn-block" id="bF">Finish</button>'+cite('melemis');
     const orb=$('#orb',b),bt=$('#bt',b),bc=$('#bc',b),bn=$('#bn',b),pr=$('#orbP',b),live=$('#bLive',b),sb=$('#bS',b);
-    const setSnd=v=>{sb.setAttribute('aria-pressed',String(v));if(v){if(!Snd.play('ocean'))sb.setAttribute('aria-pressed','false');}else Snd.stop();};
-    if(S.settings.sound)setSnd(true);
-    sb.onclick=()=>{const v=sb.getAttribute('aria-pressed')!=='true';S.settings.sound=v;saveLocal();setSnd(v);};
+    const paintSnd=()=>sb.setAttribute('aria-pressed',String(Player.state==='playing'));
+    if(S.settings.sound&&Player.state==='off'){Snd.prepare('ocean');Player.start('ocean',10);}paintSnd();
+    sb.onclick=()=>{if(Player.state==='playing'){Player.stop();S.settings.sound=false;}else{if(!Player.start(Player.mode||'ocean',10))return;S.settings.sound=true;}saveLocal();paintSnd();};
     bindChips(b,'bpat',v=>{if(!v)return;pat=v;S.settings.breath=v;saveLocal();$('#bDesc',b).textContent=BREATH[v].d;off=el;phase='';});
     const step=()=>{
       if(on)el+=.1;
       const seq=BREATH[pat].seq,L=seq.reduce((a,x)=>a+x[1],0);let c=(el-off)%L,i=0;while(c>=seq[i][1]){c-=seq[i][1];i++;}
       const [kind,len]=seq[i];const key=pat+i+Math.floor((el-off)/L);
-      if(key!==phase){phase=key;orb.style.setProperty('--d',len+'s');if(kind==='in')orb.style.setProperty('--s','1');if(kind==='out')orb.style.setProperty('--s','.56');live.textContent=BWORD[kind];Snd.breath(kind,len);}
+      if(key!==phase){phase=key;orb.style.setProperty('--d',len+'s');if(kind==='in')orb.style.setProperty('--s','1');if(kind==='out')orb.style.setProperty('--s','.56');live.textContent=BWORD[kind];}
       bt.textContent=on?BWORD[kind]:'Paused';bc.textContent=on?String(Math.ceil(len-c)):'';pr.setAttribute('stroke-dashoffset',String(100-c/len*100));
       const left=Math.max(0,total-el);bn.textContent=Math.floor(left/60)+':'+pad(Math.floor(left%60));
       if(left<=0){clearInterval(tmr);bt.textContent='Done';bc.textContent='Notice how you feel';orb.style.setProperty('--s','.7');done();}};
@@ -1681,7 +1699,7 @@ function openBreathe(){
     $('#bP',b).onclick=e=>{on=!on;e.currentTarget.textContent=on?'Pause':'Resume';if(!on)orb.style.setProperty('--d','.6s');};
     $('#bF',b).onclick=()=>{if(el>=60)done();ACTS['sheet-close']();};
   },{label:'Slow breathing',full:true});
-  Sheet.cleanup=()=>{clearTimeout(st0);clearInterval(tmr);Snd.stop();};
+  Sheet.cleanup=()=>{clearTimeout(st0);clearInterval(tmr);};
 }
 function openGround(){
   const steps=[['5','things you can see','Look around slowly. Name them out loud or in your head.'],['4','things you can feel','Your feet on the floor, the chair, your clothes, the air.'],['3','things you can hear','Near and far. Traffic, a fan, your own breathing.'],['2','things you can smell','Or two smells you like, if nothing’s around.'],['1','thing you can taste','Or one kind thing you can say to yourself.']];
@@ -2183,70 +2201,116 @@ function openLockSetup(){
   },{label:'Passcode lock'});
 }
 
-/* ============ Calm sound engine (Web Audio, generated, no files) ============ */
-const Snd={ctx:null,master:null,nodes:[],timers:[],mode:null,on:false,sw:null,_b:{},_st:0,
-  ac(){if(this.ctx)return this.ctx;const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return null;try{const c=new AC();this.ctx=c;this.master=c.createGain();this.master.gain.value=0;this.master.connect(c.destination);}catch(e){return null;}return this.ctx;},
-  buf(kind){if(this._b[kind])return this._b[kind];const c=this.ctx,len=Math.floor(c.sampleRate*6),b=c.createBuffer(2,len,c.sampleRate);
-    for(let ch=0;ch<2;ch++){const d=b.getChannelData(ch);
-      if(kind==='brown'){let l=0;for(let i=0;i<len;i++){l=(l+.02*(Math.random()*2-1))/1.02;d[i]=l*3.5;}}
-      else{let b0=0,b1=0,b2=0,b3=0,b4=0,b5=0,b6=0;for(let i=0;i<len;i++){const w=Math.random()*2-1;b0=.99886*b0+w*.0555179;b1=.99332*b1+w*.0750759;b2=.969*b2+w*.153852;b3=.8665*b3+w*.3104856;b4=.55*b4+w*.5329522;b5=-.7616*b5-w*.016898;d[i]=(b0+b1+b2+b3+b4+b5+b6+w*.5362)*.11;b6=w*.115926;}}
-      const dr=d[len-1]-d[0];for(let i=0;i<len;i++)d[i]-=dr*i/len;}
-    return this._b[kind]=b;},
-  track(n){this.nodes.push(n);n.onended=()=>{const i=this.nodes.indexOf(n);if(i>=0)this.nodes.splice(i,1);};return n;},
-  src(kind){const s=this.ctx.createBufferSource();s.buffer=this.buf(kind);s.loop=true;s.start();return this.track(s);},
-  osc(type,f){const o=this.ctx.createOscillator();o.type=type;o.frequency.value=f;o.start();return this.track(o);},
-  gain(v){const g=this.ctx.createGain();g.gain.value=v;return g;},
-  filt(type,f,q){const x=this.ctx.createBiquadFilter();x.type=type;x.frequency.value=f;if(q!=null)x.Q.value=q;return x;},
-  build(mode){const c=this.ctx,M=this.master;
-    if(mode==='ocean'){const s=this.src('brown'),lp=this.filt('lowpass',520,.5),wg=this.gain(.55);s.connect(lp);lp.connect(wg);wg.connect(M);
-      const l1=this.osc('sine',.085),l1g=this.gain(.38);l1.connect(l1g);l1g.connect(wg.gain);
-      const l2=this.osc('sine',.085),l2g=this.gain(260);l2.connect(l2g);l2g.connect(lp.frequency);
-      const s2=this.src('pink'),bp=this.filt('bandpass',900,.4),g2=this.gain(.05);s2.connect(bp);bp.connect(g2);g2.connect(M);const l3=this.osc('sine',.085),l3g=this.gain(.045);l3.connect(l3g);l3g.connect(g2.gain);
-      this.sw={wg,l1g,lp,l2g};}
-    else if(mode==='rain'){const s=this.src('pink'),hp=this.filt('highpass',500,.3),lp=this.filt('lowpass',8000,.3),g=this.gain(.5);s.connect(hp);hp.connect(lp);lp.connect(g);g.connect(M);
-      const r=this.src('brown'),rl=this.filt('lowpass',220,.5),rg=this.gain(.35);r.connect(rl);rl.connect(rg);rg.connect(M);
-      const fl=this.osc('sine',.13),fg=this.gain(.06);fl.connect(fg);fg.connect(g.gain);this.sw=null;}
-    else{const dl=c.createDelay(2);dl.delayTime.value=.42;const fb=this.gain(.38),wet=this.gain(.35),lp=this.filt('lowpass',1600,.3);dl.connect(fb);fb.connect(dl);dl.connect(wet);wet.connect(M);lp.connect(M);lp.connect(dl);
-      const dr=this.osc('sine',65.41),dg=this.gain(.05);dr.connect(dg);dg.connect(lp);
-      const N=[130.81,146.83,164.81,196,220,261.63,293.66,329.63,392];let next=c.currentTime+.2,last=4;
-      const sched=()=>{while(next<c.currentTime+1.2){let i=clamp(last+Math.round((Math.random()-.5)*4),0,N.length-1);last=i;this.note(N[i],next,lp,1);if(Math.random()<.25)this.note(N[clamp(i-2,0,N.length-1)],next+.06,lp,.5);next+=2.2+Math.random()*1.8;}};
-      sched();this.timers.push(setInterval(sched,500));this.sw=null;}
-  },
-  note(f,t,dest,vol){const c=this.ctx,o=c.createOscillator(),o2=c.createOscillator(),g=c.createGain(),g2=c.createGain();o.type='sine';o.frequency.value=f;o2.type='triangle';o2.frequency.value=f*2.003;g2.gain.value=.12;
-    g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.16*vol,t+1.8);g.gain.exponentialRampToValueAtTime(.0008,t+7.5);o.connect(g);o2.connect(g2);g2.connect(g);g.connect(dest);o.start(t);o2.start(t);o.stop(t+7.7);o2.stop(t+7.7);this.track(o);this.track(o2);},
-  play(mode){const c=this.ac();if(!c)return false;try{if(c.state!=='running')c.resume();}catch(e){}
-    clearTimeout(this._st);if(this.mode!==mode){this.kill();try{this.build(mode);}catch(e){return false;}this.mode=mode;}
-    const now=c.currentTime,g=this.master.gain;g.cancelScheduledValues(now);g.setValueAtTime(g.value,now);g.linearRampToValueAtTime(.85,now+1.6);this.on=true;return true;},
-  stop(){if(!this.ctx||!this.on)return;this.on=false;const now=this.ctx.currentTime,g=this.master.gain;g.cancelScheduledValues(now);g.setValueAtTime(g.value,now);g.linearRampToValueAtTime(0,now+.9);clearTimeout(this._st);this._st=setTimeout(()=>{if(!this.on){this.kill();this.mode=null;try{this.ctx.suspend();}catch(e){}}},1000);},
-  kill(){this.timers.forEach(clearInterval);this.timers=[];this.nodes.slice().forEach(n=>{try{n.onended=null;n.stop();}catch(e){}try{n.disconnect();}catch(e){}});this.nodes=[];this.sw=null;},
-  breath(kind,secs){if(!this.on||!this.sw||!this.ctx)return;const now=this.ctx.currentTime,{wg,l1g,lp,l2g}=this.sw;l1g.gain.setTargetAtTime(0,now,.5);l2g.gain.setTargetAtTime(0,now,.5);
-    if(kind!=='in'&&kind!=='out')return;wg.gain.cancelScheduledValues(now);wg.gain.setValueAtTime(wg.gain.value,now);wg.gain.linearRampToValueAtTime(kind==='in'?.95:.32,now+secs);lp.frequency.cancelScheduledValues(now);lp.frequency.setValueAtTime(lp.frequency.value,now);lp.frequency.linearRampToValueAtTime(kind==='in'?900:380,now+secs);}
-};
+/* ============ Calm sounds: rendered to real audio tracks so they keep playing in the background ============ */
+// Each soundscape is generated once on the phone (no downloads), saved as a seamless 60-second WAV loop,
+// and played through an <audio> element. iOS keeps media elements playing when you switch apps or lock
+// the screen, shows lock screen controls, and plays them even with the silent switch on.
 const SOUNDS={ocean:'Ocean waves',rain:'Rain',tones:'Soft tones'};
-function safeUrl(u){u=String(u||'').trim();if(!u)return '#';if(!/^https?:\/\//i.test(u))u='https://'+u.replace(/^\/+/,'');return /^https?:\/\/[^\s"'<>]+$/i.test(u)?u:'#';}
+function wavBlob(f,sr){const n=f.length,buf=new ArrayBuffer(44+n*2),v=new DataView(buf);const ws=(o,t)=>{for(let i=0;i<t.length;i++)v.setUint8(o+i,t.charCodeAt(i));};
+  ws(0,'RIFF');v.setUint32(4,36+n*2,true);ws(8,'WAVE');ws(12,'fmt ');v.setUint32(16,16,true);v.setUint16(20,1,true);v.setUint16(22,1,true);v.setUint32(24,sr,true);v.setUint32(28,sr*2,true);v.setUint16(32,2,true);v.setUint16(34,16,true);ws(36,'data');v.setUint32(40,n*2,true);
+  for(let i=0,o=44;i<n;i++,o+=2){const x=Math.max(-1,Math.min(1,f[i]));v.setInt16(o,x<0?x*0x8000:x*0x7FFF,true);}
+  return new Blob([buf],{type:'audio/wav'});}
+function renderSound(mode){
+  const SR=22050,LOOP=60,PRE=mode==='tones'?0:12,TAIL=mode==='tones'?10:0;
+  const OAC=window.OfflineAudioContext||window.webkitOfflineAudioContext;const c=new OAC(1,(PRE+LOOP+TAIL)*SR,SR);
+  const noise=kind=>{const n=SR*12,b=c.createBuffer(1,n,SR),d=b.getChannelData(0);
+    if(kind==='brown'){let l=0;for(let i=0;i<n;i++){l=(l+.02*(Math.random()*2-1))/1.02;d[i]=l*3.5;}}
+    else{let b0=0,b1=0,b2=0,b3=0,b4=0,b5=0,b6=0;for(let i=0;i<n;i++){const w=Math.random()*2-1;b0=.99886*b0+w*.0555179;b1=.99332*b1+w*.0750759;b2=.969*b2+w*.153852;b3=.8665*b3+w*.3104856;b4=.55*b4+w*.5329522;b5=-.7616*b5-w*.016898;d[i]=(b0+b1+b2+b3+b4+b5+b6+w*.5362)*.11;b6=w*.115926;}}
+    const dr=d[n-1]-d[0];for(let i=0;i<n;i++)d[i]-=dr*i/n;return b;};
+  const src=kind=>{const x=c.createBufferSource();x.buffer=noise(kind);x.loop=true;x.start(0);return x;};
+  const osc=(f,t)=>{const o=c.createOscillator();o.type=t||'sine';o.frequency.value=f;o.start(0);return o;};
+  const gain=v=>{const g=c.createGain();g.gain.value=v;return g;};
+  const filt=(t,f,q)=>{const x=c.createBiquadFilter();x.type=t;x.frequency.value=f;x.Q.value=q;return x;};
+  const D=c.destination;
+  // Every repeating part divides 60 seconds evenly, so the loop has no seam.
+  if(mode==='ocean'){const s1=src('brown'),lp=filt('lowpass',520,.5),wg=gain(.55);s1.connect(lp);lp.connect(wg);wg.connect(D);
+    const l1=osc(1/12),l1g=gain(.38);l1.connect(l1g);l1g.connect(wg.gain);const l2=osc(1/12),l2g=gain(260);l2.connect(l2g);l2g.connect(lp.frequency);
+    const s2=src('pink'),bp=filt('bandpass',900,.4),g2=gain(.05);s2.connect(bp);bp.connect(g2);g2.connect(D);const l3=osc(1/12),l3g=gain(.045);l3.connect(l3g);l3g.connect(g2.gain);}
+  else if(mode==='rain'){const s1=src('pink'),hp=filt('highpass',500,.3),lp=filt('lowpass',8000,.3),g=gain(.5);s1.connect(hp);hp.connect(lp);lp.connect(g);g.connect(D);
+    const r=src('brown'),rl=filt('lowpass',220,.5),rg=gain(.35);r.connect(rl);rl.connect(rg);rg.connect(D);const fl=osc(.1),fg=gain(.06);fl.connect(fg);fg.connect(g.gain);}
+  else{const dl=c.createDelay(2);dl.delayTime.value=.42;const fb=gain(.38),wet=gain(.35),lp=filt('lowpass',1600,.3);dl.connect(fb);fb.connect(dl);dl.connect(wet);wet.connect(D);lp.connect(D);lp.connect(dl);
+    const dr=osc(3925/60),dg=gain(.05);dr.connect(dg);dg.connect(lp);dr.stop(LOOP);
+    const N=[130.81,146.83,164.81,196,220,261.63,293.66,329.63,392];let t=.3,last=4;
+    const note=(f,at,vol)=>{const o=c.createOscillator(),o2=c.createOscillator(),g=c.createGain(),g2=c.createGain();o.frequency.value=f;o2.type='triangle';o2.frequency.value=f*2.003;g2.gain.value=.12;g.gain.setValueAtTime(0,at);g.gain.linearRampToValueAtTime(.16*vol,at+1.8);g.gain.exponentialRampToValueAtTime(.0008,at+7.5);o.connect(g);o2.connect(g2);g2.connect(g);g.connect(lp);o.start(at);o2.start(at);o.stop(at+7.7);o2.stop(at+7.7);};
+    while(t<LOOP-.5){const i=clamp(last+Math.round((Math.random()-.5)*4),0,N.length-1);last=i;note(N[i],t,1);if(Math.random()<.25)note(N[clamp(i-2,0,N.length-1)],t+.06,.5);t+=2.2+Math.random()*1.8;}}
+  const r=c.startRendering();
+  return new Promise((res,rej)=>{if(r&&r.then)r.then(res,rej);else c.oncomplete=e=>res(e.renderedBuffer);}).then(buf=>{
+    const d=buf.getChannelData(0),out=new Float32Array(LOOP*SR);out.set(d.subarray(PRE*SR,(PRE+LOOP)*SR));
+    for(let i=0;i<TAIL*SR;i++)out[i]+=d[LOOP*SR+i];   // fold the last notes' tails into the start
+    let pk=0,sq=0;for(let i=0;i<out.length;i++){const x=Math.abs(out[i]);if(x>pk)pk=x;sq+=out[i]*out[i];}
+    const rms=Math.sqrt(sq/out.length)||1,k=Math.min(.2/rms,.95/(pk||1));for(let i=0;i<out.length;i++)out[i]*=k;
+    return URL.createObjectURL(wavBlob(out,SR));});
+}
+const Snd={el:null,urls:{},jobs:{},silent:null,swapping:false,
+  ok(){return !!(window.HTMLAudioElement&&(window.OfflineAudioContext||window.webkitOfflineAudioContext));},
+  audio(){if(this.el)return this.el;const a=document.createElement('audio');a.loop=true;a.preload='auto';a.setAttribute('playsinline','');a.setAttribute('aria-hidden','true');document.body.appendChild(a);
+    a.addEventListener('pause',()=>{if(!this.swapping)Player.sysPause();});a.addEventListener('play',()=>{if(!this.swapping)Player.sysPlay();});
+    return this.el=a;},
+  prepare(mode){if(!this.ok()||!SOUNDS[mode])return Promise.resolve(null);if(this.urls[mode])return Promise.resolve(this.urls[mode]);
+    return this.jobs[mode]||(this.jobs[mode]=renderSound(mode).then(u=>{this.urls[mode]=u;return u;}).catch(()=>{delete this.jobs[mode];return null;}));},
+  load(a,url,mode){this.swapping=true;a.src=url;a.dataset.mode=mode;let p=null;try{p=a.play();}catch(e){}const done=()=>setTimeout(()=>{this.swapping=false;},80);if(p&&p.then)p.then(done,done);else done();},
+  play(mode){const a=this.audio();try{if(navigator.audioSession)navigator.audioSession.type='playback';}catch(e){}
+    if(a.dataset.mode===mode&&a.getAttribute('src')){try{const p=a.play();if(p&&p.catch)p.catch(()=>{});}catch(e){}return;}
+    if(this.urls[mode]){this.load(a,this.urls[mode],mode);return;}
+    // Start a silent track inside the tap so iOS lets the real sound start the moment it's ready.
+    if(!this.silent)this.silent=URL.createObjectURL(wavBlob(new Float32Array(2205),22050));
+    this.load(a,this.silent,'');
+    this.prepare(mode).then(u=>{if(u&&Player.state==='playing'&&Player.mode===mode)this.load(a,u,mode);});
+  },
+  pause(){if(this.el)this.el.pause();}
+};
+// One player for the whole app: keeps going across screens, other apps and a locked phone, until you stop it or the timer ends.
+const Player={mode:null,state:'off',endAt:0,mins:20,left:null,tmr:0,
+  start(mode,mins){if(!Snd.ok())return false;if(mins!=null){this.mins=mins;this.endAt=Date.now()+mins*MIN;}else if(this.state==='off'||!this.endAt)this.endAt=Date.now()+this.mins*MIN;
+    this.mode=mode;this.state='playing';S.settings.soundMode=mode;saveLocal();Snd.play(mode);this.run();this.ui();return true;},
+  pause(){if(this.state!=='playing')return;this.left=this.remaining();this.state='paused';Snd.pause();this.ui();},
+  resume(){if(this.state!=='paused')return;this.endAt=Date.now()+(this.left||this.mins*60)*1000;this.state='playing';Snd.play(this.mode);this.run();this.ui();},
+  toggle(){this.state==='playing'?this.pause():this.resume();},
+  stop(){this.state='off';clearInterval(this.tmr);Snd.pause();this.ui();},
+  setMins(m){this.mins=m;if(this.state==='playing')this.endAt=Date.now()+m*MIN;else if(this.state==='paused')this.left=m*60;this.ui();},
+  remaining(){if(this.state==='paused')return this.left;if(this.state!=='playing')return this.mins*60;return Math.max(0,(this.endAt-Date.now())/1000);},
+  sysPause(){if(this.state==='playing'){this.left=this.remaining();this.state='paused';this.ui();}},
+  sysPlay(){if(this.state==='paused'){this.endAt=Date.now()+(this.left||this.mins*60)*1000;this.state='playing';this.run();this.ui();}},
+  run(){clearInterval(this.tmr);this.tmr=setInterval(()=>this.tick(),1000);},
+  tick(){if(this.state==='playing'&&Date.now()>=this.endAt){this.stop();toast('Calm sounds finished. Notice how you feel.');return;}const t=$('#plT');if(t)t.textContent=this.label();},
+  label(){return this.state==='paused'?'Paused':fmtClock(this.remaining())+' left';},
+  ui(){playerUI();
+    if('mediaSession' in navigator){const ms=navigator.mediaSession;
+      try{if(this.state==='off'){ms.metadata=null;ms.playbackState='none';}else{ms.metadata=new MediaMetadata({title:SOUNDS[this.mode],artist:'Ebb',album:'Calm sounds',artwork:[{src:'icon-512.png',sizes:'512x512',type:'image/png'},{src:'icon-192.png',sizes:'192x192',type:'image/png'}]});ms.playbackState=this.state==='playing'?'playing':'paused';}}catch(e){}
+      if(!this._ms){this._ms=1;[['play',()=>this.resume()],['pause',()=>this.pause()],['stop',()=>this.stop()]].forEach(([k,f])=>{try{ms.setActionHandler(k,f);}catch(e){}});}}}
+};
+const fmtClock=sec=>{sec=Math.max(0,Math.round(sec||0));return Math.floor(sec/60)+':'+pad(sec%60);};
+function playerUI(){
+  const el=$('#player');if(!el)return;const on=Player.state!=='off';el.hidden=!on;document.body.classList.toggle('has-player',on);
+  if(!on){el.innerHTML='';return;}
+  const pl=Player.state==='playing';
+  el.innerHTML='<button type="button" class="pl-main" data-act="sounds" aria-label="Open Calm sounds"><span class="eq'+(pl?' on':'')+'" aria-hidden="true"><i></i><i></i><i></i></span><span class="pl-t"><b>'+esc(SOUNDS[Player.mode])+'</b><span id="plT">'+esc(Player.label())+'</span></span></button>'+
+    '<button type="button" class="pl-btn" data-act="player-toggle" aria-label="'+(pl?'Pause':'Play')+'">'+(pl?I.pause:I.play)+'</button><button type="button" class="pl-btn" data-act="player-stop" aria-label="Stop">'+I.x+'</button>';
+}
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)Player.tick();});
 function openSounds(){
-  let mode=SOUNDS[S.settings.soundMode]?S.settings.soundMode:'ocean',mins=20,left=1200,playing=false,tmr=0,last=0,tide=null;
+  let mode=Player.state!=='off'?Player.mode:(SOUNDS[S.settings.soundMode]?S.settings.soundMode:'ocean'),tmr=0,tide=null;
+  Snd.prepare(mode);
   openSheet(b=>{
-    const mus=S.plan.music.filter(m=>m.url);
-    b.innerHTML='<div><p class="step">Music for hard moments</p><h2>Calm sounds</h2></div><p class="lede">Put these on while an urge passes, before sleep, or whenever you need to settle. Ebb makes the sound itself, so it works offline.</p>'+
+    const mus=S.plan.music.filter(m=>m.url);const mine=()=>Player.state!=='off'&&Player.mode===mode;
+    b.innerHTML='<div><p class="step">Music for hard moments</p><h2>Calm sounds</h2></div><p class="lede">Put these on while an urge passes, before sleep, or whenever you need to settle. They keep playing while you use other apps or lock your phone.</p>'+
     '<div class="sound-stage"><canvas class="tide" aria-hidden="true"></canvas><div class="in"><p class="clock" id="snC">20:00</p><p class="fine" id="snM" style="color:var(--ink-2)">'+esc(SOUNDS[mode])+'</p></div></div>'+
     segHTML('snd',Object.keys(SOUNDS).map(k=>({v:k,l:SOUNDS[k]})),mode)+
-    '<div class="field"><span class="flabel">Play for</span>'+segHTML('snT',[10,20,30,60].map(m=>({v:String(m),l:m+' min'})),'20')+'</div>'+
+    '<div class="field"><span class="flabel">Play for</span>'+segHTML('snT',[10,20,30,60].map(m=>({v:String(m),l:m+' min'})),String(Player.mins))+'</div>'+
     '<button type="button" class="playbtn" id="snP" aria-label="Play">'+I.play+'</button>'+
-    '<p class="fine" style="text-align:center">On iPhone, turn off silent mode to hear it.</p>'+
+    '<p class="fine" style="text-align:center">Pause or stop it from the bar at the bottom of Ebb or from your lock screen.</p>'+
     '<div class="note-box"><h3>What the research says</h3><p>In a Cochrane review of 21 studies, music therapy with a trained music therapist, added to treatment in detox and rehab, likely reduced cravings and raised motivation for treatment. Listening on your own isn’t therapy, but it’s a calm way to wait out an urge.</p>'+cite('ghetti')+'</div>'+
     '<div class="card soft"><div class="card-h"><h3>My music</h3><button class="linkbtn" data-act="edit-music">'+(mus.length?'Edit':'Add')+'</button></div>'+(mus.length?'<div>'+mus.map(m=>'<div class="linkrow"><b>'+esc(m.name||'My music')+'</b><a href="'+esc(safeUrl(m.url))+'" target="_blank" rel="noopener">'+I.ext+'Open</a></div>').join('')+'</div>':'')+'<p class="fine">Save songs or playlists that calm you, from Spotify, YouTube or anywhere. Skip songs you used to play while using, since they can work like a trigger.</p></div>'+
     '<button class="btn btn-line btn-block" data-act="videos">'+I.video+'Videos and guided audio</button>';
     const C=$('#snC',b),M=$('#snM',b),P=$('#snP',b);
-    tide=makeTide($('.sound-stage canvas',b),t=>({level:.2+(playing?Math.sin(t*.5)*.04:0),amp:playing?1.1:.5}),{bubbles:true});
-    const paint=()=>{C.textContent=Math.floor(left/60)+':'+pad(Math.floor(left%60));P.innerHTML=playing?I.pause:I.play;P.classList.toggle('on',playing);P.setAttribute('aria-label',playing?'Pause':'Play');};
-    const stop=()=>{playing=false;clearInterval(tmr);Snd.stop();paint();};
-    P.onclick=()=>{if(playing){stop();return;}if(!Snd.play(mode)){toast('Sound isn’t available on this device.');return;}playing=true;last=Date.now();clearInterval(tmr);tmr=setInterval(()=>{const now=Date.now();left=Math.max(0,left-(now-last)/1000);last=now;paint();if(left<=0){stop();left=mins*60;paint();toast('Done. Notice how you feel now.');}},500);paint();};
-    bindChips(b,'snd',v=>{if(!v)return;mode=v;S.settings.soundMode=v;saveLocal();M.textContent=SOUNDS[v];if(playing)Snd.play(v);});
-    bindChips(b,'snT',v=>{if(!v)return;mins=+v;left=mins*60;paint();});
-    paint();
+    tide=makeTide($('.sound-stage canvas',b),t=>{const on=Player.state==='playing'&&mine();return {level:.2+(on?Math.sin(t*.5)*.04:0),amp:on?1.1:.5};},{bubbles:true});
+    const paint=()=>{const on=Player.state==='playing'&&mine();C.textContent=fmtClock(mine()?Player.remaining():Player.mins*60);P.innerHTML=on?I.pause:I.play;P.classList.toggle('on',on);P.setAttribute('aria-label',on?'Pause':'Play');};
+    P.onclick=()=>{if(mine())Player.toggle();else if(!Player.start(mode,Player.mins)){toast('Sound isn’t available on this device.');return;}paint();};
+    bindChips(b,'snd',v=>{if(!v)return;mode=v;M.textContent=SOUNDS[v];Snd.prepare(v);if(Player.state!=='off')Player.start(v,null);else{S.settings.soundMode=v;saveLocal();}paint();});
+    bindChips(b,'snT',v=>{if(!v)return;Player.setMins(+v);paint();});
+    paint();tmr=setInterval(paint,500);
   },{label:'Calm sounds'});
-  Sheet.cleanup=()=>{clearInterval(tmr);Snd.stop();if(tide)tide.destroy();};
+  Sheet.cleanup=()=>{clearInterval(tmr);if(tide)tide.destroy();};
 }
 function openVideos(){
   const item=(t,d,src,btn,ic)=>'<div class="card"><h3>'+esc(t)+'</h3><p class="fine" style="color:var(--ink-2)">'+esc(d)+'</p>'+cite(src)+'<a class="btn btn-quiet" href="'+SRC[src].u+'" target="_blank" rel="noopener" style="align-self:flex-start">'+ic+esc(btn)+'</a></div>';
@@ -2333,9 +2397,10 @@ function openWhatsNew(){
   markSeen();
   const it=(ic,t,d)=>'<li><span class="ic" aria-hidden="true">'+ic+'</span><div><b>'+t+'</b><p class="fine" style="color:var(--ink-2)">'+d+'</p></div></li>';
   openSheet(b=>{b.innerHTML='<div><p class="step">Version '+APP_VERSION+'</p><h2>What’s new in Ebb</h2></div><ul class="wn">'+
+    it(I.music,'Calm sounds keep playing','They carry on while you use other apps or lock your phone. Pause or stop them from the bar at the bottom of Ebb or from your lock screen.')+
+    it(I.gift,'New reward picks','Grown-up rewards for every milestone, from specialty coffee to a trip abroad. Swap in your own anytime.')+
     it(I.wave,'A living horizon','Today’s sky follows the time of day, and the tide rises as your next milestone gets closer.')+
-    it(I.music,'Calm sounds and videos','Ocean, rain and soft tones that work offline, your own calming music, and short videos from NIDA.')+
-    it(I.gift,'Rewards picked for you','Ebb sets a realistic reward for every milestone. Swap in your own anytime.')+
+    it(I.video,'Videos and guided audio','Short videos from NIDA and guided urge surfing, plus a place for your own calming music.')+
     it(I.coin,'Heads-ups before hard moments','On payday, and before the hours your cravings usually hit.')+
     it(I.star,'Celebrations and progress','Milestone celebrations, a shareable image, badges, a weekly review and a craving heatmap.')+
     it(I.lock,'Privacy and reminders','A passcode lock, a discreet calendar reminder, and a summary to share with your counselor.')+
@@ -2356,7 +2421,7 @@ const ACTS={
   breathe:()=>openBreathe(),ground:()=>openGround(),halt:()=>openHaltTool(),tape:()=>openTape(),delay:()=>openDelay(),rules:()=>openRules(),safety:()=>openSafety(),
   day:a=>openDay(a.dataset.k),calprev:()=>shiftCal(-1),calnext:()=>shiftCal(1),entry:a=>openEntry(a.dataset.type,a.dataset.id),
   'sheet-close':()=>{closeSheet();if(PENDING_CELEB){const m=PENDING_CELEB;PENDING_CELEB=null;setTimeout(()=>{if(!busyUI())openCelebrate(m);else PENDING_CELEB=m;},420);}},
-  sounds:()=>openSounds(),videos:()=>openVideos(),sexhelp:()=>openSexHelp(),'lock-setup':()=>openLockSetup(),'lock-now':()=>showLock(false),
+  sounds:()=>openSounds(),'player-toggle':()=>Player.toggle(),'player-stop':()=>Player.stop(),videos:()=>openVideos(),sexhelp:()=>openSexHelp(),'lock-setup':()=>openLockSetup(),'lock-now':()=>showLock(false),
   reminder:()=>openReminder(),summary:()=>openSummary(),
   'share-streak':()=>{const st=fmtStreak(stats().streakMs);shareImage(String(st.big),st.unit);},
   mile:a=>{const mm=MILES.find(x=>x.h===+a.dataset.h);if(mm)openCelebrate(mm);},
