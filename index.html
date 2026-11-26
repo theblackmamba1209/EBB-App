@@ -515,7 +515,7 @@ details.tbl td,details.tbl th{padding:6px 4px;border-top:1px solid var(--line);t
 /* Passcode */
 #lock{position:fixed;inset:0;z-index:100;background:var(--bg);overflow:hidden}
 #lock[hidden]{display:none}
-#lock canvas.tide{position:absolute;left:0;right:0;bottom:0;height:42%;width:100%}
+#lock canvas.tide{position:absolute;top:auto;left:0;right:0;bottom:0;height:40%;width:100%}
 .lock-in{position:relative;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;padding:calc(20px + env(safe-area-inset-top)) 20px calc(20px + env(safe-area-inset-bottom))}
 .lock-in h2{text-align:center}
 .pin-dots{display:flex;gap:18px;height:16px}
@@ -552,6 +552,67 @@ details.tbl td,details.tbl th{padding:6px 4px;border-top:1px solid var(--line);t
 .medal .num b{font-weight:400;font-size:62px;line-height:.95}
 .medal .num span{font-size:20px}
 .celebrate h2,.celebrate>.src{text-align:center}
+.sgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.sgrid .chip.scard{display:flex;flex-direction:column;align-items:flex-start;gap:4px;padding:12px 14px;border-radius:16px;min-height:96px;text-align:left;background:var(--surface);box-shadow:inset 0 0 0 1.5px var(--line);color:var(--ink)}
+.sgrid .chip.scard:last-child:nth-child(odd){grid-column:1/-1;min-height:0}
+.sgrid .scard svg{width:24px;height:24px;color:var(--tide)}
+.sgrid .scard b{font-size:16px;margin-top:2px}
+.sgrid .scard span{font-size:13px;color:var(--ink-2);line-height:1.3}
+.sgrid .chip.scard[aria-pressed="true"]{background:var(--tide);color:var(--tide-ink);box-shadow:none}
+.sgrid .chip.scard[aria-pressed="true"] svg,.sgrid .chip.scard[aria-pressed="true"] span{color:var(--tide-ink)}
+.note-box p+.src{margin-top:-2px}
+/* Check-in: mood faces on a diverging scale (berry, neutral, tide); HALT as warm tiles */
+.moods{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.moods .chip.mood{display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 2px 9px;border-radius:16px;background:var(--surface-2);box-shadow:none;color:var(--muted);font-size:12.5px;font-weight:700;text-align:center;min-height:0}
+.mood svg{width:38px;height:38px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;transition:transform .2s}
+.mood svg .e{fill:currentColor;stroke:none}
+.mood span{line-height:1.15}
+.moods .chip.mood[aria-pressed="true"] svg{transform:scale(1.12)}
+.moods .chip.mood[data-v="1"][aria-pressed="true"]{background:var(--berry);color:var(--berry-ink)}
+.moods .chip.mood[data-v="2"][aria-pressed="true"]{background:var(--berry-soft);color:var(--ink);box-shadow:inset 0 0 0 2px var(--berry)}
+.moods .chip.mood[data-v="3"][aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:inset 0 0 0 2px var(--muted)}
+.moods .chip.mood[data-v="4"][aria-pressed="true"]{background:var(--foam);color:var(--ink);box-shadow:inset 0 0 0 2px var(--tide)}
+.moods .chip.mood[data-v="5"][aria-pressed="true"]{background:var(--tide);color:var(--tide-ink)}
+.halts{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.halts .chip.halt{display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 2px 10px;border-radius:16px;background:var(--surface-2);box-shadow:none;color:var(--ink-2);font-size:13px;font-weight:700;text-align:center;min-height:0}
+.halts .chip.halt svg{width:24px;height:24px}
+.halts .chip.halt[aria-pressed="true"]{background:var(--lantern-soft);color:var(--ink);box-shadow:inset 0 0 0 2px var(--lantern)}
+.halts .chip.halt[aria-pressed="true"] svg{color:var(--lantern)}
+/* Help now */
+.people{display:flex;flex-direction:column;gap:8px}
+.person{display:flex;align-items:center;gap:12px;padding:10px;border-radius:16px;background:var(--surface-2)}
+.person .av{width:44px;height:44px;flex:none;border-radius:50%;display:grid;place-items:center;background:var(--tide);color:var(--tide-ink);font-weight:700;font-size:16px}
+.person .pn{flex:1;min-width:0;display:flex;flex-direction:column}
+.person .pn b{font-size:16px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.person .pn span{font-size:13px;color:var(--ink-2)}
+.person .pc{width:46px;height:46px;flex:none;border-radius:14px;display:grid;place-items:center;background:var(--tide);color:var(--tide-ink);text-decoration:none}
+.person .pc.tx{background:var(--surface);color:var(--tide);box-shadow:inset 0 0 0 1.5px var(--tide)}
+.person .pc svg{width:20px;height:20px}
+.chips .chip.msg{font-size:14.5px;border-radius:14px;padding:10px 12px;width:100%}
+.quick3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.quick3 .btn{padding:10px 6px;font-size:15px;gap:6px}
+/* Journey */
+.msum{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.msum>div{background:var(--surface-2);border-radius:12px;padding:10px 12px}
+.msum b{display:block;font-family:var(--font-display);font-weight:400;font-size:24px;line-height:1.1}
+.msum span{font-size:12.5px;color:var(--ink-2);line-height:1.25;display:block}
+.stretches{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:14px}
+.st-h{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.st-h b{font-family:var(--font-display);font-weight:400;font-size:19px}
+.st-h span{font-size:13px;color:var(--ink-2)}
+.st-h em{margin-left:auto;font-style:normal;font-size:12.5px;font-weight:700;color:var(--ink);display:inline-flex;gap:4px;align-items:center}
+.st-h em svg{width:14px;height:14px;color:var(--lantern);fill:var(--lantern)}
+.st-bar{display:block;height:10px;border-radius:6px;background:var(--surface-2);margin-top:6px;overflow:hidden}
+.st-bar i{display:block;height:100%;border-radius:6px;background:color-mix(in srgb,var(--tide) 50%,var(--surface-2))}
+.stretches .now .st-bar i{background:var(--tide)}
+/* Warning-signs stage gauge */
+.gauge{display:grid;grid-template-columns:repeat(4,1fr);gap:5px}
+.gs i{display:block;height:10px;border-radius:5px;background:var(--surface-2);transition:transform .3s}
+.gs.ok.lit i{background:var(--tide)}.gs.warn.lit i{background:var(--lantern)}.gs.hi.lit i{background:var(--berry)}.gs.act.lit i{background:var(--berry)}
+.gs.on i{transform:scaleY(1.5)}
+.gs span{display:block;margin-top:7px;font-size:12px;color:var(--muted);text-align:center}
+.gs.on span{color:var(--ink);font-weight:700}
+.lock-in #lkBio{min-height:44px}
 /* Mini player: stays above the tab bar while Calm sounds play */
 .player{position:fixed;z-index:39;left:50%;transform:translateX(-50%);bottom:calc(74px + env(safe-area-inset-bottom));width:calc(100% - 20px);max-width:540px;display:flex;align-items:center;gap:6px;padding:6px;border-radius:18px;background:var(--ink);color:var(--bg);box-shadow:0 14px 30px -14px rgba(0,0,0,.55)}
 .player[hidden]{display:none}
@@ -631,7 +692,7 @@ const avg=a=>a.length?a.reduce((x,y)=>x+y,0)/a.length:0;
 const RM=window.matchMedia?matchMedia('(prefers-reduced-motion: reduce)'):{matches:false};
 const pad=n=>String(n).padStart(2,'0');
 const LOC='en-PH';
-const APP_BUILD=true, APP_VERSION='2.1';
+const APP_BUILD=true, APP_VERSION='2.2';
 const IS_IOS=/iPhone|iPad|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
 const IS_STANDALONE=(window.matchMedia&&matchMedia('(display-mode: standalone)').matches)||navigator.standalone===true;
 const NEEDS_INSTALL=APP_BUILD&&IS_IOS&&!IS_STANDALONE;
@@ -738,6 +799,10 @@ const SRC={
   oregon:{a:'Oregon Health Authority, 2022',t:'Oregon Health Authority. Methamphetamine overdose overview, 2022.',u:'https://www.oregon.gov/oha/PH/HEALTHYENVIRONMENTS/TRACKINGASSESSMENT/ENVIRONMENTALHEALTHASSESSMENT/Documents/Methamphetamine-Overdose-Overview_Oregon_Dec2022.pdf'},
   na:{a:'Narcotics Anonymous',t:'Narcotics Anonymous. Meeting search.',u:'https://www.na.org/meetingsearch/'},
   samhsa:{a:'SAMHSA',t:'SAMHSA. Opioid Overdose Prevention Toolkit.',u:'https://portal.ct.gov/-/media/dmhas/forms/mat/samhsaoverdosetoolkitpdf.pdf'},
+  buxton:{a:'Buxton et al., 2021',t:'Buxton RT, Pearson AL, Allou C, Fristrup K, Wittemyer G. A synthesis of health benefits of natural sounds and their distribution in national parks. Proc Natl Acad Sci U S A. 2021;118(14):e2013097118.',u:'https://pubmed.ncbi.nlm.nih.gov/33753555/'},
+  dewitte:{a:'de Witte et al., 2020',t:'de Witte M, Spruit A, van Hooren S, Moonen X, Stams GJ. Effects of music interventions on stress-related outcomes: a systematic review and two meta-analyses. Health Psychol Rev. 2020;14(2):294–324.',u:'https://pubmed.ncbi.nlm.nih.gov/31167611/'},
+  slowbreath:{a:'Slow-breathing meta-analysis, Mindfulness',t:'Meta-analysis and systematic review of 31 studies on slow-paced breathing near 6 breaths a minute: cardiovascular and emotion effects. Mindfulness (Springer).',u:'https://link.springer.com/article/10.1007/s12671-023-02294-2'},
+  zaccaro:{a:'Zaccaro et al., 2018',t:'Zaccaro A, Piarulli A, Laurino M, et al. How breath-control can change your life: a systematic review on psycho-physiological correlates of slow breathing. Front Hum Neurosci. 2018;12:353.',u:'https://pubmed.ncbi.nlm.nih.gov/30245619/'},
   ghetti:{a:'Ghetti et al., 2022',t:'Ghetti C, Chen XJ, Brenner AK, et al. Music therapy for people with substance use disorders. Cochrane Database Syst Rev. 2022;5:CD012576.',u:'https://pmc.ncbi.nlm.nih.gov/articles/PMC9082681/'},
   nidavid:{a:'NIDA video',t:'National Institute on Drug Abuse. Why are drugs so hard to quit? Animated video, 3:58, with transcript.',u:'https://nida.nih.gov/videos/why-are-drugs-so-hard-to-quit'},
   mbrp:{a:'CU Change, University of Colorado',t:'CU Change, University of Colorado Boulder. Mindfulness-Based Relapse Prevention audio recordings, including urge surfing.',u:'https://www.colorado.edu/center/cuchange/mindfulness-practice'},
@@ -808,6 +873,16 @@ const I={
   plus:'<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>',
   ext:'<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>',
   back:'<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6h11v12H9l-6-6z"/><path d="M12.5 9.5l5 5M17.5 9.5l-5 5"/></svg>',
+  rain:'<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 15a4 4 0 0 1-.5-8 5.5 5.5 0 0 1 10.6 1.4A3.3 3.3 0 0 1 17 15z"/><path d="M8.5 18l-1 2.5M12.5 18l-1 2.5M16.5 18l-1 2.5"/></svg>',
+  bird:'<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 15.5c3.2 0 5.3-1.6 6.8-4.2C11.4 9.4 13 8 15.2 8c1.9 0 3.1 1 3.6 2.1l2 .6-2 1c-.4 3.9-3.6 6.8-7.6 6.8H6.5z"/><path d="M15.6 10.6h.01"/><path d="M9 18.5l-1 2.5M12 18.5l-.5 2.5"/></svg>',
+  dropw:'<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z"/><path d="M9.5 15a2.5 2.5 0 0 0 2.5 2.5"/></svg>',
+  spark:'<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5l1.8 5.2 5.2 1.8-5.2 1.8L12 17.5l-1.8-5.2L5 10.5l5.2-1.8z"/><path d="M18.5 16l.7 1.8 1.8.7-1.8.7-.7 1.8-.7-1.8-1.8-.7 1.8-.7z"/></svg>',
+  chat:'<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5h16v10.5H9.5L4 20.5z"/><path d="M8.5 10.5h.01M12 10.5h.01M15.5 10.5h.01"/></svg>',
+  faceid:'<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2"/><path d="M9 9v1.5M15 9v1.5M12 9v4h-1M9.5 15.5c1.4 1.2 3.6 1.2 5 0"/></svg>',
+  bowl:'<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 11.5h17a8.5 8.5 0 0 1-17 0z"/><path d="M9 8c0-1.5 1-2 1-3.5M13.5 8c0-1.5 1-2 1-3.5"/></svg>',
+  flame:'<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21c-3.9 0-6.5-2.6-6.5-6 0-3.6 3-5.3 3.8-9 2.7 1.6 4.2 3.9 4.2 6 .9-.6 1.6-1.6 1.8-2.8 1.8 1.5 3.2 3.4 3.2 5.8 0 3.4-2.6 6-6.5 6z"/></svg>',
+  user:'<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.5"/><path d="M5.5 20a6.5 6.5 0 0 1 13 0"/></svg>',
+  moon:'<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M19.5 14.5A8 8 0 1 1 9.5 4.5a6.3 6.3 0 0 0 10 10z"/></svg>',
   rainbow:'<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 17a9 9 0 0 1 18 0"/><path d="M6.5 17a5.5 5.5 0 0 1 11 0"/><path d="M10 17a2 2 0 0 1 4 0"/></svg>'
 };
 
@@ -827,6 +902,7 @@ function normalize(x){
   ['reasons','contacts','risks','signs','lines','music'].forEach(k=>{if(!Array.isArray(o.plan[k]))o.plan[k]=[];});
   if(!o.tools||typeof o.tools!=='object'||Array.isArray(o.tools))o.tools={};
   if(o.settings.lock&&!(o.settings.lock.h&&o.settings.lock.salt))o.settings.lock=null;
+  if(!o.settings.lock||!(o.settings.bio&&o.settings.bio.id))o.settings.bio=null;
   if(!['system','light','dark'].includes(o.settings.theme))o.settings.theme='system';
   if(!['semi','fri','off'].includes(o.settings.payday))o.settings.payday='semi';
   ['rewards','trigOld'].forEach(k=>{if(!o.plan[k]||typeof o.plan[k]!=='object'||Array.isArray(o.plan[k]))o.plan[k]={};});
@@ -1055,6 +1131,7 @@ document.addEventListener('visibilitychange',()=>{
   if(document.hidden){Tides.forEach(t=>t.stop());Lock.hiddenAt=Date.now();if(lockEnabled())showLock(true);}
   else{
     if(Lock.on&&Lock.soft&&Date.now()-Lock.hiddenAt<LOCK_GRACE)hideLock();
+    else if(Lock.on&&S.settings.bio){Lock.soft=false;setTimeout(bioUnlock,400);}
     Tides.forEach(t=>t.start());if(S&&S.profile){tick();if(S.settings.sync&&Date.now()-Cloud.last>60000)pull();}
   }
 });
@@ -1275,10 +1352,29 @@ function renderJourney(v){
   '<div class="card"><div class="cal-h"><button class="btn-icon" data-act="calprev" aria-label="Previous month"'+(canPrev?'':' disabled')+'><svg class="i" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button><h2>'+esc(first.toLocaleDateString(LOC,{month:'long',year:'numeric'}))+'</h2><button class="btn-icon" data-act="calnext" aria-label="Next month"'+(canNext?'':' disabled')+'><svg class="i" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button></div>'+
   '<div class="cal">'+wd.map(x=>'<span class="wd" aria-hidden="true">'+esc(x)+'</span>').join('')+cells+'</div>'+
   '<div class="legend"><span><i style="background:var(--foam)"></i>Substance-free</span><span><i style="background:var(--berry)"></i>Used</span><span><i style="box-shadow:inset 0 0 0 2px var(--lantern)"></i>Start</span><span><i style="width:6px;height:6px;border-radius:50%;background:var(--tide)"></i>Check-in</span></div>'+
-  '<p class="fine">'+s.clean+' of '+s.total+' days without use since you started. Tap any day to see, add or edit its entries, including past days you forgot to log.</p></div>'+
+  monthSummary(s)+
+  '<p class="fine">Tap any day to see, add or edit its entries, including past days you forgot to log. Swipe to change months.</p></div>'+
+  stretchesHTML()+
   '<div class="card-h" style="margin:10px 2px -4px"><h2 class="sec-title" style="margin:0">Milestones</h2><button class="linkbtn" data-act="rewards">Set rewards</button></div><div class="card"><ol class="miles">'+ml+'</ol></div>'+
   badgesHTML()+
   '<h2 class="sec-title">Recent entries</h2><div class="card"><p class="fine">Tap any entry to edit or delete it.</p>'+(fl?'<ul class="feed">'+fl+'</ul>':'<p class="fine">Your check-ins, cravings and warning-sign checks will show up here.</p>')+'</div>';
+  const cal=$('.cal',v);let x0=null,y0=null;
+  cal.addEventListener('touchstart',e=>{x0=e.touches[0].clientX;y0=e.touches[0].clientY;},{passive:true});
+  cal.addEventListener('touchend',e=>{if(x0==null)return;const dx=e.changedTouches[0].clientX-x0,dy=e.changedTouches[0].clientY-y0;x0=null;if(Math.abs(dx)>50&&Math.abs(dy)<45){if(dx<0&&canNext)shiftCal(1);else if(dx>0&&canPrev)shiftCal(-1);}},{passive:true});
+}
+function monthSummary(s){
+  const n=new Date(CAL.y,CAL.m+1,0).getDate();let clean=0,ci=0;
+  for(let d=1;d<=n;d++){const k=CAL.y+'-'+pad(CAL.m+1)+'-'+pad(d);if(k>s.todayK)break;if(checkin(k))ci++;if(k>s.startK&&!s.useDays.has(k))clean++;}
+  const rode=live(S.cravings).filter(c=>{const d=new Date(c.t);return d.getFullYear()===CAL.y&&d.getMonth()===CAL.m&&c.out==='passed';}).length;
+  return '<div class="msum"><div><b>'+clean+'</b><span>days without use</span></div><div><b>'+ci+'</b><span>check-ins</span></div><div><b>'+rode+'</b><span>cravings ridden out</span></div></div>';
+}
+function stretchesHTML(){
+  const start=S.profile.start,now=Date.now();const ls=lapsesSorted().filter(l=>l.t>start&&l.t<=now);if(!ls.length)return '';
+  const pts=[start].concat(ls.map(l=>l.t));const arr=pts.map((a,i)=>{const b=i+1<pts.length?pts[i+1]:now;return {a,b,ms:Math.max(0,b-a),now:i===pts.length-1};});
+  const max=Math.max(...arr.map(x=>x.ms))||1;const longest=arr.reduce((m,x)=>x.ms>m.ms?x:m,arr[0]);
+  return '<h2 class="sec-title">Your stretches</h2><div class="card"><p class="fine">Each bar is a stretch without use. A slip ends a stretch, not your progress.</p><ul class="stretches">'+
+    arr.slice().reverse().slice(0,8).map(x=>'<li class="'+(x.now?'now':'')+'"><div class="st-h"><b>'+esc(dur(x.ms))+'</b><span>'+esc(fmtDY(x.a))+' to '+(x.now?'now':esc(fmtDY(x.b)))+'</span>'+(x===longest?'<em>'+I.star+'Longest</em>':x.now?'<em class="cur">Current</em>':'')+'</div><span class="st-bar" aria-hidden="true"><i style="width:'+Math.max(2,x.ms/max*100).toFixed(1)+'%"></i></span></li>').join('')+
+  '</ul></div>';
 }
 
 /* ---------- Insights ---------- */
@@ -1376,7 +1472,7 @@ function renderToolkit(v){
   '<p class="fine" style="margin-top:-6px">Developed by psychologist Alan Marlatt. In a 2014 randomized trial, mindfulness-based relapse prevention cut drug-use days at 12 months compared with standard programs (Bowen et al., 2014).</p>'+
   '<div class="tools">'+
     '<button class="tool" data-act="breathe" type="button">'+I.breath+'<b>Slow breathing</b><span>Three patterns, with an orb that paces each breath.</span></button>'+
-    '<button class="tool" data-act="sounds" type="button">'+I.music+'<b>Calm sounds</b><span>Ocean, rain or soft tones, made in the app. Works offline.</span></button>'+
+    '<button class="tool" data-act="sounds" type="button">'+I.music+'<b>Calm sounds</b><span>Water, birdsong, slow piano and more. Keeps playing in the background.</span></button>'+
     '<button class="tool" data-act="halt" type="button">'+I.halt+'<b>HALT check</b><span>Hungry, angry, lonely or tired? Fix the need underneath.</span></button>'+
     '<button class="tool" data-act="tape" type="button">'+I.tape+'<b>Play the tape forward</b><span>Think past the first hour to tomorrow and next week.</span></button>'+
     '<button class="tool" data-act="delay" type="button">'+I.clock+'<b>Wait 30 minutes</b><span>Most urges pass in 15 to 30. Get busy until then.</span></button>'+
@@ -1422,7 +1518,7 @@ function renderPlan(v){
     setrow('edit-music','My calming music',p.music.length?p.music.length+' saved':'Save songs or playlists')+
   '</div><div class="field"><span class="flabel">Appearance</span>'+segHTML('theme',[{v:'system',l:'Match phone'},{v:'light',l:'Light'},{v:'dark',l:'Dark'}],S.settings.theme)+'</div></div>'+
   '<div class="card"><h3>Privacy and reminders</h3><div class="stack" style="gap:8px">'+
-    setrow('lock-setup','Passcode lock',lockEnabled()?'On. Ebb locks after a minute away.':'Off')+
+    setrow('lock-setup','Passcode lock',lockEnabled()?(S.settings.bio?'On, with Face ID or Touch ID':'On. Ebb locks after a minute away.'):'Off')+
     setrow('reminder','Daily check-in reminder','Adds a discreet event to your calendar')+
     setrow('summary','Summary for my counselor','Share your last 30 days as text')+
   '</div></div>'+
@@ -1445,31 +1541,36 @@ function renderPlan(v){
 }
 
 /* ============ Flows ============ */
+const HALT_IC={h:'bowl',a:'flame',l:'user',t:'moon'};
+const PROMPTS=['One thing I’m grateful for today…','What helped me today…','What made today hard…','Something I did for myself today…','Tomorrow I want to…','Someone who made today better…'];
+function faceSVG(v){const m={1:'M8 17.2c2.2-2.6 5.8-2.6 8 0',2:'M8.5 16.6c2-1.3 5-1.3 7 0',3:'M8.5 15.6h7',4:'M8.5 14.6c2 1.6 5 1.6 7 0',5:'M7.8 14c2.3 3.2 6.1 3.2 8.4 0'}[v];
+  return '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><circle class="e" cx="9" cy="10.3" r="1.1"/><circle class="e" cx="15" cy="10.3" r="1.1"/>'+(v==1?'<path d="M7.4 8.4l2.6 1M16.6 8.4l-2.6 1"/>':'')+'<path d="'+m+'"/></svg>';}
+const sleepWord=h=>h<5?'Very short':h<6?'Short':h<7?'A bit short':h<=9?'Good':'Long';
 function openCheckin(k){
   k=k||dk(Date.now());const ex=checkin(k);
   const C=ex?clone(ex):{id:k,d:k,mood:null,craving:3,halt:{h:false,a:false,l:false,t:false},sleep:7,used:false,actions:[],note:''};
-  if(!C.halt)C.halt={};
-  const isToday=k===dk(Date.now());
+  if(!C.halt)C.halt={};if(C.sleep==null)C.sleep=7;
+  const isToday=k===dk(Date.now());const prompt=PROMPTS[((daysBetween('2026-01-01',k)%PROMPTS.length)+PROMPTS.length)%PROMPTS.length];
   openSheet(b=>{
     b.innerHTML='<div><p class="step">'+(isToday?'Today':esc(fmtD(parseDk(k).getTime(),{weekday:'long',month:'long',day:'numeric'})))+'</p><h2>Daily check-in</h2></div>'+
-    '<div class="field"><span class="flabel">How are you feeling?</span>'+segHTML('mood',MOODS,C.mood)+'</div>'+
+    '<div class="field"><span class="flabel" id="moL">How are you feeling?</span><div class="moods" data-group="mood" data-multi="0" role="group" aria-labelledby="moL">'+MOODS.map(m=>'<button type="button" class="chip mood" data-v="'+m.v+'" aria-pressed="'+(String(C.mood)===m.v)+'">'+faceSVG(+m.v)+'<span>'+esc(m.l)+'</span></button>').join('')+'</div></div>'+
     sliderHTML('ciC','Strongest craving'+(isToday?' today':''),C.craving)+
-    '<div class="field"><span class="flabel">'+(isToday?'Right now I’m…':'That day I was…')+'</span>'+chipsHTML('halt',HALT,HALT.filter(x=>C.halt[x.k]).map(x=>x.k))+'</div>'+
-    '<div class="field"><span class="flabel" id="slL">Sleep the night before</span><div class="stepper" role="group" aria-labelledby="slL"><button type="button" id="slM" aria-label="Less sleep">−</button><output id="slO" class="num">'+C.sleep+'h</output><button type="button" id="slP" aria-label="More sleep">+</button></div></div>'+
+    '<div class="field"><span class="flabel" id="haL">'+(isToday?'Right now I’m…':'That day I was…')+'</span><div class="halts" data-group="halt" data-multi="1" role="group" aria-labelledby="haL">'+HALT.map(x=>'<button type="button" class="chip halt" data-v="'+x.k+'" aria-pressed="'+!!C.halt[x.k]+'">'+I[HALT_IC[x.k]]+'<span>'+x.l+'</span></button>').join('')+'</div></div>'+
+    '<div class="field"><div class="slider-head"><label for="ciS">Sleep the night before</label><output id="ciS-o" class="sv" for="ciS">'+C.sleep+'<small> h</small><span>'+sleepWord(C.sleep)+'</span></output></div><input type="range" id="ciS" class="sleep" min="0" max="12" step="0.5" value="'+C.sleep+'" style="--p:'+(C.sleep/12*100)+'%" aria-valuetext="'+C.sleep+' hours"><div class="scale-ends" aria-hidden="true"><span>0 h</span><span>12 h</span></div></div>'+
     '<div class="field"><span class="flabel">Did you use'+(isToday?' today':'')+'?</span>'+segHTML('used',[{v:'no',l:'No'},{v:'yes',l:'Yes'}],C.used?'yes':'no')+'</div>'+
     '<div class="field"><span class="flabel">What did you do for your recovery?</span>'+chipsHTML('acts',actList(),C.actions)+'</div>'+
-    '<div class="field"><label for="ciN">Note or something you’re grateful for</label><textarea id="ciN" rows="3" placeholder="Optional">'+esc(C.note)+'</textarea></div>'+
+    '<div class="field"><label for="ciN">A line for today</label><textarea id="ciN" rows="3" placeholder="'+esc(prompt)+'">'+esc(C.note)+'</textarea></div>'+
     '<div class="actions"><button class="btn btn-primary btn-block" id="ciSave">Save check-in</button>'+(ex?'<button class="btn btn-line btn-block" id="ciDel" style="color:var(--berry)">Delete this check-in</button>':'')+'</div>';
-    bindChips(b,'mood',v=>C.mood=v);bindSlider(b,'ciC',v=>C.craving=v);
+    bindChips(b,'mood',v=>{C.mood=v;buzz(8);});bindSlider(b,'ciC',v=>C.craving=v);
     bindChips(b,'halt',vals=>{HALT.forEach(x=>C.halt[x.k]=vals.includes(x.k));});
     bindChips(b,'used',v=>C.used=v==='yes');bindChips(b,'acts',vals=>C.actions=vals);
-    const so=$('#slO',b);$('#slM',b).onclick=()=>{C.sleep=clamp(C.sleep-.5,0,16);so.textContent=C.sleep+'h';};$('#slP',b).onclick=()=>{C.sleep=clamp(C.sleep+.5,0,16);so.textContent=C.sleep+'h';};
+    const sl=$('#ciS',b),so=$('#ciS-o',b);sl.addEventListener('input',()=>{C.sleep=+sl.value;sl.style.setProperty('--p',C.sleep/12*100+'%');so.innerHTML=C.sleep+'<small> h</small><span>'+sleepWord(C.sleep)+'</span>';sl.setAttribute('aria-valuetext',C.sleep+' hours');});
     $('#ciSave',b).onclick=()=>{
       C.note=$('#ciN',b).value.trim();C.u=Date.now();S.checkins[k]=C;
       let newLapse=null;
       if(C.used&&!live(S.lapses).some(l=>dk(l.t)===k)){const t=isToday?Date.now():parseDk(k).getTime()+12*HOUR;newLapse={id:uid(),t,kind:'lapse',subs:S.profile.substances.slice(0,1),trig:[],auto:true,u:Date.now()};S.lapses[newLapse.id]=newLapse;}
-      save();closeSheet(true);render();
-      if(newLapse){openLapse({id:newLapse.id,fromCheckin:true});}else toast('Check-in saved.');
+      save();closeSheet(true);render();buzz(12);
+      if(newLapse){openLapse({id:newLapse.id,fromCheckin:true});}else{const n=ciStreak();toast(n>1?'Check-in saved. '+n+' days in a row.':'Check-in saved.');}
     };
     if(ex)$('#ciDel',b).onclick=()=>confirmSheet({title:'Delete this check-in?',ok:'Delete',danger:true,onOk:()=>{S.checkins[k]=Object.assign({},S.checkins[k],{del:true,u:Date.now()});save();render();toast('Check-in deleted.');}});
   },{label:'Daily check-in'});
@@ -1602,27 +1703,40 @@ function openWarn(id){
 }
 function showWarnResult(b,rec){
   const st=STAGES[rec.stage];
-  b.innerHTML='<div><p class="step">'+esc(fmtDT(rec.t))+'</p><h2>'+esc(st.t)+'</h2></div><span class="pill '+st.cls+'" style="align-self:flex-start"><span class="dot"></span>'+rec.e.length+' self-care signs · '+rec.m.length+' thought signs'+(rec.p.length?' · action taken':'')+'</span>'+
+  const order=['steady','emotional','mental','act'],gi=order.indexOf(rec.stage);
+  b.innerHTML='<div><p class="step">'+esc(fmtDT(rec.t))+'</p><h2>'+esc(st.t)+'</h2></div>'+
+  '<div class="gauge" role="img" aria-label="Stage '+(gi+1)+' of 4: '+esc(st.t)+'">'+order.map((k,i)=>'<div class="gs '+STAGES[k].cls+(i<=gi?' lit':'')+(i===gi?' on':'')+'"><i></i><span>'+['Steady','Emotional','Mental','Act now'][i]+'</span></div>').join('')+'</div>'+
+  '<span class="pill '+st.cls+'" style="align-self:flex-start"><span class="dot"></span>'+rec.e.length+' self-care signs · '+rec.m.length+' thought signs'+(rec.p.length?' · action taken':'')+'</span>'+
   '<p class="lede">'+esc(st.d)+'</p><div class="note-box"><h3>What helps at this stage</h3><ul style="margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px">'+st.acts.map(a=>'<li>'+esc(a)+'</li>').join('')+'</ul></div>'+
   '<p class="fine">This is a self-check based on the stages of relapse described by Melemis (2015). It isn’t a diagnosis.</p>'+
   '<div class="actions">'+(rec.stage==='act'||rec.stage==='mental'?'<button class="btn btn-primary btn-block" data-act="sos">Reach out now</button><button class="btn btn-quiet btn-block" data-act="craving">Ride out an urge</button>':'')+(rec.stage!=='steady'?'<button class="btn btn-quiet btn-block" data-act="phhelp">Treatment options in the Philippines</button>':'')+'<button class="btn btn-line btn-block" data-act="sheet-close">Done</button></div>';
 }
 
+const SOS_MSGS={en:['Can you call me? I’m having a hard time right now.','I’m having a craving. Can you talk for a few minutes?','Can we meet up? I don’t want to be alone right now.'],
+  fil:['Pwede mo ba akong tawagan? Nahihirapan ako ngayon.','May craving ako ngayon. Pwede ba tayong mag-usap saglit?','Pwede ba tayong magkita? Ayokong mag-isa ngayon.']};
+const smsHref=(n,m)=>'sms:'+String(n).replace(/[^\d+]/g,'')+'?&body='+encodeURIComponent(m);
 function openSOS(){
   let reg=S.settings.region||defaultRegion();
+  let lang=S.settings.msgLang==='fil'?'fil':'en',mi=0;
   openSheet(b=>{
     const draw=()=>{
-      const R=LINES[reg]||LINES.ph;const mine=S.plan.lines.filter(l=>l.name||l.phone);
+      const R=LINES[reg]||LINES.ph;const mine=S.plan.lines.filter(l=>l.name||l.phone);const cs=S.plan.contacts.filter(c=>c.name||c.phone);const msg=SOS_MSGS[lang][mi];
       b.innerHTML='<h2>Help now</h2>'+
       '<div class="safety"><h3>'+I.shield+'Possible overdose? Call 911</h3><p>After shabu: chest pain, a seizure, a very hot body, or severe confusion. After alcohol, opioids or sedatives: can’t be woken, or breathing slowly or not at all. Call 911 and stay with them.</p><a class="btn btn-danger" href="tel:911">'+I.phone+'Call 911</a></div>'+
-      '<div class="row"><button class="btn btn-primary" data-act="craving">'+I.wave+'Ride it out</button><button class="btn btn-quiet" data-act="breathe">'+I.breath+'Breathe</button></div>'+
-      '<div class="card soft"><div class="card-h"><h3>My people</h3><button class="linkbtn" data-act="edit-contacts">Edit</button></div>'+contactsHTML()+'</div>'+
+      '<div class="card"><div class="card-h"><h3>Reach out</h3><button class="linkbtn" data-act="edit-contacts">'+(cs.length?'Edit':'Add')+'</button></div>'+
+        (cs.length?'<p class="fine">Pick a message, then tap Text. It opens Messages with the words already written.</p>'+segHTML('mlang',[{v:'en',l:'English'},{v:'fil',l:'Filipino'}],lang)+
+          '<div class="chips" data-group="msg" data-multi="0" role="group" aria-label="Message">'+SOS_MSGS[lang].map((m,i)=>'<button type="button" class="chip msg" data-v="'+i+'" aria-pressed="'+(i===mi)+'">'+esc(m)+'</button>').join('')+'</div>'+
+          '<div class="people">'+cs.map(c=>{const ini=(c.name||'?').trim().split(/\s+/).filter(w=>/^[\p{L}\p{N}]/u.test(w)).map(w=>w[0]).slice(0,2).join('').toUpperCase()||'?';return '<div class="person"><span class="av" aria-hidden="true">'+esc(ini)+'</span><div class="pn"><b>'+esc(c.name||'Contact')+'</b><span>'+esc(c.phone||'No number saved')+'</span></div>'+(c.phone?'<a class="pc" href="'+telHref(c.phone)+'" aria-label="Call '+esc(c.name||'contact')+'">'+I.phone+'</a><a class="pc tx" data-phone="'+esc(c.phone)+'" href="'+esc(smsHref(c.phone,msg))+'" aria-label="Text '+esc(c.name||'contact')+'">'+I.chat+'</a>':'')+'</div>';}).join('')+'</div>'
+        :'<p class="fine">Add a sponsor, friend, family member or counselor. Telling someone about an urge takes away some of its power.</p><button class="btn btn-quiet" data-act="edit-contacts" style="align-self:flex-start">Add someone</button>')+'</div>'+
+      '<div class="quick3"><button class="btn btn-primary" data-act="craving">'+I.wave+'Ride it out</button><button class="btn btn-quiet" data-act="breathe">'+I.breath+'Breathe</button><button class="btn btn-quiet" data-act="sounds">'+I.music+'Sounds</button></div>'+
       '<div class="card soft"><div class="card-h"><h3>My saved numbers</h3><button class="linkbtn" data-act="edit-lines">'+(mine.length?'Edit':'Add')+'</button></div>'+(mine.length?linesHTML():'<p class="fine">Save your barangay health center, rural health unit, doctor or rehab center here.</p>')+'</div>'+
       '<div class="field"><span class="flabel">Helplines</span>'+segHTML('reg',[{v:'ph',l:'Philippines'},{v:'other',l:'Abroad'},{v:'us',l:'U.S.'}],reg)+'</div>'+
       '<div>'+R.items.map(it=>'<div class="line"><b>'+esc(it.n)+'</b><span class="fine">'+esc(it.d)+'</span>'+(it.nums&&it.nums.length?'<div class="nums">'+it.nums.map(n=>'<a href="'+telHref(n)+'">'+I.phone+esc(n)+'</a>').join('')+'</div>':'')+(it.link?'<a href="'+it.link+'" target="_blank" rel="noopener">'+esc(it.link.replace('https://',''))+'</a>':'')+'</div>').join('')+'</div>'+
       (reg==='ph'?'<button class="btn btn-quiet btn-block" data-act="phhelp">'+I.home+'Treatment options in the Philippines</button>':'')+
-      '<p class="fine">If a call button doesn’t open your phone app, dial the number shown.</p>';
+      '<p class="fine">If a call or text button doesn’t open your phone app, dial the number shown.</p>';
       bindChips(b,'reg',v=>{if(v){reg=v;S.settings.region=v;touchCore();save();draw();}});
+      bindChips(b,'mlang',v=>{if(v){lang=v;S.settings.msgLang=v;saveLocal();draw();}});
+      bindChips(b,'msg',v=>{if(v==null)return;mi=+v;$$('.pc.tx',b).forEach(a=>a.setAttribute('href',smsHref(a.dataset.phone,SOS_MSGS[lang][mi])));});
     };
     draw();
   },{label:'Help now'});
@@ -1824,7 +1938,7 @@ function openRecoveryEditor(){
 }
 
 /* ============ Backup code ============ */
-function backupCode(){return JSON.stringify({app:'ebb',v:1,at:Date.now(),data:Object.assign({},S,{settings:Object.assign({},S.settings,{sync:false,lock:null})})});}
+function backupCode(){return JSON.stringify({app:'ebb',v:1,at:Date.now(),data:Object.assign({},S,{settings:Object.assign({},S.settings,{sync:false,lock:null,bio:null})})});}
 function markBackup(msg){S.settings.lastBackup=Date.now();saveLocal();toast(msg||'Backup saved. Keep it somewhere private.');}
 async function backupFile(){
   const code=backupCode();const name='ebb-backup-'+dk(Date.now())+'.json';
@@ -1860,7 +1974,7 @@ function backupRestore(){
       if(!obj||obj.app!=='ebb'||!obj.data||!obj.data.profile){$('#rM',b).textContent='That code isn’t a valid Ebb backup. Check that you copied all of it.';return;}
       const keepSync=S.settings.sync;const nd=normalize(obj.data);const now=Date.now();
       ['checkins','cravings','lapses','warn'].forEach(k=>Object.values(nd[k]).forEach(x=>{if(x)x.u=now;}));
-      nd.coreU=now;nd.demo=false;nd.settings.sync=keepSync&&!S.demo;nd.settings.lock=S.settings.lock||null;S=nd;applyTheme();Cloud.hash={};save();closeSheet();hideOnboarding();render();toast('Backup restored.');
+      nd.coreU=now;nd.demo=false;nd.settings.sync=keepSync&&!S.demo;nd.settings.lock=S.settings.lock||null;nd.settings.bio=S.settings.bio||null;S=nd;applyTheme();Cloud.hash={};save();closeSheet();hideOnboarding();render();toast('Backup restored.');
     };
   },{label:'Restore'});
 }
@@ -1938,7 +2052,8 @@ function renderOB(){
     if(st===2){const dep=OB.subs.some(x=>DEPRESSANTS.test(x));body='<h1>When did you last use?</h1><p class="lede">If you’re starting again after a relapse, that counts. Pick the time you last used, or now if you’re starting today.</p><div class="field"><label for="obT">Last use</label><input type="datetime-local" id="obT" value="'+toInput(OB.start)+'"></div><button type="button" class="btn btn-quiet" data-ob="now" style="align-self:flex-start">Set to right now</button>'+
       '<div class="field"><label for="obSp">About how much did you spend on using each day? (₱)</label><input type="text" inputmode="decimal" id="obSp" value="'+esc(OB.spend)+'" placeholder="Optional, for example 300"><p class="fine">Ebb shows you the money you keep. You can change it later.</p></div>'+
       (dep?'<div class="safety"><h3>'+I.shield+'Withdrawal safety</h3><p>Stopping alcohol, sleeping pills or opioids can cause withdrawal that needs medical care. With alcohol and sedatives it can be dangerous. Talk to a doctor, your rural health unit, or the DOH helpline 1550 about stopping safely.</p></div>':'');}
-    if(st===3){body='<h1>Why do you want to recover?</h1><p class="lede">Your reasons show up during cravings. Write them in your own words, in English or Filipino.</p>'+['Be there for my kids','Keep my job','Earn back my family’s trust'].map((ph,i)=>'<div class="field"><label class="sr" for="obR'+i+'">Reason '+(i+1)+'</label><input type="text" id="obR'+i+'" value="'+esc(OB.reasons[i])+'" placeholder="'+esc(ph)+'"></div>').join('');}
+    if(st===3){body='<h1>Why do you want to recover?</h1><p class="lede">Your reasons show up during cravings. Write them in your own words, in English or Filipino, or tap an idea to start.</p>'+
+      '<div class="chips">'+['Be there for my family','Keep my job and grow my career','Get my health back','Earn back the trust I lost','Save money for my future','Feel like myself again','Finish what I started'].map(x=>'<button type="button" class="chip" data-ob="reason" style="font-size:15px">'+esc(x)+'</button>').join('')+'</div>'+['Be there for my kids','Keep my job','Earn back my family’s trust'].map((ph,i)=>'<div class="field"><label class="sr" for="obR'+i+'">Reason '+(i+1)+'</label><input type="text" id="obR'+i+'" value="'+esc(OB.reasons[i])+'" placeholder="'+esc(ph)+'"></div>').join('');}
     if(st===4){body='<h1>Who can you call when it’s hard?</h1><p class="lede">A sponsor, friend, family member or counselor. Optional, and you can add more later.</p><div class="field"><label for="obCn">Name</label><input type="text" id="obCn" value="'+esc(OB.cname)+'" autocomplete="name" placeholder="For example: Ate Mae"></div><div class="field"><label for="obCp">Phone</label><input type="tel" id="obCp" value="'+esc(OB.cphone)+'" inputmode="tel" autocomplete="tel" placeholder="09XX XXX XXXX"></div>';}
     if(st===5&&APP_BUILD){
       OB.sync=false;
@@ -1973,6 +2088,7 @@ $('#onboard').addEventListener('click',async e=>{
   if(a==='demo'){S=makeDemo();saveLocal();hideOnboarding();ROUTE='today';try{history.replaceState(null,'','#today');}catch(_){}render();toast('Sample data loaded. Tap “Start my own” anytime.');return;}
   if(a==='restore'){b.disabled=true;b.textContent='Restoring…';S=blank();S.settings.sync=true;await pull();if(S.profile){saveLocal();hideOnboarding();render();toast('Your backup is restored.');}else{b.disabled=false;b.textContent='Couldn’t restore. Try again';}return;}
   if(a==='code'){backupRestore();return;}
+  if(a==='reason'){const ins=[0,1,2].map(i=>$('#obR'+i));const f=ins.find(x=>x&&!x.value.trim());if(f){f.value=b.textContent;b.setAttribute('aria-pressed','true');}else toast('All three are filled. Edit one to change it.');return;}
   if(a==='now'){OB.start=Date.now();$('#obT').value=toInput(OB.start);return;}
   if(a==='back'){obRead();OB.step=Math.max(0,OB.step-1);renderOB();return;}
   if(a==='next'||a==='skip'){if(OB.step>0&&a==='next')obRead();if(a==='skip'){if(OB.step===3)OB.reasons=['','',''];if(OB.step===4){OB.cname='';OB.cphone='';}}OB.step++;renderOB();return;}
@@ -1997,7 +2113,7 @@ const BEHAV=/Compulsive sex|porn/i;
 function onlyBehaviors(){const s=(S&&S.profile&&S.profile.substances)||[];return s.length>0&&s.every(x=>BEHAV.test(x));}
 function freeLabel(){return onlyBehaviors()?'On track for':'Substance-free for';}
 function freeWord(){return onlyBehaviors()?'on track':'substance-free';}
-const buzz=ms=>{try{if(navigator.vibrate)navigator.vibrate(ms||12);}catch(e){}};
+const buzz=ms=>{try{if(navigator.vibrate&&(!navigator.userActivation||navigator.userActivation.hasBeenActive))navigator.vibrate(ms||12);}catch(e){}};
 let PENDING_CELEB=null;
 function busyUI(){return $('#sheetRoot').classList.contains('open')||Lock.on||!$('#onboard').hidden;}
 const WAVE_CURVE=f=>f<.35?.62+.38*(f/.35):1-.72*((f-.35)/.65);
@@ -2146,6 +2262,15 @@ async function pinHash(pin,salt,m){
   return {h:(a>>>0).toString(16)+(b2>>>0).toString(16),m:'f'};
 }
 async function pinCheck(pin){const L=S.settings.lock;if(!L)return false;const r=await pinHash(pin,L.salt,L.m);return r.h===L.h;}
+const Bio={busy:false,
+  async available(){try{return !!(window.PublicKeyCredential&&PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable&&await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable());}catch(e){return false;}},
+  b64(buf){let s='';new Uint8Array(buf).forEach(c=>s+=String.fromCharCode(c));return btoa(s).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');},
+  unb64(t){t=t.replace(/-/g,'+').replace(/_/g,'/');while(t.length%4)t+='=';const b=atob(t);return Uint8Array.from(b,c=>c.charCodeAt(0));},
+  async enroll(){const c=await navigator.credentials.create({publicKey:{challenge:crypto.getRandomValues(new Uint8Array(32)),rp:{name:'Ebb'},user:{id:crypto.getRandomValues(new Uint8Array(16)),name:'Ebb unlock',displayName:'Ebb unlock'},pubKeyCredParams:[{type:'public-key',alg:-7},{type:'public-key',alg:-257}],authenticatorSelection:{authenticatorAttachment:'platform',userVerification:'required',residentKey:'discouraged',requireResidentKey:false},timeout:60000,attestation:'none'}});return this.b64(c.rawId);},
+  async check(){const B=S.settings.bio;if(!B||!B.id||this.busy)return false;this.busy=true;
+    try{const a=await navigator.credentials.get({publicKey:{challenge:crypto.getRandomValues(new Uint8Array(32)),allowCredentials:[{type:'public-key',id:this.unb64(B.id)}],userVerification:'required',timeout:60000}});return !!a;}catch(e){return false;}finally{this.busy=false;}}
+};
+async function bioUnlock(){if(!Lock.on)return;if(await Bio.check()){Lock.fails=0;buzz(10);hideLock();}}
 function pinPad(root,o){
   let pin='',busy=false;const wm=($('.topbar .wordmark svg')||{outerHTML:''}).outerHTML;
   root.insertAdjacentHTML('beforeend','<div class="lock-in">'+(o.brand?'<div class="wordmark">'+wm+'<span>Ebb</span></div>':'')+'<h2>'+esc(o.title)+'</h2>'+(o.sub?'<p class="fine" style="text-align:center;max-width:32ch">'+esc(o.sub)+'</p>':'')+'<div class="pin-dots" aria-hidden="true"><i></i><i></i><i></i><i></i></div><p class="pin-msg" role="status" aria-live="polite"></p><div class="keypad">'+[1,2,3,4,5,6,7,8,9].map(d=>'<button type="button" data-k="'+d+'">'+d+'</button>').join('')+'<button type="button" class="k0" data-k="0">0</button><button type="button" class="kx" data-k="x" aria-label="Delete">'+I.back+'</button></div>'+(o.extra||'')+'</div>');
@@ -2166,14 +2291,16 @@ function showLock(soft){
   $('#app').inert=true;$('#sheetRoot').inert=true;
   drawLockPad(el);
   makeTide($('canvas',el),t=>({level:.55+Math.sin(t*.4)*.03,amp:.9}),{});
+  if(!soft&&S.settings.bio)setTimeout(bioUnlock,350);
 }
 function drawLockPad(el){
   $$('.lock-in',el).forEach(n=>n.remove());
-  pinPad(el,{brand:true,title:'Enter your passcode',extra:'<button type="button" class="linkbtn" id="lkForgot">Forgot your passcode?</button>',onPin:async(pin,api)=>{
+  pinPad(el,{brand:true,title:'Enter your passcode',extra:(S.settings.bio?'<button type="button" class="btn btn-quiet" id="lkBio">'+I.faceid+'Use Face ID or Touch ID</button>':'')+'<button type="button" class="linkbtn" id="lkForgot">Forgot your passcode?</button>',onPin:async(pin,api)=>{
     if(Date.now()<Lock.until){api.fail('Too many tries. Wait a moment, then try again.');return;}
     if(await pinCheck(pin)){Lock.fails=0;buzz(10);hideLock();}
     else{Lock.fails++;buzz([30,40,30]);if(Lock.fails>=5){Lock.fails=0;Lock.until=Date.now()+30000;api.fail('Too many tries. Try again in 30 seconds.');}else api.fail('That’s not it. Try again.');}}});
   $('#lkForgot',el).onclick=()=>forgotPin(el);
+  const bb=$('#lkBio',el);if(bb)bb.onclick=bioUnlock;
 }
 function forgotPin(el){
   $$('.lock-in',el).forEach(n=>n.remove());
@@ -2194,10 +2321,14 @@ function openLockSetup(){
       if(p2!==p1){api.fail('Those didn’t match. Start again.');setTimeout(choose,1100);return;}
       const salt=uid()+uid();const r=await pinHash(p2,salt);S.settings.lock={h:r.h,salt,m:r.m};save();buzz(15);closeSheet();render();toast('Passcode on. Tap the lock at the top to lock Ebb anytime.');}));
     const has=lockEnabled();
-    b.innerHTML='<div><p class="step">Privacy</p><h2>Passcode lock</h2></div><p class="lede">Ebb asks for a 4-digit passcode when it opens, and when you come back after more than a minute away.</p><div class="note-box"><p>This keeps people who pick up your phone out of Ebb. It doesn’t encrypt your entries. Ebb can’t recover a forgotten passcode, so save a backup file too.</p></div><div class="actions">'+(has?'<button class="btn btn-primary btn-block" id="lsChange">Change passcode</button><button class="btn btn-line btn-block" id="lsOff" style="color:var(--berry)">Turn off passcode</button>':'<button class="btn btn-primary btn-block" id="lsOn">Set a passcode</button>')+'</div>';
+    b.innerHTML='<div><p class="step">Privacy</p><h2>Passcode lock</h2></div><p class="lede">Ebb asks for a 4-digit passcode when it opens, and when you come back after more than a minute away.</p><div class="note-box"><p>This keeps people who pick up your phone out of Ebb. It doesn’t encrypt your entries. Ebb can’t recover a forgotten passcode, so save a backup file too.</p></div>'+(has?'<div id="lsBio"></div>':'')+'<div class="actions">'+(has?'<button class="btn btn-primary btn-block" id="lsChange">Change passcode</button><button class="btn btn-line btn-block" id="lsOff" style="color:var(--berry)">Turn off passcode</button>':'<button class="btn btn-primary btn-block" id="lsOn">Set a passcode</button>')+'</div>';
+    if(has)Bio.available().then(ok=>{const box=$('#lsBio',b);if(!box||!ok)return;const on=!!S.settings.bio;
+      box.innerHTML='<div class="card"><h3 style="display:flex;gap:8px;align-items:center">'+I.faceid+'Face ID or Touch ID</h3><p class="fine">'+(on?'On. Ebb offers Face ID or Touch ID first, with your passcode as a backup.':'Unlock Ebb with your face or fingerprint instead of typing the passcode. Your phone will offer to save a passkey named “Ebb unlock”. That’s how Face ID works for web apps, and it only unlocks Ebb.')+'</p><button class="btn '+(on?'btn-line':'btn-quiet')+'" id="lsBioBtn" style="align-self:flex-start">'+(on?'Turn off Face ID or Touch ID':'Turn on Face ID or Touch ID')+'</button></div>';
+      $('#lsBioBtn',b).onclick=async()=>{if(S.settings.bio){S.settings.bio=null;save();toast('Face ID or Touch ID turned off.');closeSheet();render();return;}
+        try{const id=await Bio.enroll();S.settings.bio={id};save();buzz(15);toast('Face ID or Touch ID is on.');closeSheet();render();}catch(e){toast(e&&e.name==='NotAllowedError'?'Face ID setup was cancelled.':'Couldn’t set up Face ID or Touch ID on this phone.');}};});
     const on=$('#lsOn',b),ch=$('#lsChange',b),off=$('#lsOff',b);
     if(on)on.onclick=choose;if(ch)ch.onclick=()=>verify(choose);
-    if(off)off.onclick=()=>verify(()=>{S.settings.lock=null;save();closeSheet();render();toast('Passcode turned off.');});
+    if(off)off.onclick=()=>verify(()=>{S.settings.lock=null;S.settings.bio=null;save();closeSheet();render();toast('Passcode turned off.');});
   },{label:'Passcode lock'});
 }
 
@@ -2205,20 +2336,23 @@ function openLockSetup(){
 // Each soundscape is generated once on the phone (no downloads), saved as a seamless 60-second WAV loop,
 // and played through an <audio> element. iOS keeps media elements playing when you switch apps or lock
 // the screen, shows lock screen controls, and plays them even with the silent switch on.
-const SOUNDS={ocean:'Ocean waves',rain:'Rain',tones:'Soft tones'};
+const SOUNDS={ocean:'Ocean waves',stream:'Forest stream',birds:'Morning birds',rain:'Rain',piano:'Slow piano',breathe6:'Breathe at six',tones:'Soft tones'};
+const SOUND_INFO={ocean:['wave','Water sound'],stream:['dropw','Water sound'],birds:['bird','Birdsong'],rain:['rain','Rain on leaves'],piano:['music','60 beats a minute, no lyrics'],breathe6:['breath','Swells 6 times a minute to breathe with'],tones:['spark','Ambient, no beat']};
 function wavBlob(f,sr){const n=f.length,buf=new ArrayBuffer(44+n*2),v=new DataView(buf);const ws=(o,t)=>{for(let i=0;i<t.length;i++)v.setUint8(o+i,t.charCodeAt(i));};
   ws(0,'RIFF');v.setUint32(4,36+n*2,true);ws(8,'WAVE');ws(12,'fmt ');v.setUint32(16,16,true);v.setUint16(20,1,true);v.setUint16(22,1,true);v.setUint32(24,sr,true);v.setUint32(28,sr*2,true);v.setUint16(32,2,true);v.setUint16(34,16,true);ws(36,'data');v.setUint32(40,n*2,true);
   for(let i=0,o=44;i<n;i++,o+=2){const x=Math.max(-1,Math.min(1,f[i]));v.setInt16(o,x<0?x*0x8000:x*0x7FFF,true);}
   return new Blob([buf],{type:'audio/wav'});}
 function renderSound(mode){
-  const SR=22050,LOOP=60,PRE=mode==='tones'?0:12,TAIL=mode==='tones'?10:0;
+  const ev=['tones','stream','birds','piano','breathe6'].includes(mode);
+  const SR=22050,LOOP=60,PRE=ev?0:12,TAIL=ev?10:0;
   const OAC=window.OfflineAudioContext||window.webkitOfflineAudioContext;const c=new OAC(1,(PRE+LOOP+TAIL)*SR,SR);
   const noise=kind=>{const n=SR*12,b=c.createBuffer(1,n,SR),d=b.getChannelData(0);
     if(kind==='brown'){let l=0;for(let i=0;i<n;i++){l=(l+.02*(Math.random()*2-1))/1.02;d[i]=l*3.5;}}
     else{let b0=0,b1=0,b2=0,b3=0,b4=0,b5=0,b6=0;for(let i=0;i<n;i++){const w=Math.random()*2-1;b0=.99886*b0+w*.0555179;b1=.99332*b1+w*.0750759;b2=.969*b2+w*.153852;b3=.8665*b3+w*.3104856;b4=.55*b4+w*.5329522;b5=-.7616*b5-w*.016898;d[i]=(b0+b1+b2+b3+b4+b5+b6+w*.5362)*.11;b6=w*.115926;}}
     const dr=d[n-1]-d[0];for(let i=0;i<n;i++)d[i]-=dr*i/n;return b;};
-  const src=kind=>{const x=c.createBufferSource();x.buffer=noise(kind);x.loop=true;x.start(0);return x;};
-  const osc=(f,t)=>{const o=c.createOscillator();o.type=t||'sine';o.frequency.value=f;o.start(0);return o;};
+  const src=kind=>{const x=c.createBufferSource();x.buffer=noise(kind);x.loop=true;x.start(0);if(ev)x.stop(LOOP);return x;};
+  const osc=(f,t)=>{const o=c.createOscillator();o.type=t||'sine';o.frequency.value=f;o.start(0);if(ev)o.stop(LOOP);return o;};
+  const r60=f=>Math.round(f*60)/60;   // whole cycles per loop, so held tones join seamlessly
   const gain=v=>{const g=c.createGain();g.gain.value=v;return g;};
   const filt=(t,f,q)=>{const x=c.createBiquadFilter();x.type=t;x.frequency.value=f;x.Q.value=q;return x;};
   const D=c.destination;
@@ -2228,8 +2362,51 @@ function renderSound(mode){
     const s2=src('pink'),bp=filt('bandpass',900,.4),g2=gain(.05);s2.connect(bp);bp.connect(g2);g2.connect(D);const l3=osc(1/12),l3g=gain(.045);l3.connect(l3g);l3g.connect(g2.gain);}
   else if(mode==='rain'){const s1=src('pink'),hp=filt('highpass',500,.3),lp=filt('lowpass',8000,.3),g=gain(.5);s1.connect(hp);hp.connect(lp);lp.connect(g);g.connect(D);
     const r=src('brown'),rl=filt('lowpass',220,.5),rg=gain(.35);r.connect(rl);rl.connect(rg);rg.connect(D);const fl=osc(.1),fg=gain(.06);fl.connect(fg);fg.connect(g.gain);}
+  else if(mode==='stream'){
+    // A brook: soft water noise plus hundreds of tiny rising "bubble" tones
+    const s1=src('pink'),bp=filt('bandpass',1400,.5),g=gain(.22);s1.connect(bp);bp.connect(g);g.connect(D);
+    const s2=src('brown'),lp=filt('lowpass',400,.5),g2=gain(.18);s2.connect(lp);lp.connect(g2);g2.connect(D);
+    const lf=osc(1/6),lg=gain(.05);lf.connect(lg);lg.connect(g.gain);
+    const bus=gain(1),bl=filt('lowpass',3200,.4);bus.connect(bl);bl.connect(D);
+    // Bubbles are written straight into a buffer (fast on phones) and wrap around the loop point
+    const L=LOOP*SR,bb=c.createBuffer(1,L,SR),bd=bb.getChannelData(0);let t=0;
+    while(t<LOOP){const f=420+Math.random()*1100,d=.035+Math.random()*.06,a=.04+Math.random()*.09,gl=1.25+Math.random()*.5,n=Math.floor((d+.03)*SR),s0=Math.floor(t*SR),tau=(d+.03)/6.9;let ph=0;
+      for(let i=0;i<n;i++){const tt=i/SR;ph+=2*Math.PI*(tt<d?f*Math.pow(gl,tt/d):f*gl)/SR;bd[(s0+i)%L]+=a*(tt<.004?tt/.004:Math.exp(-(tt-.004)/tau))*Math.sin(ph);}
+      t+=-Math.log(1-Math.random())/14;}
+    const bs=c.createBufferSource();bs.buffer=bb;bs.connect(bus);bs.start(0);}
+  else if(mode==='birds'){
+    // Morning birds: a light breeze, distant rumble, and four kinds of song with a little forest echo
+    const w=src('pink'),wb=filt('bandpass',700,.35),wg=gain(.07);w.connect(wb);wb.connect(wg);wg.connect(D);const wl=osc(1/12),wlg=gain(.035);wl.connect(wlg);wlg.connect(wg.gain);
+    const r=src('brown'),rl=filt('lowpass',260,.5),rg=gain(.12);r.connect(rl);rl.connect(rg);rg.connect(D);
+    const bus=gain(1),hp=filt('highpass',1200,.5),lp=filt('lowpass',7500,.5);bus.connect(hp);hp.connect(lp);lp.connect(D);
+    const dl=c.createDelay(1);dl.delayTime.value=.19;const fb=gain(.22),wet=gain(.25),dlp=filt('lowpass',4000,.5);lp.connect(dl);dl.connect(dlp);dlp.connect(fb);fb.connect(dl);dlp.connect(wet);wet.connect(D);
+    const tone=(t,f0,f1,d,a)=>{const o=c.createOscillator(),e=c.createGain();o.frequency.setValueAtTime(f0,t);o.frequency.exponentialRampToValueAtTime(f1,t+d);e.gain.setValueAtTime(0,t);e.gain.linearRampToValueAtTime(a,t+Math.min(.012,d*.25));e.gain.setValueAtTime(a,t+d*.6);e.gain.exponentialRampToValueAtTime(.0004,t+d+.02);o.connect(e);e.connect(bus);o.start(t);o.stop(t+d+.04);};
+    const sp=[(t,v)=>{const n=2+Math.floor(Math.random()*4),f=3000+Math.random()*1500;for(let i=0;i<n;i++)tone(t+i*(.11+Math.random()*.05),f*(1+.06*i),f*(.72+Math.random()*.1),.07+Math.random()*.04,.12*v);return n*.15;},
+      (t,v)=>{const n=12+Math.floor(Math.random()*10),f=4200+Math.random()*800;for(let i=0;i<n;i++)tone(t+i*.034,f,f*1.08,.026,.07*v);return n*.034;},
+      (t,v)=>{const f=1900+Math.random()*500;tone(t,f,f*.82,.28,.1*v);tone(t+.38,f*.84,f*.7,.32,.09*v);return .8;},
+      (t,v)=>{const f=2600+Math.random()*900;tone(t,f*.8,f*1.25,.16,.1*v);tone(t+.2,f*1.2,f*.9,.12,.09*v);tone(t+.36,f,f*1.1,.1,.08*v);return .5;}];
+    let t=.5;while(t<LOOP-1.5){const v=.45+Math.random()*.55;t+=sp[Math.floor(Math.random()*sp.length)](t,v)+.8+Math.random()*3.2;}}
+  else if(mode==='piano'){
+    // Slow piano at 60 beats a minute: Cmaj7, Am7, Fmaj7, Dm7, G6, played three times per loop, with a soft room echo
+    const re=new Float32Array([0,1,.42,.2,.11,.06,.03]),wave=c.createPeriodicWave(re,new Float32Array(re.length));
+    const bus=gain(1),lp=filt('lowpass',2600,.4),comp=c.createDynamicsCompressor();comp.threshold.value=-28;comp.knee.value=12;comp.ratio.value=4;comp.attack.value=.004;comp.release.value=.3;
+    bus.connect(lp);lp.connect(comp);comp.connect(D);
+    const dl=c.createDelay(1);dl.delayTime.value=.36;const fb=gain(.3),wet=gain(.22),dlp=filt('lowpass',1800,.4);comp.connect(dl);dl.connect(dlp);dlp.connect(fb);fb.connect(dl);dlp.connect(wet);wet.connect(D);
+    const key=(t,m,v,len)=>{const o=c.createOscillator(),e=c.createGain();o.setPeriodicWave(wave);o.frequency.value=440*Math.pow(2,(m-69)/12);e.gain.setValueAtTime(0,t);e.gain.linearRampToValueAtTime(v,t+.006);e.gain.exponentialRampToValueAtTime(v*.35,t+.5);e.gain.exponentialRampToValueAtTime(.0004,t+len);o.connect(e);e.connect(bus);o.start(t);o.stop(t+len+.05);};
+    const P=[[48,[60,64,67,71]],[45,[57,60,64,67]],[41,[57,60,65,69]],[50,[57,62,65,69]],[43,[59,62,67,69]]];
+    for(let bar=0;bar<15;bar++){const [bass,ch]=P[bar%5],t0=bar*4;key(t0,bass,.16,5.5);key(t0,bass+12,.06,4);const ord=[0,1,2,3].sort(()=>Math.random()-.5);
+      for(let bt=0;bt<4;bt++)key(t0+bt+(bt?Math.random()*.03:0),ch[ord[bt]]+(Math.random()<.25?12:0),.07+Math.random()*.03,3.2);
+      if(Math.random()<.6)key(t0+2.5+(Math.random()<.5?0:1),ch[Math.floor(Math.random()*4)]+12,.05,2.5);}}
+  else if(mode==='breathe6'){
+    // A warm chord that swells for 5 seconds (breathe in) and fades for 5 (breathe out): six breaths a minute
+    const bus=gain(1),lp=filt('lowpass',600,.5),amp=gain(.25);bus.connect(lp);lp.connect(amp);amp.connect(D);
+    [130.81,196,246.94,293.66,329.63].forEach((f,i)=>{const o=osc(r60(f),i%2?'triangle':'sine'),g=gain(i?.12:.2);o.connect(g);g.connect(bus);const o2=osc(r60(f*1.003)),g2=gain(.06);o2.connect(g2);g2.connect(bus);});
+    const N=601,ca=new Float32Array(N),cf=new Float32Array(N);for(let i=0;i<N;i++){const w=.5-.5*Math.cos(2*Math.PI*(i/(N-1)*LOOP)/10);ca[i]=.25+.75*w;cf[i]=500+1300*w;}
+    amp.gain.setValueCurveAtTime(ca,0,LOOP);lp.frequency.setValueCurveAtTime(cf,0,LOOP);
+    const chime=(t,m,v)=>{const o=c.createOscillator(),e=c.createGain();o.frequency.value=440*Math.pow(2,(m-69)/12);e.gain.setValueAtTime(0,t);e.gain.linearRampToValueAtTime(v,t+.01);e.gain.exponentialRampToValueAtTime(.0004,t+3.5);o.connect(e);e.connect(D);o.start(t);o.stop(t+3.6);};
+    for(let i=0;i<6;i++){chime(i*10,76,.05);chime(i*10+5,72,.035);}}
   else{const dl=c.createDelay(2);dl.delayTime.value=.42;const fb=gain(.38),wet=gain(.35),lp=filt('lowpass',1600,.3);dl.connect(fb);fb.connect(dl);dl.connect(wet);wet.connect(D);lp.connect(D);lp.connect(dl);
-    const dr=osc(3925/60),dg=gain(.05);dr.connect(dg);dg.connect(lp);dr.stop(LOOP);
+    const dr=osc(3925/60),dg=gain(.05);dr.connect(dg);dg.connect(lp);
     const N=[130.81,146.83,164.81,196,220,261.63,293.66,329.63,392];let t=.3,last=4;
     const note=(f,at,vol)=>{const o=c.createOscillator(),o2=c.createOscillator(),g=c.createGain(),g2=c.createGain();o.frequency.value=f;o2.type='triangle';o2.frequency.value=f*2.003;g2.gain.value=.12;g.gain.setValueAtTime(0,at);g.gain.linearRampToValueAtTime(.16*vol,at+1.8);g.gain.exponentialRampToValueAtTime(.0008,at+7.5);o.connect(g);o2.connect(g2);g2.connect(g);g.connect(lp);o.start(at);o2.start(at);o.stop(at+7.7);o2.stop(at+7.7);};
     while(t<LOOP-.5){const i=clamp(last+Math.round((Math.random()-.5)*4),0,N.length-1);last=i;note(N[i],t,1);if(Math.random()<.25)note(N[clamp(i-2,0,N.length-1)],t+.06,.5);t+=2.2+Math.random()*1.8;}}
@@ -2238,7 +2415,8 @@ function renderSound(mode){
     const d=buf.getChannelData(0),out=new Float32Array(LOOP*SR);out.set(d.subarray(PRE*SR,(PRE+LOOP)*SR));
     for(let i=0;i<TAIL*SR;i++)out[i]+=d[LOOP*SR+i];   // fold the last notes' tails into the start
     let pk=0,sq=0;for(let i=0;i<out.length;i++){const x=Math.abs(out[i]);if(x>pk)pk=x;sq+=out[i]*out[i];}
-    const rms=Math.sqrt(sq/out.length)||1,k=Math.min(.2/rms,.95/(pk||1));for(let i=0;i<out.length;i++)out[i]*=k;
+    const tgt={ocean:.2,rain:.18,stream:.17,birds:.11,piano:.13,breathe6:.13,tones:.14}[mode]||.15;
+    const rms=Math.sqrt(sq/out.length)||1,k=Math.min(tgt/rms,.9/(pk||1));for(let i=0;i<out.length;i++)out[i]*=k;
     return URL.createObjectURL(wavBlob(out,SR));});
 }
 const Snd={el:null,urls:{},jobs:{},silent:null,swapping:false,
@@ -2295,11 +2473,16 @@ function openSounds(){
     const mus=S.plan.music.filter(m=>m.url);const mine=()=>Player.state!=='off'&&Player.mode===mode;
     b.innerHTML='<div><p class="step">Music for hard moments</p><h2>Calm sounds</h2></div><p class="lede">Put these on while an urge passes, before sleep, or whenever you need to settle. They keep playing while you use other apps or lock your phone.</p>'+
     '<div class="sound-stage"><canvas class="tide" aria-hidden="true"></canvas><div class="in"><p class="clock" id="snC">20:00</p><p class="fine" id="snM" style="color:var(--ink-2)">'+esc(SOUNDS[mode])+'</p></div></div>'+
-    segHTML('snd',Object.keys(SOUNDS).map(k=>({v:k,l:SOUNDS[k]})),mode)+
+    '<div class="sgrid" data-group="snd" data-multi="0" role="group" aria-label="Choose a sound">'+Object.keys(SOUNDS).map(k=>'<button type="button" class="chip scard" data-v="'+k+'" aria-pressed="'+(k===mode)+'">'+I[SOUND_INFO[k][0]]+'<b>'+esc(SOUNDS[k])+'</b><span>'+esc(SOUND_INFO[k][1])+'</span></button>').join('')+'</div>'+
     '<div class="field"><span class="flabel">Play for</span>'+segHTML('snT',[10,20,30,60].map(m=>({v:String(m),l:m+' min'})),String(Player.mins))+'</div>'+
     '<button type="button" class="playbtn" id="snP" aria-label="Play">'+I.play+'</button>'+
     '<p class="fine" style="text-align:center">Pause or stop it from the bar at the bottom of Ebb or from your lock screen.</p>'+
-    '<div class="note-box"><h3>What the research says</h3><p>In a Cochrane review of 21 studies, music therapy with a trained music therapist, added to treatment in detox and rehab, likely reduced cravings and raised motivation for treatment. Listening on your own isn’t therapy, but it’s a calm way to wait out an urge.</p>'+cite('ghetti')+'</div>'+
+    '<div class="note-box"><h3>What the research says</h3>'+
+      '<p><b>Nature sounds.</b> A review that pooled 18 studies found natural sounds lowered stress and annoyance and improved health and mood. Water sounds did the most for mood and health. Birdsong did the most for stress.</p>'+cite('buxton')+
+      '<p><b>Calm music.</b> Across 104 randomized trials, music lowered stress, measured both in the body and in how people felt.</p>'+cite('dewitte')+
+      '<p><b>Slow breathing.</b> Breathing about six times a minute lowered blood pressure and raised heart rate variability right away. Breathe at six is paced to that rate.</p>'+cite('slowbreath')+
+      '<p><b>For cravings.</b> Music therapy with a trained therapist, added to treatment, likely reduced cravings and raised motivation for treatment.</p>'+cite('ghetti')+
+      '<p class="fine">Ebb’s sounds are made to match what was studied: water, birdsong, calm music without lyrics, and a slow breathing pace. They help you settle; they don’t replace treatment.</p></div>'+
     '<div class="card soft"><div class="card-h"><h3>My music</h3><button class="linkbtn" data-act="edit-music">'+(mus.length?'Edit':'Add')+'</button></div>'+(mus.length?'<div>'+mus.map(m=>'<div class="linkrow"><b>'+esc(m.name||'My music')+'</b><a href="'+esc(safeUrl(m.url))+'" target="_blank" rel="noopener">'+I.ext+'Open</a></div>').join('')+'</div>':'')+'<p class="fine">Save songs or playlists that calm you, from Spotify, YouTube or anywhere. Skip songs you used to play while using, since they can work like a trigger.</p></div>'+
     '<button class="btn btn-line btn-block" data-act="videos">'+I.video+'Videos and guided audio</button>';
     const C=$('#snC',b),M=$('#snM',b),P=$('#snP',b);
@@ -2397,13 +2580,13 @@ function openWhatsNew(){
   markSeen();
   const it=(ic,t,d)=>'<li><span class="ic" aria-hidden="true">'+ic+'</span><div><b>'+t+'</b><p class="fine" style="color:var(--ink-2)">'+d+'</p></div></li>';
   openSheet(b=>{b.innerHTML='<div><p class="step">Version '+APP_VERSION+'</p><h2>What’s new in Ebb</h2></div><ul class="wn">'+
-    it(I.music,'Calm sounds keep playing','They carry on while you use other apps or lock your phone. Pause or stop them from the bar at the bottom of Ebb or from your lock screen.')+
-    it(I.gift,'New reward picks','Grown-up rewards for every milestone, from specialty coffee to a trip abroad. Swap in your own anytime.')+
-    it(I.wave,'A living horizon','Today’s sky follows the time of day, and the tide rises as your next milestone gets closer.')+
-    it(I.video,'Videos and guided audio','Short videos from NIDA and guided urge surfing, plus a place for your own calming music.')+
-    it(I.coin,'Heads-ups before hard moments','On payday, and before the hours your cravings usually hit.')+
-    it(I.star,'Celebrations and progress','Milestone celebrations, a shareable image, badges, a weekly review and a craving heatmap.')+
-    it(I.lock,'Privacy and reminders','A passcode lock, a discreet calendar reminder, and a summary to share with your counselor.')+
+    it(I.music,'Four new calm sounds','Forest stream, morning birds, slow piano and Breathe at six, chosen to match what research found calming.')+
+    it(I.faceid,'Face ID or Touch ID','Turn on a passcode in My plan, then unlock Ebb with your face or fingerprint.')+
+    it(I.chat,'Text someone in one tap','Help now has ready-made messages in English or Filipino that ask someone to call or meet you.')+
+    it(I.list,'A friendlier check-in','Mood faces, HALT tiles, a sleep slider and a short prompt for your note.')+
+    it(I.pulse,'Your stretches','Journey shows every stretch without use, your longest one, and a summary for each month.')+
+    it(I.music,'Calm sounds keep playing','They carry on while you use other apps or lock your phone.')+
+    it(I.gift,'New reward picks','Grown-up rewards for every milestone, from specialty coffee to a trip abroad.')+
     it(I.rainbow,'Sex and recovery','Support for any orientation, including compulsive sex or porn use, chemsex and HIV prevention.')+
     '</ul><div class="actions"><button class="btn btn-primary btn-block" data-act="sounds">'+I.music+'Try Calm sounds</button><button class="btn btn-line btn-block" data-act="sheet-close">Got it</button></div>';},{label:'What’s new in Ebb'});
 }
