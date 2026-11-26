@@ -1,9 +1,17 @@
-/* Ebb service worker: keeps the app working offline. Build b1e07f91 */
-const CACHE='ebb-shell-b1e07f91';
+/* Ebb service worker: keeps the app working offline. Build 7a9241d2 */
+const CACHE='ebb-shell-7a9241d2';
 const FONTS='ebb-fonts';
+const LEGACY=['ebb-shell-b1e07f91'];
 const SHELL=['./','./index.html','./manifest.webmanifest','./apple-touch-icon.png','./icon-192.png','./icon-512.png','./icon-maskable-512.png'];
-self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(SHELL)).then(()=>self.skipWaiting()));});
-self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE&&k!==FONTS).map(k=>caches.delete(k)))).then(()=>self.clients.claim()));});
+// Fetch the new shell straight from the network, never from the browser's HTTP cache.
+self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(SHELL.map(u=>new Request(u,{cache:'reload'})))).then(()=>self.skipWaiting()));});
+self.addEventListener('activate',e=>{e.waitUntil((async()=>{
+  const keys=await caches.keys();const old=keys.filter(k=>k!==CACHE&&k!==FONTS);
+  await Promise.all(old.map(k=>caches.delete(k)));
+  await self.clients.claim();
+  // Version 1 pages can't reload themselves after an update, so reload them once here.
+  if(old.some(k=>LEGACY.includes(k))){const cs=await self.clients.matchAll({type:'window'});cs.forEach(c=>{try{const p=c.navigate(c.url);if(p&&p.catch)p.catch(()=>{});}catch(_){}});}
+})());});
 self.addEventListener('fetch',e=>{
   const req=e.request;if(req.method!=='GET')return;
   const url=new URL(req.url);

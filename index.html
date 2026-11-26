@@ -67,6 +67,7 @@ button,input,textarea,select{font:inherit;color:inherit}
 button{touch-action:manipulation;cursor:pointer}
 a{color:var(--tide);text-underline-offset:3px}
 :focus-visible{outline:3px solid var(--lantern);outline-offset:2px;border-radius:8px}
+h1[tabindex="-1"]:focus,h2[tabindex="-1"]:focus{outline:none}
 h1,h2{font-family:var(--font-display);font-weight:400;letter-spacing:-.01em;text-wrap:balance;margin:0}
 h1{font-size:31px;line-height:1.1}
 h2{font-size:23px;line-height:1.2}
@@ -124,7 +125,7 @@ main{padding:4px var(--gut) calc(104px + env(safe-area-inset-bottom));display:fl
 .seg .chip[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.12)}
 .field{display:flex;flex-direction:column;gap:8px}
 .field>label,.flabel{font-weight:700;font-size:16px}
-input[type=text],input[type=tel],input[type=datetime-local],input[type=date],textarea{width:100%;font-size:17px;padding:13px 14px;border-radius:12px;border:0;background:var(--surface-2);color:var(--ink);min-height:50px;-webkit-appearance:none;appearance:none}
+input[type=text],input[type=tel],input[type=url],input[type=time],input[type=datetime-local],input[type=date],textarea{width:100%;font-size:17px;padding:13px 14px;border-radius:12px;border:0;background:var(--surface-2);color:var(--ink);min-height:50px;-webkit-appearance:none;appearance:none}
 input[type=datetime-local]{display:block;text-align:left}
 input::-webkit-date-and-time-value{text-align:left}
 textarea{resize:vertical;line-height:1.4}
@@ -268,7 +269,9 @@ canvas.tide{position:absolute;inset:0;width:100%;height:100%;display:block}
 .chart .dot{fill:var(--tide)}
 .chart .end{fill:var(--tide);stroke:var(--surface);stroke-width:2}
 .chart .endl{fill:var(--ink);font-size:12px;font-weight:700;font-family:var(--font-body)}
-.chart .xh{stroke:var(--ink-2);stroke-width:1;stroke-dasharray:3 3}
+.chart .xh{stroke:var(--ink-2);stroke-width:1}
+.chart .ar{opacity:1}
+.chart svg:focus-visible{outline:3px solid var(--lantern);outline-offset:4px}
 .tip{position:absolute;top:-6px;pointer-events:none;background:var(--ink);color:var(--bg);border-radius:10px;padding:6px 10px;font-size:13px;line-height:1.25;width:120px;box-shadow:0 6px 18px rgba(0,0,0,.2)}
 .tip b{display:block;font-size:15px}
 .hbars{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:9px}
@@ -391,6 +394,179 @@ details.tbl td,details.tbl th{padding:6px 4px;border-top:1px solid var(--line);t
 .ob .actions{margin-top:auto;padding-top:8px}
 .ob-body{display:flex;flex-direction:column;gap:18px}
 
+/* ---------- v2: living horizon ---------- */
+/* The sky follows the real hour over the bay: umaga, tanghali, takipsilim, gabi. */
+[data-sky]{--sky1:#C9E4EE;--sky3:#E2F0F2;--sky2:#EEF5F1;--sun:#FFD58A;--moon:#F3EFD9}
+[data-sky="dawn"]{--sky1:#F6DDBC;--sky3:#F2E7D6;--sky2:#E4EFE9;--sun:#FFCB7A}
+[data-sky="day"]{--sky1:#C6E2EC;--sky3:#E0EFF1;--sky2:#EEF5F1;--sun:#FFE1A1}
+[data-sky="dusk"]{--sky1:#F0AE82;--sky3:#EBA7A3;--sky2:#F3DCCF;--foam:#F1CDBE;--sun:#FFC27A;--deep:#8FC1BA}
+[data-sky="night"]{--sky1:#0A2131;--sky3:#113344;--sky2:#17414A;--ink:#EAF4F1;--ink-2:#B9CFCB;--muted:#9DB7B3;--foam:#1E5558;--tide:#6AD3C2;--tide-ink:#04201F;--line:#2B5356;--surface:#11303A;--surface-2:#18404A;--lantern-soft:#3A3120}
+.is-dark [data-sky="dawn"]{--sky1:#2C2A3D;--sky3:#24303C;--sky2:#10282E;--sun:#F3B26B}
+.is-dark [data-sky="day"]{--sky1:#11394A;--sky3:#103039;--sky2:#0F262B;--sun:#F6D58E}
+.is-dark [data-sky="dusk"]{--sky1:#4B2A37;--sky3:#3A2834;--sky2:#13282F;--sun:#F1A36B;--deep:#0E3A3A}
+.is-dark [data-sky="night"]{--sky1:#05111B;--sky3:#091C27;--sky2:#0F262B;--foam:#164442;--tide:#4CC3B2;--surface:#0F262B;--surface-2:#173339;--line:#24423F}
+.hero[data-sky],.ob-welcome[data-sky]{background:linear-gradient(180deg,var(--sky1) 0%,var(--sky3) 52%,var(--sky2) 100%);color:var(--ink)}
+.hero-in{min-height:356px}
+.hero{min-height:356px}
+.hero-num .n,.hero-num .u{font-variant-numeric:normal}
+.hero-meta{margin-top:auto;padding-top:18px}
+.hero-meta b{font-size:21px}
+.hero-prog{height:6px;border-radius:6px;background:color-mix(in srgb,var(--ink) 14%,transparent);overflow:hidden;margin-top:10px}
+.hero-prog i{display:block;height:100%;border-radius:6px;background:var(--tide);width:calc(var(--p,0)*1%);transition:width .8s cubic-bezier(.2,.8,.2,1)}
+.hero-share{position:absolute;top:14px;right:14px;z-index:2;border:0;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;color:var(--ink);background:color-mix(in srgb,var(--surface) 55%,transparent);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+.hero-share svg{width:20px;height:20px}
+.ob-welcome[data-sky] .lede,.ob-welcome[data-sky] .tl,.ob-welcome[data-sky] .fine{color:var(--ink-2)}
+
+/* Tab bar: a pill that slides to the tab you pick */
+.tabbar .ind{position:absolute;top:6px;left:0;height:52px;width:0;border-radius:14px;background:color-mix(in srgb,var(--tide) 13%,transparent);transition:transform .38s cubic-bezier(.3,1.25,.4,1),width .3s;pointer-events:none}
+.tabbar button[aria-current="page"]::before{display:none}
+.tabbar button{z-index:1}
+
+/* Touch feedback */
+.btn,.tile,.tool,.cta,.feature,.setrow,.chip,.badge,.keypad button{transition:transform .14s ease,background-color .2s,box-shadow .2s,color .2s}
+.btn:active,.tile:active,.tool:active,.cta:active,.feature:active,.setrow:active{transform:scale(.975)}
+.chip:active{transform:scale(.95)}
+.cta{box-shadow:0 14px 28px -16px var(--tide)}
+.topbar .tools-r{display:flex;gap:8px;align-items:center}
+.iconbtn{border:0;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;background:var(--surface-2);color:var(--ink-2)}
+.iconbtn svg{width:19px;height:19px}
+
+/* Heads-up cards */
+.heads{flex-direction:row;gap:14px;align-items:flex-start}
+.heads>.hi{flex:none;width:42px;height:42px;border-radius:13px;display:grid;place-items:center;background:var(--lantern-soft);color:var(--lantern)}
+.heads>.hi svg{width:22px;height:22px}
+.heads>div{display:flex;flex-direction:column;gap:8px;min-width:0;flex:1}
+.heads .q{padding:10px 12px;border-radius:12px;background:var(--surface-2);font-size:15px}
+.heads .q small{display:block;font-size:13px;color:var(--ink-2);font-weight:700;margin-bottom:2px}
+.heads .lk{display:flex;gap:16px;flex-wrap:wrap}
+
+/* Weekly review */
+.wk{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.wk>div{background:var(--surface-2);border-radius:14px;padding:12px 14px}
+.wk b{font-family:var(--font-display);font-weight:400;font-size:26px;line-height:1.1;display:block}
+.wk b small{font-size:15px;color:var(--muted)}
+.wk span{font-size:13px;color:var(--ink-2);display:block;line-height:1.3}
+.wk em{font-style:normal;font-size:13px;font-weight:700;color:var(--ink);display:flex;gap:4px;align-items:center;margin-top:6px}
+.wk em svg{width:14px;height:14px;stroke-width:2.4}
+
+/* Heatmap: one hue, light to dark, for craving strength; used days carry a mark */
+.heat-wrap{display:grid;grid-template-columns:auto 1fr;gap:4px 6px}
+.heat-m span{white-space:nowrap;overflow:visible}
+.heat-m{grid-column:2;display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:3px;font-size:11px;color:var(--muted);height:14px}
+.heat-d{display:grid;grid-template-rows:repeat(7,1fr);gap:3px;font-size:10.5px;color:var(--muted);line-height:1}
+.heat-d span{display:flex;align-items:center}
+.heat{display:grid;grid-auto-flow:column;grid-template-rows:repeat(7,1fr);grid-auto-columns:1fr;gap:3px;touch-action:pan-y}
+.heat i{aspect-ratio:1;border-radius:3px;background:var(--surface-2);position:relative;display:block}
+.heat i.n{background:transparent}
+.heat i.l1{background:color-mix(in srgb,var(--tide) 22%,var(--surface-2))}
+.heat i.l2{background:color-mix(in srgb,var(--tide) 42%,var(--surface-2))}
+.heat i.l3{background:color-mix(in srgb,var(--tide) 62%,var(--surface-2))}
+.heat i.l4{background:color-mix(in srgb,var(--tide) 82%,var(--surface-2))}
+.heat i.l5{background:var(--tide)}
+.heat i.u{background:var(--berry)}
+.legend i.ux{position:relative}
+.heat i.u::after,.legend i.ux::after{content:"";position:absolute;inset:22%;background:linear-gradient(45deg,transparent 42%,var(--berry-ink) 42%,var(--berry-ink) 58%,transparent 58%),linear-gradient(-45deg,transparent 42%,var(--berry-ink) 42%,var(--berry-ink) 58%,transparent 58%)}
+.heat i.sel{box-shadow:0 0 0 2px var(--ink)}
+.heat i.t{box-shadow:inset 0 0 0 1.5px var(--ink-2)}
+.ramp{display:flex;align-items:center;gap:4px;font-size:12px;color:var(--ink-2)}
+.ramp i{width:12px;height:12px;border-radius:3px;display:inline-block}
+
+/* Plan strength */
+.segbar{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.segbar i{height:8px;border-radius:4px;background:var(--surface-2)}
+.segbar i.on{background:var(--tide)}
+.todo{display:flex;flex-wrap:wrap;gap:8px}
+.todo button{border:0;border-radius:999px;padding:8px 12px;font-size:14px;font-weight:700;background:var(--surface-2);color:var(--ink);display:inline-flex;gap:6px;align-items:center}
+.todo button svg{width:16px;height:16px;color:var(--tide)}
+
+/* Skill badges */
+.badges{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.badge{display:flex;flex-direction:column;align-items:center;text-align:center;gap:6px;padding:14px 6px 12px;border-radius:16px;background:var(--surface-2)}
+.badge .md{width:54px;height:54px;border-radius:50%;display:grid;place-items:center;box-shadow:inset 0 0 0 2px var(--line);color:var(--muted);background:var(--surface)}
+.badge .md svg{width:24px;height:24px}
+.badge.got .md{background:radial-gradient(circle at 34% 28%,color-mix(in srgb,var(--lantern) 45%,#fff) 0%,var(--lantern) 72%);color:var(--lantern-ink);box-shadow:0 8px 18px -10px var(--lantern)}
+.badge b{font-size:14px;line-height:1.2}
+.badge span{font-size:12px;color:var(--ink-2);line-height:1.25}
+.badge.got span{color:var(--ink-2)}
+
+/* Urge wave track */
+.wavetrack{display:flex;flex-direction:column;gap:2px;margin-top:-4px}
+.wavetrack svg{width:100%;height:auto;display:block;overflow:visible}
+.wavetrack .lb{position:relative;height:18px}
+.wavetrack .lb span{position:absolute;top:0;white-space:nowrap}
+.wavetrack .wv{fill:none;stroke:var(--line);stroke-width:2}
+.wavetrack .wd{fill:none;stroke:var(--tide);stroke-width:2.5;stroke-linecap:round}
+.wavetrack circle{fill:var(--tide);stroke:var(--surface);stroke-width:2.5}
+.wavetrack .lb{font-size:13px;color:var(--muted)}
+.soundbtn[aria-pressed="true"]{background:var(--tide);color:var(--tide-ink)}
+
+/* Breathing orb */
+.orb-wrap{position:relative;display:grid;place-items:center;height:330px}
+.orb{position:relative;width:232px;height:232px;display:grid;place-items:center}
+.orb .glow{position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle at 50% 36%,color-mix(in srgb,var(--foam) 55%,#fff) 0%,var(--foam) 48%,color-mix(in srgb,var(--tide) 42%,var(--foam)) 100%);transform:scale(var(--s,.56));transition:transform var(--d,4s) cubic-bezier(.45,0,.55,1);box-shadow:0 24px 60px -18px color-mix(in srgb,var(--tide) 70%,transparent)}
+.orb .halo{position:absolute;inset:-6px;border-radius:50%;box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--tide) 30%,transparent);transform:scale(var(--s,.56));transition:transform var(--d,4s) cubic-bezier(.45,0,.55,1),opacity var(--d,4s);opacity:.6}
+.orb svg.pr{position:absolute;inset:-18px;width:calc(100% + 36px);height:calc(100% + 36px);transform:rotate(-90deg);overflow:visible}
+.orb .pr circle{fill:none;stroke-width:3}
+.orb .pr .tr{stroke:var(--line)}
+.orb .pr .fl{stroke:var(--tide);stroke-linecap:round}
+.orb .lbl{position:relative;text-align:center;font-family:var(--font-display);font-size:27px;line-height:1.05;color:var(--ink)}
+.orb .lbl small{display:block;font-family:var(--font-body);font-size:16px;color:var(--ink-2);margin-top:6px;font-variant-numeric:tabular-nums}
+
+/* Passcode */
+#lock{position:fixed;inset:0;z-index:100;background:var(--bg);overflow:hidden}
+#lock[hidden]{display:none}
+#lock canvas.tide{position:absolute;left:0;right:0;bottom:0;height:42%;width:100%}
+.lock-in{position:relative;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;padding:calc(20px + env(safe-area-inset-top)) 20px calc(20px + env(safe-area-inset-bottom))}
+.lock-in h2{text-align:center}
+.pin-dots{display:flex;gap:18px;height:16px}
+.pin-dots i{width:15px;height:15px;border-radius:50%;box-shadow:inset 0 0 0 2px var(--ink-2);transition:background .12s,transform .12s}
+.pin-dots i.on{background:var(--ink);box-shadow:none;transform:scale(1.08)}
+.pin-dots.shake{animation:shake .42s}
+@keyframes shake{0%,100%{transform:none}20%{transform:translateX(-10px)}40%{transform:translateX(9px)}60%{transform:translateX(-6px)}80%{transform:translateX(4px)}}
+.keypad{display:grid;grid-template-columns:repeat(3,74px);gap:14px 24px;justify-content:center}
+.keypad button{width:74px;height:74px;border-radius:50%;border:0;background:var(--surface);box-shadow:inset 0 0 0 1px var(--line);font-family:var(--font-display);font-size:29px;color:var(--ink);display:grid;place-items:center}
+.keypad button:active{background:var(--surface-2);transform:scale(.94)}
+.keypad button.k0{grid-column:2}
+.keypad button.kx{background:transparent;box-shadow:none;color:var(--ink-2)}
+.sheet-pin .lock-in{height:auto;padding:8px 0 4px}
+.sound-stage{position:relative;border-radius:24px;overflow:hidden;background:var(--surface-2);height:230px}
+.sound-stage .in{position:relative;height:100%;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:4px;text-align:center}
+.playbtn{width:76px;height:76px;border-radius:50%;border:0;align-self:center;background:var(--tide);color:var(--tide-ink);display:grid;place-items:center;box-shadow:0 14px 28px -14px var(--tide)}
+.playbtn svg{width:30px;height:30px;fill:currentColor;stroke:none}
+.playbtn.on svg{fill:none;stroke:currentColor;stroke-width:3}
+.linkrow{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 0;border-top:1px solid var(--line)}
+.linkrow:first-child{border-top:0}
+.linkrow a{display:inline-flex;align-items:center;gap:6px;font-weight:700;text-decoration:none;background:var(--surface-2);color:var(--ink);padding:9px 14px;border-radius:999px;font-size:15px;white-space:nowrap}
+.linkrow a svg{width:16px;height:16px;color:var(--tide)}
+.medal .rays{transform-origin:100px 100px;animation:spin 40s linear infinite}
+.medal{animation:pop .7s cubic-bezier(.2,1.4,.4,1) both}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes pop{from{transform:scale(.4);opacity:0}}
+.pin-msg{min-height:1.4em;font-size:15px;color:var(--ink-2);text-align:center}
+
+/* Celebration */
+.confetti{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:95}
+.medal{align-self:center;position:relative;width:200px;height:200px;margin:6px 0 2px}
+.medal svg{width:100%;height:100%;overflow:visible}
+.medal .num{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:var(--font-display);color:var(--lantern-ink);font-variant-numeric:normal}
+.medal .num b{font-weight:400;font-size:62px;line-height:.95}
+.medal .num span{font-size:20px}
+.celebrate h2,.celebrate>.src{text-align:center}
+.wn{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:16px}
+.wn li{display:grid;grid-template-columns:42px 1fr;gap:12px;align-items:start}
+.wn .ic{width:42px;height:42px;border-radius:13px;display:grid;place-items:center;background:var(--foam);color:var(--tide)}
+.wn b{display:block;margin-bottom:2px}
+.medal .num{padding-bottom:14px;text-shadow:0 1px 2px rgba(0,0,0,.18)}
+.celebrate .lede{text-align:center;margin:0 auto}
+
+/* View transitions between tabs */
+main#view{view-transition-name:view}
+::view-transition-old(root),::view-transition-new(root){animation:none}
+::view-transition-old(view){animation:vtOut .14s ease both}
+::view-transition-new(view){animation:vtIn .26s cubic-bezier(.2,.8,.2,1) both}
+@keyframes vtOut{to{opacity:0}}
+@keyframes vtIn{from{opacity:0;transform:translateY(8px)}}
+
 @media (prefers-reduced-motion: reduce){
   *{transition:none!important;animation:none!important}
   .bcircle{transition:none!important}
@@ -407,11 +583,12 @@ details.tbl td,details.tbl th{padding:6px 4px;border-top:1px solid var(--line);t
       <svg viewBox="0 0 26 26" aria-hidden="true"><circle cx="13" cy="13" r="12" fill="var(--tide)"/><path d="M4 15.5c2.2-2 4.3-2 6.5 0s4.3 2 6.5 0 3.3-1.6 5 0" fill="none" stroke="var(--tide-ink)" stroke-width="2" stroke-linecap="round"/><path d="M6 19.5c1.7-1.4 3.3-1.4 5 0s3.3 1.4 5 0 3.3-1.4 4.5-.4" fill="none" stroke="var(--tide-ink)" stroke-width="1.6" stroke-linecap="round" opacity=".6"/></svg>
       <span>Ebb</span>
     </div>
-    <button class="sos" data-act="sos" type="button"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"/></svg>Help now</button>
+    <div class="tools-r"><button class="iconbtn" id="lockBtn" data-act="lock-now" type="button" aria-label="Lock Ebb" hidden><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10.5" width="14" height="10" rx="2.5"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/></svg></button><button class="sos" data-act="sos" type="button"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"/></svg>Help now</button></div>
   </header>
   <div id="banner"></div>
   <main id="view" tabindex="-1"></main>
   <nav class="tabbar" aria-label="Sections">
+    <span class="ind" aria-hidden="true"></span>
     <button type="button" data-act="tab" data-tab="today"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 12a5 5 0 0 1 10 0"/><path d="M12 3v2M4.5 6.5l1.4 1.4M19.5 6.5l-1.4 1.4"/><path d="M3 16c1.5-1.2 3-1.2 4.5 0s3 1.2 4.5 0 3-1.2 4.5 0 3 1.2 4.5 0"/><path d="M3 20c1.5-1.2 3-1.2 4.5 0s3 1.2 4.5 0 3-1.2 4.5 0 3 1.2 4.5 0"/></svg>Today</button>
     <button type="button" data-act="tab" data-tab="journey"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M8 3v4M16 3v4M3.5 10h17"/><path d="M8 14h.01M12 14h.01M16 14h.01M8 17h.01M12 17h.01"/></svg>Journey</button>
     <button type="button" data-act="tab" data-tab="insights"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h16"/><path d="M7 16v-5M12 16V6M17 16v-8"/></svg>Insights</button>
@@ -420,6 +597,7 @@ details.tbl td,details.tbl th{padding:6px 4px;border-top:1px solid var(--line);t
   </nav>
 </div>
 <div id="onboard" hidden></div>
+<div id="lock" hidden role="dialog" aria-modal="true" aria-label="Ebb is locked"></div>
 <div id="sheetRoot"></div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
@@ -436,7 +614,7 @@ const avg=a=>a.length?a.reduce((x,y)=>x+y,0)/a.length:0;
 const RM=window.matchMedia?matchMedia('(prefers-reduced-motion: reduce)'):{matches:false};
 const pad=n=>String(n).padStart(2,'0');
 const LOC='en-PH';
-const APP_BUILD=true, APP_VERSION='1.0';
+const APP_BUILD=true, APP_VERSION='2.0';
 const IS_IOS=/iPhone|iPad|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
 const IS_STANDALONE=(window.matchMedia&&matchMedia('(display-mode: standalone)').matches)||navigator.standalone===true;
 const NEEDS_INSTALL=APP_BUILD&&IS_IOS&&!IS_STANDALONE;
@@ -456,10 +634,10 @@ const clone=o=>JSON.parse(JSON.stringify(o));
 const telHref=n=>'tel:'+String(n).replace(/[^\d+]/g,'');
 
 /* ============ Content ============ */
-const SUBSTANCES=['Shabu (methamphetamine)','Marijuana (damo)','Alcohol (alak)','Nicotine (yosi or vape)','Rugby or other inhalants','Ecstasy (MDMA)','Cocaine','Sleeping pills or sedatives','Opioids','Prescription pills'];
+const SUBSTANCES=['Shabu (methamphetamine)','Marijuana (damo)','Alcohol (alak)','Nicotine (yosi or vape)','Rugby or other inhalants','Ecstasy (MDMA)','Cocaine','Sleeping pills or sedatives','Opioids','Prescription pills','Compulsive sex or porn use'];
 const DEPRESSANTS=/Alcohol|Opioid|sedative|Sleeping|Prescription/i;
 const STIMULANTS=/Shabu|methamph|Cocaine|Ecstasy|MDMA/i;
-const TRIGGERS=[{k:'stress',l:'Stress'},{k:'money',l:'Sweldo or cash on hand'},{k:'people',l:'Barkada I used with'},{k:'party',l:'Inuman, party or fiesta'},{k:'family',l:'Family conflict (away sa bahay)'},{k:'work',l:'Work pressure or night shift'},{k:'tired',l:'Puyat or exhausted'},{k:'bored',l:'Boredom (walang magawa)'},{k:'lonely',l:'Loneliness'},{k:'sad',l:'Sadness or problems'},{k:'anger',l:'Anger'},{k:'place',l:'A place linked to use'},{k:'cue',l:'Saw, smelled or was offered it'},{k:'pain',l:'Physical pain'},{k:'other',l:'Something else'}];
+const TRIGGERS=[{k:'stress',l:'Stress'},{k:'money',l:'Sweldo or cash on hand'},{k:'people',l:'Barkada I used with'},{k:'party',l:'Inuman, party or fiesta'},{k:'family',l:'Family conflict (away sa bahay)'},{k:'work',l:'Work pressure or night shift'},{k:'tired',l:'Puyat or exhausted'},{k:'bored',l:'Boredom (walang magawa)'},{k:'lonely',l:'Loneliness'},{k:'sad',l:'Sadness or problems'},{k:'anger',l:'Anger'},{k:'place',l:'A place linked to use'},{k:'cue',l:'Saw, smelled or was offered it'},{k:'pain',l:'Physical pain'},{k:'sex',l:'Sex, dating or hookup apps'},{k:'other',l:'Something else'}];
 const TRIG=Object.fromEntries(TRIGGERS.map(t=>[t.k,t.l]));
 const HALT=[{k:'h',l:'Hungry'},{k:'a',l:'Angry'},{k:'l',l:'Lonely'},{k:'t',l:'Tired'}];
 const ACTIONS=[{k:'meet',l:'NA meeting or support group'},{k:'rehab',l:'Rehab, CBDRP or aftercare session'},{k:'therapy',l:'Counseling or therapy'},{k:'meds',l:'Took medication as prescribed'},{k:'move',l:'Exercise or a walk'},{k:'family',l:'Time with family'},{k:'talk',l:'Talked to someone supportive'},{k:'pray',l:'Prayer, Mass or church'},{k:'mind',l:'Mindfulness or slow breathing'},{k:'meals',l:'Regular meals'},{k:'joy',l:'Did something I enjoy'},{k:'help',l:'Helped someone'}];
@@ -501,8 +679,25 @@ const TIPS=[
   {t:'In a study of people quitting smoking, stronger guilt after a lapse was linked to a faster slide back into regular use. Self-compassion is a relapse-prevention skill.',s:'kirchner'},
   {t:'Contingency management, which rewards drug-free milestones, has the strongest evidence of any treatment for shabu and other stimulants. Plan a reward for your next milestone.',s:'tip33'},
   {t:'In a national survey, Filipinos named the household as the most helpful source of support for people who use drugs. Let someone at home in on your plan.',s:'ddbsurvey'},
-  {t:'Many cities and municipalities run DOH-guided community-based drug rehabilitation. Ask your city or municipal health office or rural health unit.',s:'cbdrp'}
+  {t:'Many cities and municipalities run DOH-guided community-based drug rehabilitation. Ask your city or municipal health office or rural health unit.',s:'cbdrp'},
+  {t:'In a Cochrane review of 21 studies, music therapy added to treatment likely reduced cravings and raised motivation for treatment. Try Calm sounds in the Toolkit while an urge passes.',s:'ghetti'}
 ];
+/* Ebb’s reward picks: small and soon at first, bigger as the stretch grows. Rough 2026 prices for a Filipino middle-class budget. */
+const REWARD_PICKS={
+  24:['Halo-halo or your favorite merienda (about ₱150)','Lechon manok for dinner at home (about ₱400)','A long merienda with someone who supports you'],
+  72:['A large milk tea and a movie night at home (about ₱200)','A month of music streaming (about ₱170)','A new shirt from the ukay-ukay (about ₱200)'],
+  168:['Samgyup or unli-wings with a sober friend (about ₱500)','A movie at the mall cinema (about ₱400)','Your favorite ulam, takeout for the whole family'],
+  336:['A full-body massage or hilot (about ₱600)','A fresh haircut at a good barbershop or salon (about ₱400)','A board game or a new book for the family'],
+  720:['New rubber shoes for walking or jogging (about ₱3,000)','A family buffet dinner (about ₱1,200 per person)','Wireless earbuds for your calm music (about ₱1,500)'],
+  1440:['A one-night staycation in Tagaytay or the city (about ₱4,000)','A resort pool day with the family (about ₱2,500)','A month of gym or badminton (about ₱1,500)'],
+  2160:['A family beach day in Batangas or Zambales (about ₱5,000)','A smartwatch to track sleep and steps (about ₱3,000)','Lechon belly and a family celebration at home, no alcohol'],
+  4392:['A weekend in Baguio, La Union or Ilocos with family (about ₱12,000)','A bike for weekend rides (about ₱8,000)','Open Pag-IBIG MP2 savings with the money you’ve kept'],
+  8760:['A flight trip for two to Bohol, Siargao, Palawan or Boracay (about ₱25,000)','A new phone or laptop for work or study','A big family celebration at home, no alcohol'],
+  13140:['Something lasting for home, like an inverter aircon (about ₱30,000)','A TESDA course or certificate for a better job','An emergency fund worth three months of expenses'],
+  17520:['A trip abroad to Japan, Korea or Vietnam (about ₱50,000 per person)','A room makeover or home repairs','A thank-you dinner for the people who stood by you'],
+  43824:['A down payment on a car or motorcycle','A home renovation or a down payment on a lot','The family trip you’ve always talked about']
+};
+function rewardFor(h){const mine=S&&S.plan.rewards&&S.plan.rewards[h];if(mine)return {t:mine,mine:true};const p=REWARD_PICKS[h];return p?{t:p[0],mine:false}:null;}
 const SRC={
   melemis:{a:'Melemis, 2015',t:'Melemis SM. Relapse prevention and the five rules of recovery. Yale J Biol Med. 2015;88(3):325–332.',u:'https://pmc.ncbi.nlm.nih.gov/articles/PMC4553654/'},
   larimer:{a:'Larimer, Palmer & Marlatt, 1999',t:'Larimer ME, Palmer RS, Marlatt GA. Relapse prevention: an overview of Marlatt’s cognitive-behavioral model. Alcohol Res Health. 1999;23(2):151–160.',u:'https://pubs.niaaa.nih.gov/publications/arh23-2/151-160.pdf'},
@@ -525,7 +720,19 @@ const SRC={
   datrc:{a:'PhilHealth list, 2025',t:'PhilHealth. List of Accredited Drug Abuse Treatment and Rehabilitation Centers, CY 2025 (updated May 31, 2025).',u:'https://www.philhealth.gov.ph/partners/providers/facilities/accredited/DATRC_053125.pdf'},
   oregon:{a:'Oregon Health Authority, 2022',t:'Oregon Health Authority. Methamphetamine overdose overview, 2022.',u:'https://www.oregon.gov/oha/PH/HEALTHYENVIRONMENTS/TRACKINGASSESSMENT/ENVIRONMENTALHEALTHASSESSMENT/Documents/Methamphetamine-Overdose-Overview_Oregon_Dec2022.pdf'},
   na:{a:'Narcotics Anonymous',t:'Narcotics Anonymous. Meeting search.',u:'https://www.na.org/meetingsearch/'},
-  samhsa:{a:'SAMHSA',t:'SAMHSA. Opioid Overdose Prevention Toolkit.',u:'https://portal.ct.gov/-/media/dmhas/forms/mat/samhsaoverdosetoolkitpdf.pdf'}
+  samhsa:{a:'SAMHSA',t:'SAMHSA. Opioid Overdose Prevention Toolkit.',u:'https://portal.ct.gov/-/media/dmhas/forms/mat/samhsaoverdosetoolkitpdf.pdf'},
+  ghetti:{a:'Ghetti et al., 2022',t:'Ghetti C, Chen XJ, Brenner AK, et al. Music therapy for people with substance use disorders. Cochrane Database Syst Rev. 2022;5:CD012576.',u:'https://pmc.ncbi.nlm.nih.gov/articles/PMC9082681/'},
+  nidavid:{a:'NIDA video',t:'National Institute on Drug Abuse. Why are drugs so hard to quit? Animated video, 3:58, with transcript.',u:'https://nida.nih.gov/videos/why-are-drugs-so-hard-to-quit'},
+  mbrp:{a:'CU Change, University of Colorado',t:'CU Change, University of Colorado Boulder. Mindfulness-Based Relapse Prevention audio recordings, including urge surfing.',u:'https://www.colorado.edu/center/cuchange/mindfulness-practice'},
+  pap:{a:'PAP via Inquirer, 2026',t:'Psychological Association of the Philippines condemns the promotion of conversion therapy for LGBTQ+ people. Philippine Daily Inquirer, August 13, 2026.',u:'https://newsinfo.inquirer.net/2283833/psychologists-slam-promotion-of-conversion-therapy-for-lgbtq-people'},
+  blosnich:{a:'Blosnich et al., 2020',t:'Blosnich JR, Henderson ER, Coulter RWS, Goldbach JT, Meyer IH. Sexual orientation change efforts, adverse childhood experiences, and suicide ideation and attempt among sexual minority adults, United States, 2016–2018. Am J Public Health. 2020;110(7):1024–1030.',u:'https://pmc.ncbi.nlm.nih.gov/articles/PMC7287530/'},
+  icd:{a:'WHO ICD-11 via CNN, 2018',t:'WHO ICD-11, 6C72 Compulsive sexual behaviour disorder: definition and exclusion of distress based only on moral judgment (CNN report, 2018).',u:'https://amp.cnn.com/cnn/2018/07/10/health/compulsive-sexual-behavior-mental-health-condition'},
+  csbd:{a:'Antons et al., 2022',t:'Antons S, Engel J, Briken P, et al. Treatments and interventions for compulsive sexual behavior disorder with a focus on problematic pornography use: a preregistered systematic review. J Behav Addict. 2022;11(3):643–666.',u:'https://pubmed.ncbi.nlm.nih.gov/36083776/'},
+  ppu:{a:'Meta-analysis, 2025',t:'Psychotherapy for problematic pornography use: a comprehensive meta-analysis. 2025 (CBT and ACT).',u:'https://pubmed.ncbi.nlm.nih.gov/40126561/'},
+  chemsexph:{a:'Olete et al., 2024',t:'Olete RA, Strong C, Leyritana K, Bourne A, et al. ChemsexPH: the association between chemsex, HIV status and adherence to antiretroviral therapy among men who have sex with men in the Philippines. J Int AIDS Soc. 2024;27(7):e26323.',u:'https://pubmed.ncbi.nlm.nih.gov/38982574/'},
+  loveyourself:{a:'LoveYourself',t:'LoveYourself Inc. HIV prevention: testing and PrEP services in the Philippines.',u:'https://loveyourself.ph/hiv-prevention/'},
+  pep:{a:'NIH HIVinfo',t:'NIH HIVinfo. Post-exposure prophylaxis (PEP): start within 72 hours.',u:'https://hivinfo.nih.gov/understanding-hiv/fact-sheets/post-exposure-prophylaxis-pep'},
+  poppers:{a:'Healthy Male',t:'Healthy Male (Andrology Australia). The dangers of mixing erectile dysfunction medicine and poppers.',u:'https://www.healthymale.org.au/news/dangers-mixing-erectile-dysfunction-medicine-and-poppers'}
 };
 const cite=k=>SRC[k]?`<p class="src">Source: <a href="${SRC[k].u}" target="_blank" rel="noopener">${esc(SRC[k].a)}</a></p>`:'';
 const LINES={
@@ -565,7 +772,26 @@ const I={
   pen:'<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/></svg>',
   gift:'<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="8.5" width="17" height="4" rx="1"/><path d="M5 12.5V20h14v-7.5M12 8.5V20"/><path d="M12 8.5C10.5 5 6.5 4.5 6.5 7S10 8.5 12 8.5zm0 0c1.5-3.5 5.5-4 5.5-1.5S14 8.5 12 8.5z"/></svg>',
   home:'<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 11L12 4l8.5 7"/><path d="M6 9.5V20h12V9.5"/><path d="M10 20v-5h4v5"/></svg>',
-  ground:'<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21V11"/><path d="M12 11c0-4 3-6 7-6 0 4-3 6-7 6zM12 14c0-3-2.5-5-6-5 0 3 2.5 5 6 5z"/><path d="M6 21h12"/></svg>'
+  ground:'<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21V11"/><path d="M12 11c0-4 3-6 7-6 0 4-3 6-7 6zM12 14c0-3-2.5-5-6-5 0 3 2.5 5 6 5z"/><path d="M6 21h12"/></svg>',
+  lock:'<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10.5" width="14" height="10" rx="2.5"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/></svg>',
+  share:'<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V3.5M8 7.5l4-4 4 4"/><path d="M6 11v8.5h12V11"/></svg>',
+  sound:'<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.5h3.5L12 6v12l-4.5-3.5H4z"/><path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11"/></svg>',
+  coin:'<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><ellipse cx="12" cy="6.5" rx="7" ry="3"/><path d="M5 6.5v5c0 1.7 3.1 3 7 3s7-1.3 7-3v-5"/><path d="M5 11.5v5c0 1.7 3.1 3 7 3s7-1.3 7-3v-5"/></svg>',
+  star:'<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l2.6 5.6 6.1.7-4.5 4.2 1.2 6L12 16.6 6.6 19.5l1.2-6L3.3 9.3l6.1-.7z"/></svg>',
+  music:'<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18V5.5l11-2V16"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="17.5" cy="16" r="2.5"/></svg>',
+  play:'<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l10.5-6.5z"/></svg>',
+  pause:'<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.5 5.5v13M15.5 5.5v13"/></svg>',
+  heart:'<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20s-7.5-4.6-7.5-10.2A4.3 4.3 0 0 1 12 7a4.3 4.3 0 0 1 7.5 2.8C19.5 15.4 12 20 12 20z"/></svg>',
+  video:'<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="6" width="13" height="12" rx="2.5"/><path d="M16 10.5l5-3v9l-5-3z"/></svg>',
+  cal:'<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M8 3v4M16 3v4M3.5 10h17"/><path d="M12 13v3.5l2 1.2"/></svg>',
+  doc:'<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3.5h7l4 4v12.5a.5.5 0 0 1-.5.5h-10.5a.5.5 0 0 1-.5-.5V4a.5.5 0 0 1 .5-.5z"/><path d="M14 3.5V8h4M9.5 12.5h5M9.5 16h5"/></svg>',
+  down:'<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7l6 6 4-4 6 6"/><path d="M20 10v5h-5"/></svg>',
+  up:'<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 17l6-6 4 4 6-6"/><path d="M20 14V9h-5"/></svg>',
+  flat:'<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h16"/></svg>',
+  plus:'<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>',
+  ext:'<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>',
+  back:'<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6h11v12H9l-6-6z"/><path d="M12.5 9.5l5 5M17.5 9.5l-5 5"/></svg>',
+  rainbow:'<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 17a9 9 0 0 1 18 0"/><path d="M6.5 17a5.5 5.5 0 0 1 11 0"/><path d="M10 17a2 2 0 0 1 4 0"/></svg>'
 };
 
 /* ============ State & local storage ============ */
@@ -574,14 +800,18 @@ let LOCAL_OK=false, S=null;
 function testLocal(){try{const k='__ebb_t';localStorage.setItem(k,'1');localStorage.removeItem(k);return true;}catch(e){return false;}}
 function loadLocal(){if(!LOCAL_OK)return null;try{const s=localStorage.getItem(KEY);return s?JSON.parse(s):null;}catch(e){return null;}}
 function saveLocal(){if(!LOCAL_OK)return false;try{localStorage.setItem(KEY,JSON.stringify(S));return true;}catch(e){return false;}}
-function blank(){return {v:1,profile:null,settings:{sync:false,region:'ph',lastMile:0},plan:{name:'',spend:0,reasons:[],contacts:[],risks:[],signs:[],lines:[],rewards:{},triggers:null,actions:null,trigOld:{},tape:{hour:'',tomorrow:'',week:'',sober:''}},checkins:{},cravings:{},lapses:{},warn:{},demo:false,coreU:0,u:0};}
+function blank(){return {v:1,profile:null,settings:{sync:false,region:'ph',lastMile:0,theme:'system',payday:'semi',lock:null,sound:false,soundMode:'ocean',breath:'calm'},plan:{name:'',spend:0,reasons:[],contacts:[],risks:[],signs:[],lines:[],music:[],rewards:{},triggers:null,actions:null,trigOld:{},tape:{hour:'',tomorrow:'',week:'',sober:''}},checkins:{},cravings:{},lapses:{},warn:{},tools:{},demo:false,coreU:0,u:0};}
 function normalize(x){
   const o=Object.assign(blank(),x||{});
   o.settings=Object.assign(blank().settings,o.settings||{});
   o.plan=Object.assign(blank().plan,o.plan||{});
   o.plan.tape=Object.assign(blank().plan.tape,o.plan.tape||{});
   ['checkins','cravings','lapses','warn'].forEach(k=>{if(!o[k]||typeof o[k]!=='object'||Array.isArray(o[k]))o[k]={};});
-  ['reasons','contacts','risks','signs','lines'].forEach(k=>{if(!Array.isArray(o.plan[k]))o.plan[k]=[];});
+  ['reasons','contacts','risks','signs','lines','music'].forEach(k=>{if(!Array.isArray(o.plan[k]))o.plan[k]=[];});
+  if(!o.tools||typeof o.tools!=='object'||Array.isArray(o.tools))o.tools={};
+  if(o.settings.lock&&!(o.settings.lock.h&&o.settings.lock.salt))o.settings.lock=null;
+  if(!['system','light','dark'].includes(o.settings.theme))o.settings.theme='system';
+  if(!['semi','fri','off'].includes(o.settings.payday))o.settings.payday='semi';
   ['rewards','trigOld'].forEach(k=>{if(!o.plan[k]||typeof o.plan[k]!=='object'||Array.isArray(o.plan[k]))o.plan[k]={};});
   return o;
 }
@@ -593,7 +823,7 @@ function trigL(k){const f=trigList().find(t=>t.k===k);return f?f.l:((S&&S.plan.t
 function actList(){return S&&Array.isArray(S.plan.actions)&&S.plan.actions.length?S.plan.actions:ACTIONS;}
 const peso=n=>'₱'+Math.round(n).toLocaleString(LOC);
 function greeting(){const h=new Date().getHours();return h<12?'Magandang umaga':h<18?'Magandang hapon':'Magandang gabi';}
-const heroLvl=p=>.1+.17*clamp(p,0,1);
+const heroLvl=p=>.31+.2*clamp(p,0,1);
 
 /* ============ Derived numbers ============ */
 function lapsesSorted(){return live(S.lapses).sort((a,b)=>a.t-b.t);}
@@ -729,43 +959,99 @@ function syncButtons(){
 }
 
 /* ============ Tide canvas ============ */
+/* The hero is a horizon: sky follows the hour, the sun or moon sits over the water, and the tide rises toward the next milestone. */
+function hexRGB(c){c=String(c||'').trim();let m=/^#([0-9a-f]{3})$/i.exec(c);if(m)c='#'+m[1].replace(/./g,x=>x+x);m=/^#([0-9a-f]{6})$/i.exec(c);if(m){const n=parseInt(m[1],16);return [n>>16&255,n>>8&255,n&255];}m=/rgba?\(\s*([\d.]+)[ ,]+([\d.]+)[ ,]+([\d.]+)/.exec(c);return m?[+m[1],+m[2],+m[3]]:null;}
+const rgbStr=(a,al)=>'rgba('+a.map(Math.round).join(',')+','+(al==null?1:al)+')';
+const mixC=(a,b,t)=>a.map((v,i)=>v+(b[i]-v)*t);
+function skyPhase(){const d=new Date();const h=d.getHours()+d.getMinutes()/60;return h>=5&&h<9?'dawn':h<16.5&&h>=9?'day':h>=16.5&&h<18.75?'dusk':'night';}
+function crescent(ctx,x,y,r,col){ctx.save();ctx.beginPath();ctx.arc(x,y,r,0,6.283);ctx.clip();ctx.beginPath();ctx.arc(x,y,r,0,6.283);ctx.moveTo(x+r*.45+r*.88,y-r*.25);ctx.arc(x+r*.45,y-r*.25,r*.88,0,6.283);ctx.fillStyle=col;ctx.fill('evenodd');ctx.restore();}
 const Tides=new Set();
 function makeTide(canvas,levelFn,opt){
   opt=opt||{};
   const ctx=canvas.getContext('2d');let w=0,h=0,raf=0,alive=true,cols=null,n=0;const t0=performance.now();
+  const R=mulberry(7);
+  const stars=Array.from({length:42},()=>({x:R(),y:R()*.72,r:.4+R()*1.1,p:R()*6.28,s:.5+R()*1.5}));
+  const bubbles=Array.from({length:10},()=>({x:.05+R()*.9,o:R(),sp:.03+R()*.045,r:1+R()*2.2,wb:R()*6.28}));
+  const still=()=>RM.matches||opt.still;
   function size(){const r=canvas.getBoundingClientRect();const d=Math.min(2,window.devicePixelRatio||1);w=r.width;h=r.height;if(!w||!h)return;canvas.width=Math.round(w*d);canvas.height=Math.round(h*d);ctx.setTransform(d,0,0,d,0,0);}
-  function readCols(){const cs=getComputedStyle(canvas);cols={foam:cs.getPropertyValue('--foam').trim()||'#CDE7E1',tide:cs.getPropertyValue('--tide').trim()||'#12786F'};}
+  function readCols(){const cs=getComputedStyle(canvas);const g=(k,d)=>cs.getPropertyValue(k).trim()||d;
+    const foam=g('--foam','#CDE7E1'),tide=g('--tide','#12786F');
+    const host=opt.sky?canvas.closest('[data-sky]'):null;
+    cols={foam,tide,deepC:g('--deep',''),fr:hexRGB(foam)||[205,231,225],tr:hexRGB(tide)||[18,120,111],sun:hexRGB(g('--sun','#FFD58A'))||[255,213,138],moon:hexRGB(g('--moon','#F3EFD9'))||[243,239,217],phase:host?host.dataset.sky:null};}
   const layers=[{a:.42,amp:12,k:1.5,s:.28,ph:0,dy:-8},{a:.68,amp:8,k:1.05,s:-.38,ph:2.1,dy:6},{a:1,amp:6,k:.72,s:.52,ph:4.2,dy:20}];
+  function sky(t,base){
+    const ph=cols.phase;if(!ph)return null;
+    if(ph==='night'){
+      stars.forEach(s=>{const y=s.y*base*.9;if(y>base-10)return;ctx.globalAlpha=still()?.55:.22+.6*Math.pow(Math.sin(t*s.s+s.p),2);ctx.fillStyle=rgbStr(cols.moon);ctx.beginPath();ctx.arc(s.x*w,y,s.r,0,6.283);ctx.fill();});
+      const mx=w*.83,my=Math.max(44,base*.26),mr=Math.min(w,h)*.05+5;
+      const gl=ctx.createRadialGradient(mx,my,mr*.9,mx,my,mr*3.4);gl.addColorStop(0,rgbStr(cols.moon,.16));gl.addColorStop(1,rgbStr(cols.moon,0));
+      ctx.globalAlpha=1;ctx.fillStyle=gl;ctx.beginPath();ctx.arc(mx,my,mr*3.4,0,6.283);ctx.fill();
+      crescent(ctx,mx,my,mr,rgbStr(cols.moon));
+      return {x:mx,r:mr,low:false,moon:true};
+    }
+    const d=new Date();const hr=d.getHours()+d.getMinutes()/60;const f=clamp((hr-5.6)/13,0,1);
+    const arc=Math.sin(Math.PI*f);const sr=Math.min(w,h)*(ph==='dusk'?.095:.072)+4;
+    const sx=w*(.56+.3*f),sy=base-(base-80)*arc+(1-arc)*4;
+    const gl=ctx.createRadialGradient(sx,sy,sr*.5,sx,sy,sr*(ph==='day'?3:4.4));gl.addColorStop(0,rgbStr(cols.sun,.7));gl.addColorStop(1,rgbStr(cols.sun,0));
+    ctx.globalAlpha=1;ctx.fillStyle=gl;ctx.beginPath();ctx.arc(sx,sy,sr*4.4,0,6.283);ctx.fill();
+    ctx.fillStyle=rgbStr(cols.sun);ctx.beginPath();ctx.arc(sx,sy,sr,0,6.283);ctx.fill();
+    return {x:sx,r:sr,low:arc<.45};
+  }
   function draw(t){
     if(!w)size();if(!w)return;if(!cols||n%120===0)readCols();n++;
     ctx.clearRect(0,0,w,h);
-    const o=levelFn(t)||{};const L=o.level==null?.4:o.level,A=o.amp==null?1:o.amp;const base=h*(1-L);
+    const o=levelFn(t)||{};let L=o.level==null?.4:o.level;const A=o.amp==null?1:o.amp;
+    if(opt.rise&&!still()){const r=clamp(t/1.8,0,1);L=.02+(L-.02)*(1-Math.pow(1-r,3));}
+    const base=h*(1-L);
+    const sun=opt.sky?sky(t,base):null;
+    const deep=cols.deepC||rgbStr(mixC(cols.fr,cols.tr,.42));
     layers.forEach((ly,i)=>{
       const pts=[];
       for(let x=0;x<=w+6;x+=6){const u=x/w;pts.push([x,base+ly.dy+Math.sin(u*Math.PI*2*ly.k+t*ly.s+ly.ph)*ly.amp*A+Math.sin(u*Math.PI*5.3*ly.k-t*ly.s*1.7)*ly.amp*.3*A]);}
+      const gr=ctx.createLinearGradient(0,base+ly.dy-ly.amp,0,h);gr.addColorStop(0,cols.foam);gr.addColorStop(1,deep);
       ctx.beginPath();ctx.moveTo(0,h);pts.forEach(p=>ctx.lineTo(p[0],p[1]));ctx.lineTo(w,h);ctx.closePath();
-      ctx.globalAlpha=ly.a;ctx.fillStyle=cols.foam;ctx.fill();
+      ctx.globalAlpha=ly.a;ctx.fillStyle=gr;ctx.fill();
       if(i===0||i===2){ctx.beginPath();pts.forEach((p,j)=>j?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]));ctx.globalAlpha=i===0?.55:.35;ctx.strokeStyle=cols.tide;ctx.lineWidth=i===0?1.6:1.2;ctx.stroke();}
     });
+    if(sun&&(sun.low||sun.moon)){
+      const col=sun.moon?cols.moon:cols.sun;
+      for(let i=0;i<6;i++){const y=base+16+i*7;if(y>h-2)break;const ww=sun.r*(2.1-i*.26)*(still()?.9:.72+.28*Math.sin(t*1.6+i*1.3));ctx.globalAlpha=(sun.moon?.2:.34)-i*.035;ctx.fillStyle=rgbStr(col);ctx.beginPath();ctx.ellipse(sun.x+(still()?0:Math.sin(t+i)*3),y,Math.max(2,ww),1.6,0,0,6.283);ctx.fill();}
+    }
+    if(opt.bubbles&&!still()){
+      ctx.strokeStyle=cols.tide;ctx.lineWidth=1;const span=h-base-14;
+      if(span>24)bubbles.forEach(b=>{const p=(b.o+t*b.sp)%1;const y=h-4-p*span;const x=b.x*w+Math.sin(t*1.3+b.wb)*4;ctx.globalAlpha=.4*Math.sin(Math.PI*p);ctx.beginPath();ctx.arc(x,y,b.r,0,6.283);ctx.stroke();});
+    }
     ctx.globalAlpha=1;
   }
   function loop(now){if(!alive)return;if(!canvas.isConnected){api.destroy();return;}draw((now-t0)/1000);raf=requestAnimationFrame(loop);}
   const api={
-    start(){cancelAnimationFrame(raf);if(RM.matches||opt.still){size();draw(2);return;}raf=requestAnimationFrame(loop);},
+    start(){cancelAnimationFrame(raf);if(still()){size();draw(3);return;}raf=requestAnimationFrame(loop);},
     stop(){cancelAnimationFrame(raf);},
     destroy(){alive=false;cancelAnimationFrame(raf);Tides.delete(api);},
-    resize(){size();if(RM.matches||opt.still)draw(2);},
-    redraw(){readCols();if(RM.matches||opt.still)draw(2);}
+    resize(){size();if(still())draw(3);},
+    redraw(){readCols();if(still())draw(3);}
   };
   api.canvas=canvas;Tides.add(api);size();api.start();return api;
 }
-window.addEventListener('resize',()=>Tides.forEach(t=>t.resize()));
+window.addEventListener('resize',()=>{Tides.forEach(t=>t.resize());positionInd();});
 document.addEventListener('visibilitychange',()=>{
-  if(document.hidden){Tides.forEach(t=>t.stop());}
-  else{Tides.forEach(t=>t.start());if(S&&S.profile){tick();if(S.settings.sync&&Date.now()-Cloud.last>60000)pull();}}
+  if(document.hidden){Tides.forEach(t=>t.stop());Lock.hiddenAt=Date.now();if(lockEnabled())showLock(true);}
+  else{
+    if(Lock.on&&Lock.soft&&Date.now()-Lock.hiddenAt<LOCK_GRACE)hideLock();
+    Tides.forEach(t=>t.start());if(S&&S.profile){tick();if(S.settings.sync&&Date.now()-Cloud.last>60000)pull();}
+  }
 });
-if(window.matchMedia){const mq=matchMedia('(prefers-color-scheme: dark)');(mq.addEventListener?mq.addEventListener('change',()=>Tides.forEach(t=>t.redraw())):mq.addListener&&mq.addListener(()=>Tides.forEach(t=>t.redraw())));}
-new MutationObserver(()=>Tides.forEach(t=>t.redraw())).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+if(window.matchMedia){const mq=matchMedia('(prefers-color-scheme: dark)');const on=()=>{applyTheme();Tides.forEach(t=>t.redraw());};(mq.addEventListener?mq.addEventListener('change',on):mq.addListener&&mq.addListener(on));}
+new MutationObserver(()=>Tides.forEach(t=>t.redraw())).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme','class']});
+
+/* ============ Theme ============ */
+const DARK_MQ=window.matchMedia?matchMedia('(prefers-color-scheme: dark)'):{matches:false};
+function applyTheme(){
+  const t=S&&S.settings?S.settings.theme:'system';const r=document.documentElement;
+  if(t==='light'||t==='dark')r.setAttribute('data-theme',t);else r.removeAttribute('data-theme');
+  const dark=t==='dark'||(t!=='light'&&DARK_MQ.matches);r.classList.toggle('is-dark',dark);
+  $$('meta[name="theme-color"]').forEach(m=>{const md=m.getAttribute('media')||'';m.setAttribute('content',(t==='system'?md.includes('dark'):dark)?'#081A1E':'#E9EFEC');});
+}
 
 /* ============ UI helpers ============ */
 function toast(msg){const t=$('#toast');t.textContent=msg;t.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(()=>t.classList.remove('on'),2600);}
@@ -776,6 +1062,12 @@ function openSheet(build,opt){
   root.innerHTML='<div class="scrim" data-act="sheet-close"></div><section class="sheet'+(opt.full?' full':'')+'" role="dialog" aria-modal="true" aria-label="'+esc(opt.label||'Panel')+'"><div class="sheet-top"><span class="grab" aria-hidden="true"></span><button type="button" class="x" data-act="sheet-close" aria-label="Close">'+I.x+'</button></div><div class="sheet-body"></div></section>';
   root.classList.add('open');document.body.classList.add('locked');
   const body=$('.sheet-body',root);build(body);
+  // Drag the top bar down to close
+  const sh=$('.sheet',root),top=$('.sheet-top',root);let y0=null,dy=0;
+  top.addEventListener('touchstart',e=>{if(sh.scrollTop>4||e.target.closest('.x'))return;y0=e.touches[0].clientY;dy=0;sh.style.transition='none';},{passive:true});
+  top.addEventListener('touchmove',e=>{if(y0==null)return;dy=Math.max(0,e.touches[0].clientY-y0);sh.style.transform='translateY('+dy+'px)';},{passive:true});
+  const end=()=>{if(y0==null)return;y0=null;sh.style.transition='';sh.style.transform='';if(dy>110)ACTS['sheet-close']();};
+  top.addEventListener('touchend',end);top.addEventListener('touchcancel',end);
   requestAnimationFrame(()=>requestAnimationFrame(()=>root.classList.add('in')));
   setTimeout(()=>{const h=$('.sheet h2',root);if(h){h.setAttribute('tabindex','-1');h.focus({preventScroll:true});}},60);
   return body;
@@ -837,10 +1129,12 @@ const TABS=['today','journey','insights','toolkit','plan'];
 let ROUTE='today', CAL=null;
 function readRoute(){const h=(location.hash||'').replace('#','');ROUTE=TABS.includes(h)?h:'today';}
 function go(tab){if(tab===ROUTE){$('#view').scrollIntoView({block:'start'});window.scrollTo(0,0);return;}try{location.hash=tab;}catch(e){ROUTE=tab;render();}}
-window.addEventListener('hashchange',()=>{readRoute();if(S&&S.profile){render();window.scrollTo(0,0);}});
+window.addEventListener('hashchange',()=>{readRoute();if(S&&S.profile){const run=()=>{render();window.scrollTo(0,0);};if(document.startViewTransition&&!RM.matches){try{document.startViewTransition(run);}catch(e){run();}}else run();}});
+function positionInd(){const bar=$('.tabbar'),ind=$('.tabbar .ind');if(!bar||!ind)return;const b=$('.tabbar button[aria-current="page"]');if(!b){ind.style.width='0';return;}ind.style.width=b.offsetWidth+'px';ind.style.transform='translateX('+b.offsetLeft+'px)';}
 function render(){
   if(!S.profile)return;
-  $$('.tabbar button').forEach(b=>b.setAttribute('aria-current',b.dataset.tab===ROUTE?'page':'false'));
+  $$('.tabbar button').forEach(b=>b.setAttribute('aria-current',b.dataset.tab===ROUTE?'page':'false'));positionInd();
+  $('#lockBtn').hidden=!lockEnabled();
   $('#banner').innerHTML=S.demo?'<div class="banner"><span>You’re exploring sample data. Nothing here is real.</span><button type="button" data-act="demo-exit">Start my own</button></div>':'';
   const v=$('#view');
   Tides.forEach(t=>{if(!t.canvas.isConnected)t.destroy();});
@@ -851,51 +1145,69 @@ function tick(){
   if(!S||!S.profile)return;
   const s=stats();const st=fmtStreak(s.streakMs);const m=nextMile(s.streakMs);
   heroLevel=heroLvl(m.prog);
-  const n=$('#heroN');if(n){n.textContent=st.big;$('#heroU').textContent=st.unit;$('#heroSub').textContent=st.small+' · since '+fmtD(s.last);$('#heroLeft').textContent=m.next?dur(m.leftMs):'All reached';$('#heroNext').textContent=m.next?m.next.l:'5 years';}
+  const n=$('#heroN');if(n&&!n.dataset.counting){n.textContent=st.big;$('#heroU').textContent=st.unit;$('#heroSub').textContent=st.small+' · since '+fmtD(s.last);$('#heroLeft').textContent=m.next?dur(m.leftMs):'All reached';$('#heroNext').textContent=m.next?m.next.l:'5 years';}
+  const bar=$('#heroBar');if(bar){const pct=Math.round(clamp(m.prog,0,1)*100);bar.style.setProperty('--p',pct);bar.parentNode.setAttribute('aria-valuenow',pct);}
+  const hero=$('.hero[data-sky]');if(hero&&hero.dataset.sky!==skyPhase()){hero.dataset.sky=skyPhase();Tides.forEach(t=>t.redraw());}
   let reached=0;MILES.forEach(mm=>{if(s.streakMs>=mm.h*HOUR)reached=mm.h;});
   const key=s.last+':'+reached;
-  if(reached&&S.settings.lastMile!==key){const same=S.settings.lastMile&&String(S.settings.lastMile).split(':')[0]===String(s.last);S.settings.lastMile=key;saveLocal();if(same){const mm=MILES.find(x=>x.h===reached);const rw=S.plan.rewards&&S.plan.rewards[reached];toast('You reached '+mm.l+' substance-free.'+(rw?' Time for your reward: '+rw:''));}}
+  if(reached&&S.settings.lastMile!==key){const same=S.settings.lastMile&&String(S.settings.lastMile).split(':')[0]===String(s.last);S.settings.lastMile=key;saveLocal();if(same&&!S.demo){const mm=MILES.find(x=>x.h===reached);if(busyUI())PENDING_CELEB=mm;else openCelebrate(mm);}}
 }
 
 /* ---------- Today ---------- */
+let HERO_DONE=false;
 function renderToday(v){
   const s=stats();const st=fmtStreak(s.streakMs);const m=nextMile(s.streakMs);
-  heroLevel=heroLvl(m.prog);
-  const today=s.todayK;const ci=checkin(today);
+  heroLevel=heroLvl(m.prog);const pct=Math.round(clamp(m.prog,0,1)*100);
+  const today=s.todayK;const ci=checkin(today);const run=ciStreak();
   const rs=S.plan.reasons.filter(r=>r.text);const dayIdx=daysBetween('2026-01-01',today);
   const reason=rs.length?rs[((dayIdx%rs.length)+rs.length)%rs.length].text:null;
   const tip=TIPS[((dayIdx%TIPS.length)+TIPS.length)%TIPS.length];
   const lw=lastWarn();const warnDue=!lw||Date.now()-lw.t>6*DAY;
   const recentSlip=lapsesSorted().filter(l=>l.t>S.profile.start&&Date.now()-l.t<3*DAY).pop();
   const ridden=live(S.cravings).filter(c=>c.out==='passed'||c.out==='strong').length;
-  const spend=+S.plan.spend||0;const reward=m.next&&S.plan.rewards?S.plan.rewards[m.next.h]:null;
+  const spend=+S.plan.spend||0;const reward=m.next?rewardFor(m.next.h):null;
   const backupDue=APP_BUILD&&!S.demo&&Date.now()-(S.settings.lastBackup||S.profile.created||Date.now())>14*DAY&&(live(S.checkins).length+live(S.cravings).length)>0;
+  const heads=[];const pay=paydayInfo();const peak=peakHeadsUp();
+  if(pay){const mp=moneyPlan();heads.push('<div class="card heads"><span class="hi" aria-hidden="true">'+I.coin+'</span><div><h3>'+(pay==='today'?'Sweldo day':'Sweldo tomorrow')+'</h3><p>Cash in your pocket can make using feel easy. Decide where the money goes before you get it.</p>'+(mp?'<div class="q"><small>Your plan</small>'+esc(mp.plan||mp.situation)+'</div>':'')+'<div class="lk">'+(mp?'':'<button class="linkbtn" data-act="edit-risks">Make a payday plan</button>')+'<button class="linkbtn" data-act="prefs">Payday settings</button></div></div></div>');}
+  if(peak)heads.push('<div class="card heads"><span class="hi" aria-hidden="true">'+I.clock+'</span><div><h3>'+(peak.now?'You’re in your high-risk hours':'High-risk hours ahead')+'</h3><p>'+esc(peak.text)+'</p><div class="lk"><button class="linkbtn" data-act="tab" data-tab="toolkit">Open the toolkit</button><button class="linkbtn" data-act="sounds">Calm sounds</button></div></div></div>');
+  const ciPill=ci?'<span class="pill ok"><span class="dot"></span>'+(run>1?run+' days in a row':'Done today')+'</span>':run>0?'<span class="pill warn"><span class="dot"></span>Keep your '+run+'-day run</span>':'<span class="pill">Not yet</span>';
   v.innerHTML=
   (NEEDS_INSTALL?'<button class="tile" data-act="install" type="button" style="min-height:0;background:var(--lantern-soft);box-shadow:none"><b>Install Ebb on your Home Screen</b><span>So it opens like an app, works offline and keeps your entries. Takes 30 seconds.</span></button>':'')+
+  (DEFER_INSTALL?'<button class="tile" data-act="install-android" type="button" style="min-height:0;background:var(--lantern-soft);box-shadow:none"><b>Install Ebb on this phone</b><span>Opens like an app, works offline and keeps your entries.</span></button>':'')+
   '<p class="greet">'+esc(greeting())+(S.plan.name?', '+esc(S.plan.name):'')+'.</p>'+
-  '<section class="hero" aria-label="Current substance-free stretch"><canvas class="tide" aria-hidden="true"></canvas><div class="hero-in">'+
-    '<p class="hero-label">Substance-free for</p>'+
-    '<p class="hero-num"><span class="n num" id="heroN">'+st.big+'</span><span class="u" id="heroU">'+st.unit+'</span></p>'+
+  '<section class="hero" data-sky="'+skyPhase()+'" aria-label="Current stretch"><canvas class="tide" aria-hidden="true"></canvas>'+
+    '<button class="hero-share" type="button" data-act="share-streak" aria-label="Share my progress as an image">'+I.share+'</button>'+
+    '<div class="hero-in">'+
+    '<p class="hero-label">'+esc(freeLabel())+'</p>'+
+    '<p class="hero-num"><span class="n" id="heroN">'+st.big+'</span><span class="u" id="heroU">'+st.unit+'</span></p>'+
     '<p class="hero-sub" id="heroSub">'+esc(st.small+' · since '+fmtD(s.last))+'</p>'+
     '<div class="hero-meta"><div>Next milestone<b id="heroNext">'+(m.next?m.next.l:'5 years')+'</b></div><div class="r">To go<b id="heroLeft">'+(m.next?dur(m.leftMs):'All reached')+'</b></div></div>'+
+    '<div class="hero-prog" role="progressbar" aria-label="Progress to your next milestone" aria-valuemin="0" aria-valuemax="100" aria-valuenow="'+pct+'"><i id="heroBar" style="--p:'+(HERO_DONE||RM.matches?pct:0)+'"></i></div>'+
   '</div></section>'+
-  '<div class="tally"><div><p class="big num">'+s.clean+'<small> / '+s.total+'</small></p><p>days without use since '+esc(fmtDY(S.profile.start))+'</p></div><div><p class="big num">'+Math.floor(s.longest/DAY)+'<small> days</small></p><p>longest stretch'+(ridden?' · '+ridden+' cravings ridden out':'')+'</p></div>'+
-    '<div class="money">'+(spend?'<p class="big num">'+peso(s.clean*spend)+'</p><p>kept, not spent on using ('+peso(spend)+' a day)</p>':'<p>Add what you used to spend each day to see the money you keep.</p><button class="linkbtn" data-act="prefs">Add amount</button>')+'</div></div>'+
-  (reward?'<button class="tile" data-act="rewards" type="button" style="min-height:0"><span class="pill warn" style="margin-top:0"><span class="dot"></span>Your reward at '+esc(m.next.l)+'</span><b>'+esc(reward)+'</b></button>':'')+
-  (recentSlip?'<div class="card soft"><h3>After a slip</h3><p>You logged a slip on '+esc(fmtDT(recentSlip.t))+'. Your '+s.clean+' substance-free days still count, and so does everything you learned getting them.</p><p class="fine">Tolerance drops during a break, which raises overdose risk if you use again. Don’t use alone.</p><button class="linkbtn" data-act="safety" style="align-self:flex-start">Read the safety steps</button></div>':'')+
-  (backupDue?'<div class="card soft"><h3>Time to save a backup</h3><p>Your entries live only in this app. A backup file in Files or Notes protects them if your phone is lost or the app is removed.</p><button class="btn btn-quiet" data-act="backup-file" style="align-self:flex-start">Save backup file</button></div>':'')+
   '<button class="cta" data-act="craving" type="button">'+I.wave+'<div><b>I’m having a craving</b><span>Rate it, then ride it out with a guided timer</span></div></button>'+
+  heads.slice(0,2).join('')+
+  (recentSlip?'<div class="card soft"><h3>After a slip</h3><p>You logged a slip on '+esc(fmtDT(recentSlip.t))+'. Your '+s.clean+' substance-free days still count, and so does everything you learned getting them.</p><p class="fine">Tolerance drops during a break, which raises overdose risk if you use again. Don’t use alone.</p><button class="linkbtn" data-act="safety" style="align-self:flex-start">Read the safety steps</button></div>':'')+
   '<div class="duo">'+
-    '<button class="tile" data-act="checkin" data-k="'+today+'" type="button"><b>Daily check-in</b><span>'+(ci?'Mood, cravings, sleep, HALT':'Two minutes: mood, cravings, sleep')+'</span>'+(ci?'<span class="pill ok"><span class="dot"></span>Done today</span>':'<span class="pill">Not yet</span>')+'</button>'+
+    '<button class="tile" data-act="checkin" data-k="'+today+'" type="button"><b>Daily check-in</b><span>'+(ci?'Mood, cravings, sleep, HALT':'Two minutes: mood, cravings, sleep')+'</span>'+ciPill+'</button>'+
     '<button class="tile" data-act="lapse" type="button"><b>Log a slip</b><span>Record it, learn from it, and keep going</span></button>'+
   '</div>'+
+  '<div class="tally"><div><p class="big">'+s.clean+'<small> / '+s.total+'</small></p><p>days without use since '+esc(fmtDY(S.profile.start))+'</p></div><div><p class="big">'+Math.floor(s.longest/DAY)+'<small> days</small></p><p>longest stretch'+(ridden?' · '+ridden+' cravings ridden out':'')+'</p></div>'+
+    '<div class="money">'+(spend?'<p class="big">'+peso(s.clean*spend)+'</p><p>kept, not spent on using ('+peso(spend)+' a day)</p>':'<p>Add what you used to spend each day to see the money you keep.</p><button class="linkbtn" data-act="prefs">Add amount</button>')+'</div></div>'+
+  (reward?'<button class="tile" data-act="rewards" type="button" style="min-height:0"><span class="pill warn" style="margin-top:0"><span class="dot"></span>'+(reward.mine?'Your reward at ':'Ebb’s pick for ')+esc(m.next.l)+'</span><b>'+esc(reward.t)+'</b>'+(reward.mine?'':'<span>Tap to choose a different reward</span>')+'</button>':'')+
+  (backupDue?'<div class="card soft"><h3>Time to save a backup</h3><p>Your entries live only in this app. A backup file in Files or Notes protects them if your phone is lost or the app is removed.</p><button class="btn btn-quiet" data-act="backup-file" style="align-self:flex-start">Save backup file</button></div>':'')+
   (ci?'<div class="card"><div class="card-h"><h3>Today’s check-in</h3><button class="linkbtn" data-act="checkin" data-k="'+today+'">Edit</button></div><div class="kv"><div><b>'+esc((MOODS.find(x=>x.v==ci.mood)||{l:'–'}).l)+'</b><span>Mood</span></div><div><b class="num">'+(ci.craving!=null?ci.craving:'–')+'</b><span>Craving</span></div><div><b class="num">'+(ci.sleep!=null?ci.sleep+'h':'–')+'</b><span>Sleep</span></div><div><b>'+(HALT.filter(x=>ci.halt&&ci.halt[x.k]).map(x=>x.l[0]).join(' ')||'None')+'</b><span>HALT</span></div></div></div>':'')+
   (reason?'<div class="card"><div class="card-h"><p class="fine">One of your reasons</p><button class="linkbtn" data-act="edit-reasons">Edit</button></div><p class="reason">'+esc(reason)+'</p></div>':'<div class="empty"><p>Writing down why you want to recover gives you something to hold onto during a craving.</p><button class="btn btn-quiet" data-act="edit-reasons">Add my reasons</button></div>')+
   (warnDue?'<button class="tile" data-act="warn" type="button"><b>Weekly warning-signs check</b><span>'+(lw?'Last check '+esc(fmtDY(lw.t))+'. ':'')+'Relapse starts long before use. Catch it early in about a minute.</span><span class="pill warn"><span class="dot"></span>Due</span></button>'
     :'<button class="tile" data-act="entry" data-type="warn" data-id="'+esc(lw.id)+'" type="button"><b>Warning signs this week</b><span>Checked '+esc(fmtDY(lw.t))+'. Tap to review or edit.</span><span class="pill '+STAGES[lw.stage].cls+'"><span class="dot"></span>'+esc(STAGES[lw.stage].t)+'</span></button>')+
   '<button class="tool wide" data-act="phhelp" type="button">'+I.home+'<div><b>Treatment in the Philippines</b><span>City and barangay programs, DOH rehab centers, PhilHealth, and your rights under RA 9165.</span></div></button>'+
   '<div class="card soft"><p class="fine">From the research</p><p>'+esc(tip.t)+'</p>'+cite(tip.s)+'</div>';
-  makeTide($('.hero canvas',v),()=>({level:heroLevel,amp:.8}));
+  const first=!HERO_DONE&&!RM.matches;HERO_DONE=true;
+  makeTide($('.hero canvas',v),()=>({level:heroLevel,amp:.8}),{sky:true,bubbles:true,rise:first});
+  if(first){
+    const n=$('#heroN',v),target=st.big,t0=performance.now();
+    if(target>1){n.dataset.counting='1';const stepN=now=>{const r=clamp((now-t0)/1300,0,1);n.textContent=Math.round(target*(1-Math.pow(1-r,3)));if(r<1&&n.isConnected)requestAnimationFrame(stepN);else{n.textContent=target;delete n.dataset.counting;}};requestAnimationFrame(stepN);}
+    setTimeout(()=>{const b=$('#heroBar');if(b)b.style.setProperty('--p',pct);},350);
+  }
 }
 
 /* ---------- Journey ---------- */
@@ -919,13 +1231,14 @@ function renderJourney(v){
   const miles=MILES.map(mm=>({mm,got:s.streakMs>=mm.h*HOUR,when:s.last+mm.h*HOUR}));
   const nxIdx=miles.findIndex(x=>!x.got);const nm=nextMile(s.streakMs);
   const showUpTo=Math.min(MILES.length,(nxIdx<0?MILES.length:nxIdx+3));
-  const RW=S.plan.rewards||{};
+  const latest=nxIdx<0?MILES.length-1:nxIdx-1;
   const ml=miles.slice(0,showUpTo).map((x,i)=>{
-    const cls=x.got?'got':i===nxIdx?'nx':'';const rw=RW[x.mm.h];
+    const cls=x.got?'got':i===nxIdx?'nx':'';const rw=rewardFor(x.mm.h);
     const showNote=(x.got&&i>=Math.max(0,(nxIdx<0?MILES.length:nxIdx)-1))||i===nxIdx;
     return '<li class="'+cls+'"'+(i===nxIdx?' style="--pp:'+Math.round(nm.prog*100)+'"':'')+'><span class="node" aria-hidden="true">'+(x.got?I.check:'')+'</span><div><b>'+x.mm.l+'</b><div class="when">'+(x.got?'Reached '+esc(fmtDY(x.when)):i===nxIdx?esc(dur(nm.leftMs))+' to go · '+esc(fmtDY(x.when)):esc(fmtDY(x.when)))+'</div>'+
-      (rw?'<span class="reward">'+I.gift+esc(rw)+'</span>':'')+
-      (showNote?'<p class="note">'+esc(x.mm.n)+(x.mm.s?' <span class="src">('+esc(SRC[x.mm.s].a)+')</span>':'')+'</p>':'')+'</div></li>';
+      (rw?'<span class="reward">'+I.gift+(rw.mine?'':'Ebb’s pick: ')+esc(rw.t)+'</span>':'')+
+      (showNote?'<p class="note">'+esc(x.mm.n)+(x.mm.s?' <span class="src">('+esc(SRC[x.mm.s].a)+')</span>':'')+'</p>':'')+
+      (x.got&&i===latest?'<button class="linkbtn" data-act="mile" data-h="'+x.mm.h+'" style="display:flex;gap:6px;align-items:center">'+I.star+'Celebrate and share</button>':'')+'</div></li>';
   }).join('');
   const feed=[];
   live(S.checkins).forEach(c=>feed.push({t:parseDk(c.d).getTime()+20*HOUR,type:'checkin',id:c.d,o:c}));
@@ -947,35 +1260,49 @@ function renderJourney(v){
   '<div class="legend"><span><i style="background:var(--foam)"></i>Substance-free</span><span><i style="background:var(--berry)"></i>Used</span><span><i style="box-shadow:inset 0 0 0 2px var(--lantern)"></i>Start</span><span><i style="width:6px;height:6px;border-radius:50%;background:var(--tide)"></i>Check-in</span></div>'+
   '<p class="fine">'+s.clean+' of '+s.total+' days without use since you started. Tap any day to see, add or edit its entries, including past days you forgot to log.</p></div>'+
   '<div class="card-h" style="margin:10px 2px -4px"><h2 class="sec-title" style="margin:0">Milestones</h2><button class="linkbtn" data-act="rewards">Set rewards</button></div><div class="card"><ol class="miles">'+ml+'</ol></div>'+
+  badgesHTML()+
   '<h2 class="sec-title">Recent entries</h2><div class="card"><p class="fine">Tap any entry to edit or delete it.</p>'+(fl?'<ul class="feed">'+fl+'</ul>':'<p class="fine">Your check-ins, cravings and warning-sign checks will show up here.</p>')+'</div>';
 }
 
 /* ---------- Insights ---------- */
 const CH={};
+function smoothPath(p){
+  if(p.length<3)return 'M'+p.map(q=>q[0].toFixed(1)+','+q[1].toFixed(1)).join('L');
+  const n=p.length,dx=[],m=[],t=[];for(let i=0;i<n-1;i++){dx[i]=p[i+1][0]-p[i][0];m[i]=(p[i+1][1]-p[i][1])/dx[i];}
+  t[0]=m[0];t[n-1]=m[n-2];for(let i=1;i<n-1;i++)t[i]=m[i-1]*m[i]<=0?0:(m[i-1]+m[i])/2;
+  for(let i=0;i<n-1;i++){if(m[i]===0){t[i]=0;t[i+1]=0;continue;}const a=t[i]/m[i],b=t[i+1]/m[i],q=a*a+b*b;if(q>9){const k=3/Math.sqrt(q);t[i]=k*a*m[i];t[i+1]=k*b*m[i];}}
+  let d='M'+p[0][0].toFixed(1)+','+p[0][1].toFixed(1);
+  for(let i=0;i<n-1;i++){const h=dx[i]/3;d+='C'+(p[i][0]+h).toFixed(1)+','+(p[i][1]+t[i]*h).toFixed(1)+' '+(p[i+1][0]-h).toFixed(1)+','+(p[i+1][1]-t[i+1]*h).toFixed(1)+' '+p[i+1][0].toFixed(1)+','+p[i+1][1].toFixed(1);}
+  return d;
+}
 function lineChart(id,pts,o){
   const W=340,H=160,pl=26,pr=26,pt=14,pb=24,iw=W-pl-pr,ih=H-pt-pb,n=pts.length;
   const x=i=>pl+(n<=1?iw/2:i*iw/(n-1)),y=val=>pt+ih-(val-o.min)/(o.max-o.min)*ih;
   let g='';o.ticks.forEach(t=>{g+='<line class="'+(t===o.min?'base':'g')+'" x1="'+pl+'" x2="'+(W-pr)+'" y1="'+y(t)+'" y2="'+y(t)+'"/><text class="ax" x="'+(pl-6)+'" y="'+(y(t)+3.5)+'" text-anchor="end">'+(o.tickFmt?o.tickFmt(t):t)+'</text>';});
   const segs=[];let cur=[];pts.forEach((p,i)=>{if(p.v==null){if(cur.length)segs.push(cur);cur=[];}else cur.push([x(i),y(p.v)]);});if(cur.length)segs.push(cur);
-  const P=s=>s.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join('L');
-  const area=segs.filter(s=>s.length>1).map(s=>'<path class="ar" d="M'+s[0][0].toFixed(1)+','+y(o.min)+'L'+P(s)+'L'+s[s.length-1][0].toFixed(1)+','+y(o.min)+'Z"/>').join('');
-  const line=segs.map(s=>s.length===1?'<circle class="dot" cx="'+s[0][0]+'" cy="'+s[0][1]+'" r="2.6"/>':'<path class="ln" d="M'+P(s)+'"/>').join('');
+  const gid='g-'+id;
+  const area=segs.filter(q=>q.length>1).map(q=>'<path class="ar" style="fill:url(#'+gid+')" d="'+smoothPath(q)+'L'+q[q.length-1][0].toFixed(1)+','+y(o.min)+'L'+q[0][0].toFixed(1)+','+y(o.min)+'Z"/>').join('');
+  const line=segs.map(q=>q.length===1?'<circle class="dot" cx="'+q[0][0]+'" cy="'+q[0][1]+'" r="2.6"/>':'<path class="ln" d="'+smoothPath(q)+'"/>').join('');
   let li=-1;for(let i=n-1;i>=0;i--)if(pts[i].v!=null){li=i;break;}
   const end=li>=0?'<circle class="end" cx="'+x(li)+'" cy="'+y(pts[li].v)+'" r="5"/><text class="endl" text-anchor="end" x="'+(x(li)+6)+'" y="'+(y(pts[li].v)-10)+'">'+(o.fmt?o.fmt(pts[li].v):pts[li].v)+'</text>':'';
   const xl=[0,Math.floor((n-1)/2),n-1].map((i,j)=>'<text class="ax" x="'+x(i)+'" y="'+(H-6)+'" text-anchor="'+(j===0?'start':j===2?'end':'middle')+'">'+esc(fmtD(parseDk(pts[i].k).getTime()))+'</text>').join('');
-  CH[id]={pts,x,W,pl,iw,fmt:o.fmt,unit:o.unit};
-  return '<div class="chart" id="'+id+'"><svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="'+esc(o.label)+'">'+g+area+line+end+xl+'<line class="xh" x1="0" x2="0" y1="'+pt+'" y2="'+(pt+ih)+'" style="opacity:0"/></svg><div class="tip" hidden></div></div>';
+  CH[id]={pts,x,y,W,pl,iw,fmt:o.fmt,unit:o.unit};
+  return '<div class="chart" id="'+id+'"><svg viewBox="0 0 '+W+' '+H+'" role="img" tabindex="0" aria-label="'+esc(o.label)+'. Use the left and right arrow keys to read each day."><defs><linearGradient id="'+gid+'" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:var(--tide);stop-opacity:.3"/><stop offset="1" style="stop-color:var(--tide);stop-opacity:0"/></linearGradient></defs>'+g+area+line+end+xl+'<line class="xh" x1="0" x2="0" y1="'+pt+'" y2="'+(pt+ih)+'" style="opacity:0"/><circle class="hv" r="5" cx="-20" cy="-20" style="fill:var(--surface);stroke:var(--tide);stroke-width:2.5;opacity:0"/></svg><div class="tip" hidden></div></div>';
 }
 function wireLine(id){
-  const el=document.getElementById(id);if(!el)return;const c=CH[id];const svg=$('svg',el),tip=$('.tip',el),xh=$('.xh',svg);
-  const show=cx=>{const r=svg.getBoundingClientRect();const sx=(cx-r.left)/r.width*c.W;let i=Math.round((sx-c.pl)/c.iw*(c.pts.length-1));i=clamp(i,0,c.pts.length-1);const p=c.pts[i];const X=c.x(i);
+  const el=document.getElementById(id);if(!el)return;const c=CH[id];const svg=$('svg',el),tip=$('.tip',el),xh=$('.xh',svg),hv=$('.hv',svg);let ki=-1;
+  const showI=i=>{i=clamp(i,0,c.pts.length-1);ki=i;const r=svg.getBoundingClientRect();const p=c.pts[i];const X=c.x(i);
     xh.setAttribute('x1',X);xh.setAttribute('x2',X);xh.style.opacity=1;tip.hidden=false;
+    if(p.v!=null){hv.setAttribute('cx',X);hv.setAttribute('cy',c.y(p.v));hv.style.opacity=1;}else hv.style.opacity=0;
     tip.innerHTML='<b>'+(p.v==null?'No entry':esc(c.fmt?c.fmt(p.v):p.v)+(c.unit||''))+'</b>'+esc(fmtD(parseDk(p.k).getTime(),{weekday:'short',month:'short',day:'numeric'}));
     const px=X/c.W*r.width;tip.style.left=clamp(px-60,0,r.width-120)+'px';tip.style.top='-52px';};
-  const hide=()=>{xh.style.opacity=0;tip.hidden=true;};
+  const show=cx=>{const r=svg.getBoundingClientRect();const sx=(cx-r.left)/r.width*c.W;showI(Math.round((sx-c.pl)/c.iw*(c.pts.length-1)));};
+  const hide=()=>{xh.style.opacity=0;hv.style.opacity=0;tip.hidden=true;};
   svg.addEventListener('pointerdown',e=>show(e.clientX));
   svg.addEventListener('pointermove',e=>{if(e.pointerType==='mouse'||e.pressure>0)show(e.clientX);});
   svg.addEventListener('pointerleave',hide);svg.addEventListener('pointercancel',hide);
+  svg.addEventListener('keydown',e=>{if(e.key==='ArrowLeft'||e.key==='ArrowRight'){e.preventDefault();showI((ki<0?c.pts.length-1:ki)+(ki<0?0:e.key==='ArrowLeft'?-1:1));}else if(e.key==='Escape')hide();});
+  svg.addEventListener('blur',hide);
 }
 function hbars(items){const max=Math.max(1,...items.map(i=>i.v));return '<ul class="hbars">'+items.map(i=>'<li><span class="hl">'+esc(i.l)+'</span><span class="hb" aria-hidden="true"><i style="width:'+(i.v/max*100).toFixed(1)+'%"></i></span><span class="hv">'+i.v+'</span></li>').join('')+'</ul>';}
 function renderInsights(v){
@@ -995,8 +1322,7 @@ function renderInsights(v){
   // time of day
   const bins=[0,0,0,0,0,0,0,0];crav.forEach(c=>{bins[Math.floor(new Date(c.t).getHours()/3)]++;});
   const bmax=Math.max(1,...bins);const peak=bins.indexOf(Math.max(...bins));
-  const binL=['12a','3a','6a','9a','12p','3p','6p','9p'];
-  const binLong=['12 to 3 AM','3 to 6 AM','6 to 9 AM','9 AM to 12 PM','12 to 3 PM','3 to 6 PM','6 to 9 PM','9 PM to 12 AM'];
+  const binL=BIN_SHORT,binLong=BIN_LONG;
   // HALT
   const hc={h:0,a:0,l:0,t:0};let withHalt=0;crav.forEach(c=>{let any=false;HALT.forEach(x=>{if(c.halt&&c.halt[x.k]){hc[x.k]++;any=true;}});if(any)withHalt++;});
   // patterns
@@ -1009,9 +1335,11 @@ function renderInsights(v){
   if(trigs.length&&crav.length>=5)pats.push({t:'Your most common trigger is '+trigs[0].l.toLowerCase()+'. Add it to the high-risk situations in My plan with a specific exit plan.',s:'larimer'});
   const tableRows=cravPts.filter(p=>p.v!=null).slice(-30).reverse().map(p=>'<tr><td>'+esc(fmtD(parseDk(p.k).getTime(),{weekday:'short',month:'short',day:'numeric'}))+'</td><td>'+p.v+'/10</td><td>'+(checkin(p.k)&&checkin(p.k).mood?esc(MOODS.find(m=>m.v==checkin(p.k).mood).l):'–')+'</td></tr>').join('');
   v.innerHTML=
+  weekHTML()+
   '<div class="stats3"><div class="stat"><b class="num">'+noUse+'<small style="font-size:15px;color:var(--muted)">/'+crav.length+'</small></b><span>cravings passed without use</span></div><div class="stat"><b class="num">'+(drop==null?'–':'−'+drop.toFixed(1))+'</b><span>average drop after riding one out</span></div><div class="stat"><b class="num">'+nCi+'<small style="font-size:15px;color:var(--muted)">/30</small></b><span>check-ins in the last 30 days</span></div></div>'+
   '<div class="card"><div><h3>Craving strength, last 30 days</h3><p class="fine">Strongest craving each day, 0 to 10, from check-ins and craving logs. Tap the chart for a day.</p></div>'+
     (nCrav>=2?lineChart('chC',cravPts,{min:0,max:10,ticks:[0,5,10],label:'Daily craving strength over the last 30 days',unit:'/10'})+'<details class="tbl"><summary>Show as a table</summary><table><thead><tr><th>Day</th><th>Craving</th><th>Mood</th></tr></thead><tbody>'+tableRows+'</tbody></table></details>':'<p class="fine">Log a few check-ins or cravings to see this chart.</p>')+'</div>'+
+  heatHTML()+
   '<div class="card"><div><h3>Mood, last 30 days</h3><p class="fine">From your daily check-ins: 1 is very low, 5 is great.</p></div>'+
     (nMood>=2?lineChart('chM',moodPts,{min:1,max:5,ticks:[1,3,5],label:'Daily mood over the last 30 days',fmt:v2=>MOODS[v2-1].l,tickFmt:t=>t}):'<p class="fine">Mood appears after two check-ins.</p>')+'</div>'+
   (pats.length?'<h2 class="sec-title">Patterns in your entries</h2><div class="card">'+pats.map(p=>'<div class="insight"><div><p>'+esc(p.t)+'</p>'+cite(p.s)+'</div></div>').join('')+'<p class="fine">These are patterns in your own entries, not proof of cause. They’re worth talking through with a counselor.</p></div>':'')+
@@ -1020,7 +1348,7 @@ function renderInsights(v){
     '<p class="cap" id="colCap">Most cravings: '+binLong[peak]+' ('+bins[peak]+')</p><div class="cols" role="img" aria-label="Cravings by time of day">'+bins.map((b,i)=>'<button type="button" data-bin="'+i+'" aria-label="'+binLong[i]+': '+b+' cravings"><i class="'+(i===peak?'':'lo')+'" style="height:'+(b/bmax*100)+'%"></i>'+(i===peak?'<em style="bottom:calc('+(b/bmax*100)+'% + 3px)">'+b+'</em>':'')+'</button>').join('')+'</div><div class="cols-x" aria-hidden="true">'+binL.map(l=>'<span>'+l+'</span>').join('')+'</div>'
     :'<p class="fine">This fills in as you log cravings.</p>')+'</div>'+
   '<div class="card"><div><h3>HALT during cravings</h3><p class="fine">How often each state was present when you logged a craving.</p></div>'+(crav.length?hbars(HALT.map(x=>({l:x.l,v:hc[x.k]}))):'<p class="fine">Nothing logged yet.</p>')+'</div>';
-  wireLine('chC');wireLine('chM');
+  wireLine('chC');wireLine('chM');wireHeat(v);
   const cols=$('.cols',v);if(cols)cols.addEventListener('click',e=>{const b=e.target.closest('[data-bin]');if(!b)return;const i=+b.dataset.bin;$('#colCap').textContent=binLong[i]+': '+bins[i]+(bins[i]===1?' craving':' cravings');});
 }
 
@@ -1030,19 +1358,22 @@ function renderToolkit(v){
   '<button class="feature" data-act="craving" type="button"><canvas class="tide" aria-hidden="true"></canvas><div class="in"><h2>Urge surfing</h2><p>Watch a craving rise, peak and fall without acting on it. A guided timer and breathing pace you through.</p><span class="go">Start riding it out</span></div></button>'+
   '<p class="fine" style="margin-top:-6px">Developed by psychologist Alan Marlatt. In a 2014 randomized trial, mindfulness-based relapse prevention cut drug-use days at 12 months compared with standard programs (Bowen et al., 2014).</p>'+
   '<div class="tools">'+
-    '<button class="tool" data-act="breathe" type="button">'+I.breath+'<b>Slow breathing</b><span>In for 4, out for 6. Calms the body in about three minutes.</span></button>'+
+    '<button class="tool" data-act="breathe" type="button">'+I.breath+'<b>Slow breathing</b><span>Three patterns, with an orb that paces each breath.</span></button>'+
+    '<button class="tool" data-act="sounds" type="button">'+I.music+'<b>Calm sounds</b><span>Ocean, rain or soft tones, made in the app. Works offline.</span></button>'+
     '<button class="tool" data-act="halt" type="button">'+I.halt+'<b>HALT check</b><span>Hungry, angry, lonely or tired? Fix the need underneath.</span></button>'+
     '<button class="tool" data-act="tape" type="button">'+I.tape+'<b>Play the tape forward</b><span>Think past the first hour to tomorrow and next week.</span></button>'+
     '<button class="tool" data-act="delay" type="button">'+I.clock+'<b>Wait 30 minutes</b><span>Most urges pass in 15 to 30. Get busy until then.</span></button>'+
     '<button class="tool" data-act="ground" type="button">'+I.eye+'<b>5-4-3-2-1 grounding</b><span>Use your senses to come back to the present.</span></button>'+
+    '<button class="tool" data-act="videos" type="button">'+I.video+'<b>Videos and guided audio</b><span>Short, free, from NIDA and relapse-prevention researchers.</span></button>'+
     '<button class="tool" data-act="sos" type="button">'+I.people+'<b>Call someone</b><span>Telling someone about an urge takes away some of its power.</span></button>'+
     '<button class="tool wide" data-act="phhelp" type="button">'+I.home+'<div><b>Treatment in the Philippines</b><span>City and barangay programs, DOH rehab centers, PhilHealth, NA meetings, and your rights under RA 9165.</span></div></button>'+
-    '<button class="tool wide" data-act="rewards" type="button">'+I.gift+'<div><b>Milestone rewards</b><span>Rewarding drug-free milestones is the best-supported approach for shabu and other stimulants.</span></div></button>'+
+    '<button class="tool wide" data-act="sexhelp" type="button">'+I.rainbow+'<div><b>Sex and recovery</b><span>For any orientation: compulsive sex or porn use, chemsex on shabu, HIV testing, PrEP and PEP.</span></div></button>'+
+    '<button class="tool wide" data-act="rewards" type="button">'+I.gift+'<div><b>Milestone rewards</b><span>Ebb picks a realistic reward for each milestone. Swap in your own anytime.</span></div></button>'+
     '<button class="tool wide" data-act="rules" type="button">'+I.rules+'<div><b>The five rules of recovery</b><span>Change your life, be honest, ask for help, practice self-care, don’t bend the rules.</span></div></button>'+
     '<button class="tool wide alert" data-act="safety" type="button">'+I.shield+'<div><b>Safety if you use</b><span>Lower tolerance after a break raises overdose risk. Know the steps.</span></div></button>'+
     '<button class="tool wide" data-act="warn" type="button">'+I.pulse+'<div><b>Warning-signs check</b><span>Spot emotional and mental relapse before it becomes physical.</span></div></button>'+
   '</div>'+cite('melemis');
-  makeTide($('.feature canvas',v),t=>({level:.3+Math.sin(t*.4)*.04,amp:1}));
+  makeTide($('.feature canvas',v),t=>({level:.3+Math.sin(t*.4)*.04,amp:1}),{bubbles:true});
 }
 
 /* ---------- Plan ---------- */
@@ -1050,9 +1381,12 @@ function linesHTML(){const ls=S.plan.lines.filter(l=>l.name||l.phone);return '<d
 function renderPlan(v){
   const p=S.plan;const lw=lastWarn();const sl=syncLine();const spend=+p.spend||0;
   const risks=p.risks.filter(r=>r.situation||r.plan);const signs=p.signs.filter(x=>x.text);const mine=p.lines.filter(l=>l.name||l.phone);
-  const nRw=Object.values(p.rewards||{}).filter(Boolean).length;
+  const nRw=Object.values(p.rewards||{}).filter(Boolean).length;const thLabel={system:'Match phone',light:'Light',dark:'Dark'};
   const setrow=(act,label,val)=>'<button type="button" class="setrow" data-act="'+act+'"><div><b>'+esc(label)+'</b><span>'+esc(val)+'</span></div><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>';
+  const parts=planParts();const done=parts.filter(x=>x.done).length;
   v.innerHTML=
+  '<div class="card"><div class="card-h"><h3>Plan strength</h3><span class="fine">'+done+' of '+parts.length+' parts</span></div><div class="segbar" role="img" aria-label="'+done+' of '+parts.length+' parts of your plan are filled in">'+parts.map(x=>'<i class="'+(x.done?'on':'')+'"></i>').join('')+'</div>'+
+    (done<parts.length?'<p class="fine">A full relapse-prevention plan means you have something ready for every hard moment. Still to fill in:</p><div class="todo">'+parts.filter(x=>!x.done).map(x=>'<button type="button" data-act="'+x.act+'">'+I.plus+esc(x.l)+'</button>').join('')+'</div>':'<p class="fine">Every part is filled in. Look it over every few weeks as your life changes.</p>')+cite('larimer')+'</div>'+
   '<div class="card"><div class="card-h"><h3>Why I’m doing this</h3><button class="linkbtn" data-act="edit-reasons">Edit</button></div>'+reasonsHTML()+'</div>'+
   '<div class="card"><div class="card-h"><h3>My people</h3><button class="linkbtn" data-act="edit-contacts">Edit</button></div>'+contactsHTML()+'<p class="fine">Asking for help is one of the five rules of recovery. In a national survey, Filipinos named the household as the most helpful support for people who use drugs.</p>'+cite('ddbsurvey')+'</div>'+
   '<div class="card"><div class="card-h"><h3>My saved numbers</h3><button class="linkbtn" data-act="edit-lines">Edit</button></div>'+(mine.length?linesHTML():'<p class="fine">Save numbers you might need, like your barangay health center, rural health unit, doctor, counselor or rehab center. They also appear under Help now.</p>')+'</div>'+
@@ -1062,12 +1396,18 @@ function renderPlan(v){
     (signs.length?'<ul class="plist">'+signs.map(x=>'<li>'+esc(x.text)+'</li>').join('')+'</ul><p class="fine">These appear as checkboxes in your weekly warning-signs check.</p>':'<p class="fine">What do you notice in yourself before things slide? Staying up late, skipping meals, avoiding calls?</p>')+
     '<button class="btn btn-quiet btn-block" data-act="warn">Do the warning-signs check'+(lw?' · last '+esc(fmtDY(lw.t)):'')+'</button></div>'+
   '<div class="card"><h3>Customize Ebb</h3><p class="fine">Everything here is yours to change.</p><div class="stack" style="gap:8px">'+
-    setrow('prefs','Name and daily spend',(p.name||'No nickname')+' · '+(spend?peso(spend)+' a day':'no amount set'))+
+    setrow('prefs','Name, spend and payday',(p.name||'No nickname')+' · '+(spend?peso(spend)+' a day':'no amount set')+' · '+PAYDAY_L[S.settings.payday])+
     setrow('edit-recovery','Substances and recovery start',(S.profile.substances.join(', ')||'None listed')+' · since '+fmtDY(S.profile.start))+
-    setrow('rewards','Milestone rewards',nRw?nRw+' set':'None set yet')+
+    setrow('rewards','Milestone rewards',nRw?nRw+' of your own, Ebb picks the rest':'Using Ebb’s picks')+
     setrow('edit-triggers','Trigger list',trigList().length+' triggers')+
     setrow('edit-actions','Recovery actions',actList().length+' actions in your check-in')+
     setrow('tape','Play the tape forward',(p.tape.hour||p.tape.tomorrow||p.tape.week)?'Written':'Not written yet')+
+    setrow('edit-music','My calming music',p.music.length?p.music.length+' saved':'Save songs or playlists')+
+  '</div><div class="field"><span class="flabel">Appearance</span>'+segHTML('theme',[{v:'system',l:'Match phone'},{v:'light',l:'Light'},{v:'dark',l:'Dark'}],S.settings.theme)+'</div></div>'+
+  '<div class="card"><h3>Privacy and reminders</h3><div class="stack" style="gap:8px">'+
+    setrow('lock-setup','Passcode lock',lockEnabled()?'On. Ebb locks after a minute away.':'Off')+
+    setrow('reminder','Daily check-in reminder','Adds a discreet event to your calendar')+
+    setrow('summary','Summary for my counselor','Share your last 30 days as text')+
   '</div></div>'+
   '<h2 class="sec-title">Your data</h2>'+
   (APP_BUILD?'<div class="card">'+(NEEDS_INSTALL?'<div class="status wait"><i></i><span>You\u2019re using Ebb in Safari. Install it to your Home Screen so it opens like an app and keeps your entries.</span></div><button class="btn btn-primary btn-block" data-act="install">How to install</button>':'<div class="status '+(LOCAL_OK?'ok':'bad')+'"><i></i><span>'+(LOCAL_OK?'Saved inside the Ebb app on this '+(IS_IOS?'iPhone':'device')+'. Nothing is sent anywhere.':'This browser isn\u2019t keeping your entries. Save a backup file before you close Ebb.')+'</span></div>')+
@@ -1075,7 +1415,7 @@ function renderPlan(v){
     '<p class="fine">Removing Ebb from your Home Screen deletes its entries. Save a backup file every couple of weeks, and restore it if you reinstall or change phones.</p>'+
     '<button class="btn btn-primary btn-block" data-act="backup-file">Save backup file</button>'+
     '<div class="row"><button class="btn btn-quiet" data-act="backup-copy">Copy backup code</button><button class="btn btn-quiet" data-act="backup-restore">Restore</button></div>'+
-    '<button class="btn btn-line btn-block" data-act="wipe" style="color:var(--berry)">Delete all my data</button><p class="fine">Ebb version '+APP_VERSION+'</p></div>':
+    '<button class="btn btn-line btn-block" data-act="wipe" style="color:var(--berry)">Delete all my data</button><p class="fine">Ebb version '+APP_VERSION+' <button class="linkbtn" data-act="whatsnew" style="font-size:14px;padding:0 0 0 6px">What’s new</button></p></div>':
   '<div class="card"><div class="status '+(LOCAL_OK?'ok':'bad')+'"><i></i><span>'+(LOCAL_OK?'Saved in this browser on this device.':'This browser isn’t keeping your entries. Turn on private backup or copy a backup code before you close Ebb.')+'</span></div>'+
     '<div id="syncStatus" class="status '+sl.c+'"><i></i><span>'+esc(sl.t)+'</span></div><div id="syncBtns">'+syncButtons()+'</div>'+
     '<p class="fine">Private backup saves your entries to your own Claude account so they survive a cleared browser and appear on your other devices. Other people who open this page can’t see them.</p>'+
@@ -1084,6 +1424,7 @@ function renderPlan(v){
   '<h2 class="sec-title">Research behind Ebb</h2>'+
   '<div class="card"><ol class="refs">'+Object.keys(SRC).map(k=>'<li><a href="'+SRC[k].u+'" target="_blank" rel="noopener">'+esc(SRC[k].t)+'</a></li>').join('')+'</ol>'+
   '<p class="fine">Ebb supports recovery. It doesn’t replace treatment, medication, medical or legal advice. If you or someone else is in danger, call 911.</p></div>';
+  bindChips(v,'theme',t=>{if(!t)return;S.settings.theme=t;saveLocal();applyTheme();toast(t==='system'?'Ebb now matches your phone.':t==='dark'?'Dark mode on.':'Light mode on.');});
 }
 
 /* ============ Flows ============ */
@@ -1121,7 +1462,7 @@ function openCraving(){
   const C={id:uid(),t:Date.now(),i:6,trig:[],halt:{h:false,a:false,l:false,t:false},dur:15};
   let raf=0,tmr=0,paused=false,elapsed=0,lastT=0,tide=null;
   openSheet(b=>stepA(b),{label:'Ride out a craving',full:true});
-  Sheet.cleanup=()=>{cancelAnimationFrame(raf);clearInterval(tmr);if(tide)tide.destroy();};
+  Sheet.cleanup=()=>{cancelAnimationFrame(raf);clearInterval(tmr);if(tide)tide.destroy();Snd.stop();};
   function stepA(b){
     b.innerHTML='<div><p class="step">Step 1 of 3</p><h2>Name the craving</h2></div><p class="lede">Noticing it is the first step. You don’t have to act on it or fight it.</p>'+
     sliderHTML('crI','How strong is it right now?',C.i,'None','Intense')+
@@ -1136,11 +1477,18 @@ function openCraving(){
   function stepB(b){
     const tape=S.plan.tape;const hasTape=tape.hour||tape.tomorrow||tape.week;
     b.innerHTML='<div class="surf"><canvas class="tide" aria-hidden="true"></canvas><div class="in"><p class="step">Step 2 of 3 · Riding it out</p><p class="clock" id="sClock" aria-live="off">'+C.dur+':00</p><p class="phase" id="sPhase" aria-live="polite">Notice the urge. You don’t have to act on it or fight it.</p><p class="breath" id="sBreath" aria-hidden="true">Breathe in<small>4</small></p></div></div>'+
-    '<div class="row"><button class="btn btn-quiet" id="sPause">Pause</button><button class="btn btn-quiet" id="sPlus">+5 min</button></div>'+
+    '<div class="wavetrack" aria-hidden="true"><svg viewBox="0 0 300 56"><path class="wv" d="'+WAVE_D+'"/><path class="wd" id="sWd" d="'+WAVE_D+'" pathLength="100" stroke-dasharray="100" stroke-dashoffset="100"/><circle id="sDot" r="6" cx="0" cy="'+wavePt(0)[1]+'"/></svg><div class="lb"><span style="left:0">Rising</span><span style="left:35%;transform:translateX(-50%)">Peak</span><span style="right:0">Easing</span></div></div>'+
+    '<div class="row"><button class="btn btn-quiet" id="sPause">Pause</button><button class="btn btn-quiet" id="sPlus">+5 min</button><button class="btn btn-quiet soundbtn" id="sSnd" aria-pressed="'+(!!S.settings.sound)+'" aria-label="Ocean sound">'+I.sound+'</button></div>'+
     '<button class="btn btn-primary btn-block" id="sDone">It’s eased. Finish</button>'+
+    needsHTML(C.halt)+
     '<div class="card soft"><h3>Play the tape forward</h3>'+(hasTape?'<ul class="plist">'+(tape.hour?'<li><small>In the next hour</small>'+esc(tape.hour)+'</li>':'')+(tape.tomorrow?'<li><small>Tomorrow</small>'+esc(tape.tomorrow)+'</li>':'')+(tape.week?'<li><small>Next week</small>'+esc(tape.week)+'</li>':'')+(tape.sober?'<li><small>If I don’t use</small>'+esc(tape.sober)+'</li>':'')+'</ul>':'<p>Picture past the first few minutes. How does tonight end if you use? How do you feel tomorrow morning? Next week?</p>')+'</div>'+
+    exitPlansHTML()+
     '<div class="card soft"><h3>My reasons</h3>'+reasonsHTML()+'</div>'+
     '<div class="card soft"><h3>Call someone</h3>'+contactsHTML()+hotlinesInline()+'</div>';
+    const sb=$('#sSnd',b);const setSnd=on=>{sb.setAttribute('aria-pressed',String(on));if(on){if(!Snd.play('ocean')){sb.setAttribute('aria-pressed','false');toast('Sound isn’t available on this device.');}}else Snd.stop();};
+    if(S.settings.sound)setSnd(true);
+    sb.onclick=()=>{const on=sb.getAttribute('aria-pressed')!=='true';S.settings.sound=on;saveLocal();setSnd(on);};
+    const wd=$('#sWd',b),dot=$('#sDot',b);
     let total=C.dur*60;const cl=$('#sClock',b),ph=$('#sPhase',b),br=$('#sBreath',b);let lastPhase='';
     const PH=[[.15,'Notice the urge. You don’t have to act on it or fight it.'],[.35,'Where do you feel it? Chest, stomach, hands, mouth? Breathe into that spot.'],[.6,'Urges rise like a wave, peak, then fall. Ride the crest with your breath.'],[.85,'Notice any change in strength, even a small one.'],[1.01,'It’s passing. You’re riding it out.']];
     lastT=performance.now();
@@ -1149,13 +1497,14 @@ function openCraving(){
     const upd=()=>{const now=performance.now();if(!paused)elapsed+=(now-lastT)/1000;lastT=now;
       const left=Math.max(0,total-elapsed);cl.textContent=Math.floor(left/60)+':'+pad(Math.floor(left%60));
       const f=elapsed/total;const p=(PH.find(x=>f<x[0])||PH[PH.length-1])[1];if(p!==lastPhase){ph.textContent=p;lastPhase=p;}
+      const fc=clamp(f,0,1);wd.setAttribute('stroke-dashoffset',String(100-fc*100));const wp=wavePt(fc);dot.setAttribute('cx',wp[0]);dot.setAttribute('cy',wp[1]);
       const cyc=elapsed%10;br.innerHTML=paused?'Paused':(cyc<4?'Breathe in<small>'+(4-Math.floor(cyc))+'</small>':'Breathe out<small>'+(6-Math.floor(cyc-4))+'</small>');
       if(left<=0){clearInterval(tmr);finish(true);}};
     tmr=setInterval(upd,250);
     $('#sPause',b).onclick=e=>{paused=!paused;e.currentTarget.textContent=paused?'Resume':'Pause';};
     $('#sPlus',b).onclick=()=>{total+=300;};
     $('#sDone',b).onclick=()=>finish(false);
-    function finish(timeUp){clearInterval(tmr);if(tide){tide.destroy();tide=null;}C.mins=Math.max(1,Math.round(elapsed/60));stepC(b,timeUp);sheetScrollTop();}
+    function finish(timeUp){clearInterval(tmr);Snd.stop();if(tide){tide.destroy();tide=null;}C.mins=Math.max(1,Math.round(elapsed/60));stepC(b,timeUp);sheetScrollTop();}
   }
   function stepC(b,timeUp){
     C.after=Math.max(0,C.i-3);C.out='passed';
@@ -1169,7 +1518,7 @@ function openCraving(){
       C.note=$('#crN',b).value.trim();C.u=Date.now();S.cravings[C.id]=C;save();closeSheet(true);render();
       if(C.out==='used')openLapse({t:Date.now(),trig:C.trig});
       else if(C.out==='strong'){openSOS();toast('Craving saved. Reach out now.');}
-      else toast('Saved. You rode out a '+C.i+'/10 craving.');
+      else{toast('Saved. You rode out a '+C.i+'/10 craving.');buzz(15);}
     };
   }
 }
@@ -1278,37 +1627,61 @@ function openPHHelp(){
   },{label:'Treatment in the Philippines'});
 }
 function openRewards(){
-  const R=Object.assign({},S.plan.rewards||{});const s=stats();
+  const R=Object.assign({},S.plan.rewards||{});const s=stats();const spend=+S.plan.spend||0;
   openSheet(b=>{
-    b.innerHTML='<div><p class="step">Something to look forward to</p><h2>Milestone rewards</h2></div><p class="lede">Pick a healthy reward for each milestone, like a family meal, new rubber shoes or a trip. The money you’re not spending can pay for it.</p>'+
-    '<div class="note-box"><p>Contingency management, which rewards staying drug-free, has the strongest evidence of any treatment for stimulants like shabu. Clinic programs confirm abstinence with drug tests. Planning your own rewards borrows the idea.</p>'+cite('tip33')+'</div>'+
-    MILES.map(m=>{const got=s.streakMs>=m.h*HOUR;return '<div class="field"><label for="rw'+m.h+'">'+m.l+(got?' (reached this stretch)':'')+'</label><input type="text" id="rw'+m.h+'" value="'+esc(R[m.h]||'')+'" placeholder="Reward for '+m.l+'"></div>';}).join('')+
-    '<div class="actions"><button class="btn btn-primary btn-block" id="rwS">Save rewards</button></div>';
-    $('#rwS',b).onclick=()=>{const o={};MILES.forEach(m=>{const v=$('#rw'+m.h,b).value.trim().slice(0,120);if(v)o[m.h]=v;});S.plan.rewards=o;touchCore();save();closeSheet();render();toast('Rewards saved.');};
+    b.innerHTML='<div><p class="step">Something to look forward to</p><h2>Milestone rewards</h2></div><p class="lede">Ebb has picked a reward for every milestone, starting small and growing as your stretch does. Keep Ebb’s pick, tap another idea, or write your own.</p>'+
+    (spend?'<div class="note-box"><p>You’ve kept about <b>'+peso(s.clean*spend)+'</b> so far by not using. That money can pay for these.</p></div>':'')+
+    '<div class="note-box"><p>Contingency management, which rewards staying drug-free, has the strongest evidence of any treatment for stimulants like shabu. Clinic programs confirm abstinence with drug tests. Planning your own rewards borrows the idea.</p>'+cite('tip33')+'<p class="fine">Prices are rough guides. Skip rewards that involve alcohol or old using places, and pay by card or GCash if cash is a trigger for you.</p></div>'+
+    MILES.map(m=>{const got=s.streakMs>=m.h*HOUR;const picks=REWARD_PICKS[m.h]||[];const own=R[m.h]||'';const sel=own?picks.indexOf(own):0;
+      return '<div class="field"><span class="flabel" id="rwl'+m.h+'">'+m.l+(got?' (reached this stretch)':'')+'</span><div class="chips" role="group" aria-labelledby="rwl'+m.h+'">'+picks.map((x,i)=>'<button type="button" class="chip" data-fill="rw'+m.h+'" aria-pressed="'+(i===sel)+'" style="font-size:14px;min-height:36px;padding:7px 12px">'+(i===0?'<b>Ebb’s pick:</b> ':'')+esc(x)+'</button>').join('')+'</div><label class="sr" for="rw'+m.h+'">Your own reward for '+m.l+'</label><input type="text" id="rw'+m.h+'" value="'+esc(sel>0?own:(sel<0?own:''))+'" placeholder="Or write your own"></div>';}).join('')+
+    '<div class="actions"><button class="btn btn-primary btn-block" id="rwS">Save rewards</button><button class="btn btn-line btn-block" id="rwR">Go back to Ebb’s picks</button></div>';
+    const pickOf=c=>c.textContent.replace(/^Ebb’s pick: /,'');
+    b.addEventListener('click',e=>{const c=e.target.closest('[data-fill]');if(!c)return;const inp=$('#'+c.dataset.fill,b);inp.value=c.previousElementSibling?pickOf(c):'';$$('[data-fill="'+c.dataset.fill+'"]',b).forEach(x=>x.setAttribute('aria-pressed',String(x===c)));});
+    b.addEventListener('input',e=>{if(e.target.id&&e.target.id.indexOf('rw')===0){const f=e.target.id;$$('[data-fill="'+f+'"]',b).forEach((x,i)=>x.setAttribute('aria-pressed',String(!e.target.value.trim()&&i===0)));}});
+    $('#rwS',b).onclick=()=>{const o={};MILES.forEach(m=>{const v=$('#rw'+m.h,b).value.trim().slice(0,120);if(v&&v!==(REWARD_PICKS[m.h]||[])[0])o[m.h]=v;});S.plan.rewards=o;touchCore();save();closeSheet();render();toast('Rewards saved.');};
+    $('#rwR',b).onclick=()=>{S.plan.rewards={};touchCore();save();closeSheet();render();toast('Using Ebb’s picks.');};
   },{label:'Milestone rewards'});
 }
 function openPrefs(){
   openSheet(b=>{
-    b.innerHTML='<h2>Name and daily spend</h2><div class="field"><label for="pN">What should Ebb call you?</label><input type="text" id="pN" value="'+esc(S.plan.name||'')+'" placeholder="Optional nickname" autocomplete="nickname"></div>'+
+    b.innerHTML='<h2>Name, spend and payday</h2><div class="field"><label for="pN">What should Ebb call you?</label><input type="text" id="pN" value="'+esc(S.plan.name||'')+'" placeholder="Optional nickname" autocomplete="nickname"></div>'+
     '<div class="field"><label for="pS">About how much did you spend on using each day? (₱)</label><input type="text" inputmode="decimal" id="pS" value="'+(S.plan.spend||'')+'" placeholder="For example: 300"><p class="fine">Used only to show the money you keep. A rough guess is fine. You can include related costs like transport or drinks.</p></div>'+
+    '<div class="field"><span class="flabel">Payday heads-up</span>'+segHTML('pay',[{v:'semi',l:'15th and 30th'},{v:'fri',l:'Fridays'},{v:'off',l:'Off'}],S.settings.payday)+'<p class="fine">Ebb shows a reminder on payday and the day before, with your payday plan if you have one.</p></div>'+
     '<div class="actions"><button class="btn btn-primary btn-block" id="pSave">Save</button></div>';
-    $('#pSave',b).onclick=()=>{S.plan.name=$('#pN',b).value.trim().slice(0,40);const v=parseFloat(String($('#pS',b).value).replace(/[^\d.]/g,''));S.plan.spend=isNaN(v)?0:clamp(v,0,1e6);touchCore();save();closeSheet();render();toast('Saved.');};
-  },{label:'Name and daily spend'});
+    let pay=S.settings.payday;bindChips(b,'pay',v=>{if(v)pay=v;});
+    $('#pSave',b).onclick=()=>{S.settings.payday=pay;S.plan.name=$('#pN',b).value.trim().slice(0,40);const v=parseFloat(String($('#pS',b).value).replace(/[^\d.]/g,''));S.plan.spend=isNaN(v)?0:clamp(v,0,1e6);touchCore();save();closeSheet();render();toast('Saved.');};
+  },{label:'Name, spend and payday'});
 }
+const BREATH={calm:{l:'Calm',d:'In for 4, out for 6. A longer out-breath helps your body settle.',seq:[['in',4],['out',6]]},box:{l:'Box',d:'In 4, hold 4, out 4, hold 4. Even and steady.',seq:[['in',4],['hold',4],['out',4],['rest',4]]},relax:{l:'4-7-8',d:'In 4, hold 7, out 8. Slower, for winding down before sleep.',seq:[['in',4],['hold',7],['out',8]]}};
+const BWORD={in:'Breathe in',hold:'Hold',out:'Breathe out',rest:'Hold'};
 function openBreathe(){
-  let tmr=0,el=0,total=180,on=true,st0=0;
+  let pat=BREATH[S.settings.breath]?S.settings.breath:'calm';
+  let tmr=0,el=0,off=0,total=180,on=true,counted=false,phase='',st0=0;
   openSheet(b=>{
-    b.innerHTML='<div><p class="step">Three minutes</p><h2>Slow breathing</h2></div><p class="lede">Breathe in through your nose for 4, out slowly for 6. A longer out-breath helps your body settle.</p>'+
-    '<div class="bcircle-wrap"><div class="bcircle" id="bc"><span id="bt">Ready</span></div></div><p class="bnum num" id="bn" style="text-align:center;font-family:var(--font-display)">3:00</p>'+
-    '<div class="row"><button class="btn btn-quiet" id="bP">Pause</button><button class="btn btn-primary" data-act="sheet-close">Finish</button></div>'+cite('melemis');
-    const bc=$('#bc',b),bt=$('#bt',b),bn=$('#bn',b);let phase='';
-    const step=()=>{if(on)el+=.25;const cyc=el%10;const p=cyc<4?'in':'out';if(p!==phase){phase=p;bc.style.transitionDuration=(p==='in'?4:6)+'s';bc.classList.toggle('big',p==='in');}
-      bt.textContent=(p==='in'?'In ':'Out ')+(p==='in'?4-Math.floor(cyc):6-Math.floor(cyc-4));const left=Math.max(0,total-el);bn.textContent=Math.floor(left/60)+':'+pad(Math.floor(left%60));
-      if(left<=0){clearInterval(tmr);bt.textContent='Done';bc.classList.remove('big');}};
-    st0=setTimeout(()=>{tmr=setInterval(step,250);step();},400);
-    $('#bP',b).onclick=e=>{on=!on;e.currentTarget.textContent=on?'Pause':'Resume';};
+    b.innerHTML='<div><p class="step">Three minutes</p><h2>Slow breathing</h2></div>'+segHTML('bpat',Object.keys(BREATH).map(k=>({v:k,l:BREATH[k].l})),pat)+'<p class="lede" id="bDesc">'+esc(BREATH[pat].d)+'</p>'+
+    '<div class="orb-wrap"><div class="orb" id="orb"><span class="halo"></span><span class="glow"></span><svg class="pr" viewBox="0 0 100 100" aria-hidden="true"><circle class="tr" cx="50" cy="50" r="48"/><circle class="fl" id="orbP" cx="50" cy="50" r="48" pathLength="100" stroke-dasharray="100" stroke-dashoffset="100"/></svg><p class="lbl"><span id="bt">Ready</span><small id="bc"></small></p></div></div>'+
+    '<span class="sr" id="bLive" aria-live="polite"></span>'+
+    '<p class="bnum" id="bn" style="text-align:center;font-family:var(--font-display)">3:00</p>'+
+    '<div class="row"><button class="btn btn-quiet" id="bP">Pause</button><button class="btn btn-quiet soundbtn" id="bS" aria-pressed="false">'+I.sound+'Ocean</button></div><button class="btn btn-primary btn-block" id="bF">Finish</button>'+cite('melemis');
+    const orb=$('#orb',b),bt=$('#bt',b),bc=$('#bc',b),bn=$('#bn',b),pr=$('#orbP',b),live=$('#bLive',b),sb=$('#bS',b);
+    const setSnd=v=>{sb.setAttribute('aria-pressed',String(v));if(v){if(!Snd.play('ocean'))sb.setAttribute('aria-pressed','false');}else Snd.stop();};
+    if(S.settings.sound)setSnd(true);
+    sb.onclick=()=>{const v=sb.getAttribute('aria-pressed')!=='true';S.settings.sound=v;saveLocal();setSnd(v);};
+    bindChips(b,'bpat',v=>{if(!v)return;pat=v;S.settings.breath=v;saveLocal();$('#bDesc',b).textContent=BREATH[v].d;off=el;phase='';});
+    const step=()=>{
+      if(on)el+=.1;
+      const seq=BREATH[pat].seq,L=seq.reduce((a,x)=>a+x[1],0);let c=(el-off)%L,i=0;while(c>=seq[i][1]){c-=seq[i][1];i++;}
+      const [kind,len]=seq[i];const key=pat+i+Math.floor((el-off)/L);
+      if(key!==phase){phase=key;orb.style.setProperty('--d',len+'s');if(kind==='in')orb.style.setProperty('--s','1');if(kind==='out')orb.style.setProperty('--s','.56');live.textContent=BWORD[kind];Snd.breath(kind,len);}
+      bt.textContent=on?BWORD[kind]:'Paused';bc.textContent=on?String(Math.ceil(len-c)):'';pr.setAttribute('stroke-dashoffset',String(100-c/len*100));
+      const left=Math.max(0,total-el);bn.textContent=Math.floor(left/60)+':'+pad(Math.floor(left%60));
+      if(left<=0){clearInterval(tmr);bt.textContent='Done';bc.textContent='Notice how you feel';orb.style.setProperty('--s','.7');done();}};
+    const done=()=>{if(counted)return;counted=true;S.tools.breathe=(S.tools.breathe||0)+1;save();buzz(15);};
+    st0=setTimeout(()=>{tmr=setInterval(step,100);step();},400);
+    $('#bP',b).onclick=e=>{on=!on;e.currentTarget.textContent=on?'Pause':'Resume';if(!on)orb.style.setProperty('--d','.6s');};
+    $('#bF',b).onclick=()=>{if(el>=60)done();ACTS['sheet-close']();};
   },{label:'Slow breathing',full:true});
-  Sheet.cleanup=()=>{clearTimeout(st0);clearInterval(tmr);};
+  Sheet.cleanup=()=>{clearTimeout(st0);clearInterval(tmr);Snd.stop();};
 }
 function openGround(){
   const steps=[['5','things you can see','Look around slowly. Name them out loud or in your head.'],['4','things you can feel','Your feet on the floor, the chair, your clothes, the air.'],['3','things you can hear','Near and far. Traffic, a fan, your own breathing.'],['2','things you can smell','Or two smells you like, if nothing’s around.'],['1','thing you can taste','Or one kind thing you can say to yourself.']];
@@ -1321,7 +1694,7 @@ function openGround(){
   },{label:'Grounding'});
 }
 function openHaltTool(){
-  const tips={h:['Eat something with protein, and drink some water.','Plan regular meals so hunger doesn’t sneak up.'],a:['Name what’s under the anger: hurt, fear, embarrassment?','Move your body, write it out, or talk to someone before you act.'],l:['Message or call someone from your list.','Go to a meeting or anywhere safe with people around.'],t:['Rest if you can. If not, take a 10-minute break with water and fresh air.','Protect tonight’s sleep: screens off, same bedtime.']};
+  const tips=HALT_TIPS;
   openSheet(b=>{
     b.innerHTML='<div><p class="step">Thirty seconds</p><h2>HALT check</h2></div><p class="lede">Before you decide anything, ask: am I hungry, angry, lonely or tired? Each one makes urges harder to resist.</p>'+chipsHTML('halt',HALT,[])+'<div id="hOut" class="stack"></div>'+cite('kretchman');
     bindChips(b,'halt',vals=>{$('#hOut',b).innerHTML=vals.map(k=>'<div class="note-box"><h3>'+HALT.find(x=>x.k===k).l+'</h3><ul style="margin:0;padding-left:20px">'+tips[k].map(t=>'<li>'+esc(t)+'</li>').join('')+'</ul></div>').join('')||'';});
@@ -1433,7 +1806,7 @@ function openRecoveryEditor(){
 }
 
 /* ============ Backup code ============ */
-function backupCode(){return JSON.stringify({app:'ebb',v:1,at:Date.now(),data:Object.assign({},S,{settings:Object.assign({},S.settings,{sync:false})})});}
+function backupCode(){return JSON.stringify({app:'ebb',v:1,at:Date.now(),data:Object.assign({},S,{settings:Object.assign({},S.settings,{sync:false,lock:null})})});}
 function markBackup(msg){S.settings.lastBackup=Date.now();saveLocal();toast(msg||'Backup saved. Keep it somewhere private.');}
 async function backupFile(){
   const code=backupCode();const name='ebb-backup-'+dk(Date.now())+'.json';
@@ -1469,7 +1842,7 @@ function backupRestore(){
       if(!obj||obj.app!=='ebb'||!obj.data||!obj.data.profile){$('#rM',b).textContent='That code isn’t a valid Ebb backup. Check that you copied all of it.';return;}
       const keepSync=S.settings.sync;const nd=normalize(obj.data);const now=Date.now();
       ['checkins','cravings','lapses','warn'].forEach(k=>Object.values(nd[k]).forEach(x=>{if(x)x.u=now;}));
-      nd.coreU=now;nd.demo=false;nd.settings.sync=keepSync&&!S.demo;S=nd;Cloud.hash={};save();closeSheet();hideOnboarding();render();toast('Backup restored.');
+      nd.coreU=now;nd.demo=false;nd.settings.sync=keepSync&&!S.demo;nd.settings.lock=S.settings.lock||null;S=nd;applyTheme();Cloud.hash={};save();closeSheet();hideOnboarding();render();toast('Backup restored.');
     };
   },{label:'Restore'});
 }
@@ -1514,7 +1887,7 @@ function makeDemo(){
   [6,13,20,27,34,41,48,55,62].forEach(d=>{if(d>total)return;const t=parseDk(addDays(startK,d)).getTime()+19*HOUR;let e=[],m=[];
     if(d===27){e=['iso','sleep','mood'];m=['glam','bargain'];}else if(d===20){e=['sleep','nofun','bottle'];}else if(d===34){e=['bottle','mood'];m=['crave'];}else if(d<20){e=R()<.5?['sleep']:[];}else{e=R()<.4?['nofun']:[];}
     const id='w'+d;st.warn[id]={id,t,e,m,p:[],stage:stageOf(e.length,m.length,false),u:now};});
-  st.settings.lastMile=start+':0';
+  st.settings.lastMile=start+':0';st.tools={breathe:4};
   return st;
 }
 
@@ -1529,7 +1902,7 @@ function hideOnboarding(){const el=$('#onboard');el.hidden=true;el.innerHTML='';
 function renderOB(){
   const el=$('#onboard');if(!OB)return;const st=OB.step;
   if(st===0){
-    el.innerHTML='<div class="ob ob-welcome"><canvas class="tide" aria-hidden="true"></canvas><div class="in">'+
+    el.innerHTML='<div class="ob ob-welcome" data-sky="'+skyPhase()+'"><canvas class="tide" aria-hidden="true"></canvas><div class="in">'+
     '<div class="wordmark">'+$('.topbar .wordmark svg').outerHTML+'<span>Ebb</span></div>'+
     '<h1>Every craving passes.</h1><p class="tl" lang="fil">Lilipas din ito.</p>'+
     '<p class="lede">A private recovery tracker built on relapse-prevention research and made for the Philippines. Ride out cravings with a guided timer, catch warning signs early, and keep every substance-free day, even after a slip.</p>'+
@@ -1539,7 +1912,7 @@ function renderOB(){
     '<button class="btn btn-line btn-block" data-ob="demo" style="background:var(--surface)">Explore with sample data</button>'+
     '<button class="linkbtn" data-ob="code" style="align-self:center">Restore from a backup code</button>'+
     '<p class="fine">Your entries stay on this device unless you choose private backup. Ebb supports treatment. It doesn’t replace it.</p></div></div></div>';
-    makeTide($('canvas',el),tt=>({level:.34+Math.sin(tt*.35)*.03,amp:1.1}));
+    makeTide($('canvas',el),tt=>({level:.34+Math.sin(tt*.35)*.03,amp:1.1}),{sky:true,bubbles:true,rise:true});
   }else{
     const head='<div class="ob-head"><button class="btn-icon" data-ob="back" aria-label="Back"><svg class="i" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button><div class="ob-prog" aria-hidden="true">'+[1,2,3,4,5].map(i=>'<i class="'+(i<=st?'on':'')+'"></i>').join('')+'</div><span class="step">Step '+st+' of 5</span></div>';
     let body='';
@@ -1598,6 +1971,383 @@ $('#onboard').addEventListener('click',async e=>{
   }
 });
 
+/* ============ v2: helpers ============ */
+const BIN_SHORT=['12a','3a','6a','9a','12p','3p','6p','9p'];
+const BIN_LONG=['12 to 3 AM','3 to 6 AM','6 to 9 AM','9 AM to 12 PM','12 to 3 PM','3 to 6 PM','6 to 9 PM','9 PM to 12 AM'];
+const HALT_TIPS={h:['Eat something with protein, and drink some water.','Plan regular meals so hunger doesn’t sneak up.'],a:['Name what’s under the anger: hurt, fear, embarrassment?','Move your body, write it out, or talk to someone before you act.'],l:['Message or call someone from your list.','Go to a meeting or anywhere safe with people around.'],t:['Rest if you can. If not, take a 10-minute break with water and fresh air.','Protect tonight’s sleep: screens off, same bedtime.']};
+const BEHAV=/Compulsive sex|porn/i;
+function onlyBehaviors(){const s=(S&&S.profile&&S.profile.substances)||[];return s.length>0&&s.every(x=>BEHAV.test(x));}
+function freeLabel(){return onlyBehaviors()?'On track for':'Substance-free for';}
+function freeWord(){return onlyBehaviors()?'on track':'substance-free';}
+const buzz=ms=>{try{if(navigator.vibrate)navigator.vibrate(ms||12);}catch(e){}};
+let PENDING_CELEB=null;
+function busyUI(){return $('#sheetRoot').classList.contains('open')||Lock.on||!$('#onboard').hidden;}
+const WAVE_CURVE=f=>f<.35?.62+.38*(f/.35):1-.72*((f-.35)/.65);
+const wavePt=f=>[+(f*300).toFixed(1),+(50-WAVE_CURVE(f)*44).toFixed(1)];
+const WAVE_D=(()=>{let d='';for(let i=0;i<=50;i++){const p=wavePt(i/50);d+=(i?'L':'M')+p[0]+','+p[1];}return d;})();
+function needsHTML(h){const ks=HALT.filter(x=>h&&h[x.k]);if(!ks.length)return '';return '<div class="card soft"><h3>What you need right now</h3>'+ks.map(x=>'<div><b>'+esc(x.l)+'</b><ul style="margin:4px 0 0;padding-left:20px;display:flex;flex-direction:column;gap:4px">'+HALT_TIPS[x.k].map(t=>'<li>'+esc(t)+'</li>').join('')+'</ul></div>').join('')+cite('kretchman')+'</div>';}
+function exitPlansHTML(){const rs=S.plan.risks.filter(r=>r.situation||r.plan);if(!rs.length)return '';return '<div class="card soft"><h3>My exit plans</h3><ul class="plist">'+rs.map(r=>'<li><small>When</small>'+esc(r.situation)+'<small style="margin-top:8px">I will</small>'+esc(r.plan)+'</li>').join('')+'</ul></div>';}
+function ciStreak(){let k=dk(Date.now());if(!checkin(k))k=addDays(k,-1);let n=0;while(checkin(k)&&n<4000){n++;k=addDays(k,-1);}return n;}
+function bestCiStreak(){const ks=live(S.checkins).map(c=>c.d).filter(Boolean).sort();let best=0,run=0,prev=null;ks.forEach(k=>{run=prev&&addDays(prev,1)===k?run+1:1;if(run>best)best=run;prev=k;});return best;}
+function dayCrav(k){const ci=checkin(k);const v=[];if(ci&&ci.craving!=null)v.push(+ci.craving);dayCravings(k).forEach(c=>v.push(+c.i));return v.length?Math.max(...v):null;}
+const PAYDAY_L={semi:'payday 15th and 30th',fri:'payday Fridays',off:'no payday heads-up'};
+function isPayday(d,mode){if(mode==='fri')return d.getDay()===5;if(mode!=='semi')return false;const last=new Date(d.getFullYear(),d.getMonth()+1,0).getDate();return d.getDate()===15||d.getDate()===Math.min(30,last);}
+function paydayInfo(){const mode=S.settings.payday;if(mode==='off')return null;const d=new Date();const t=new Date(d.getFullYear(),d.getMonth(),d.getDate()+1);return isPayday(d,mode)?'today':isPayday(t,mode)?'tomorrow':null;}
+function moneyPlan(){return S.plan.risks.find(r=>(r.situation||r.plan)&&/sweldo|suweldo|sahod|payday|pay day|salary|cash|money|pera|gcash|maya|allowance|padala|bonus|13th/i.test((r.situation||'')+' '+(r.plan||'')));}
+function peakHeadsUp(){
+  const crav=live(S.cravings);if(crav.length<8)return null;
+  const bins=Array(8).fill(0);crav.forEach(c=>bins[Math.floor(new Date(c.t).getHours()/3)]++);
+  const mx=Math.max(...bins),i=bins.indexOf(mx),share=mx/crav.length;if(share<.25)return null;
+  const h=new Date().getHours(),st=i*3,inWin=h>=st&&h<st+3,ahead=(st-h+24)%24;
+  if(!inWin&&!(ahead>0&&ahead<=3))return null;
+  return {now:inWin,text:Math.round(share*100)+'% of the cravings you’ve logged came from '+BIN_LONG[i]+'. Plan something for '+(inWin?'right now':'that time')+': a call, a walk, a meal or a meeting.'};
+}
+function planParts(){const p=S.plan;return [
+  {l:'Reasons',done:p.reasons.some(r=>r.text),act:'edit-reasons'},
+  {l:'People to call',done:p.contacts.some(c=>c.name||c.phone),act:'edit-contacts'},
+  {l:'High-risk situations',done:p.risks.some(r=>r.situation||r.plan),act:'edit-risks'},
+  {l:'Early warning signs',done:p.signs.some(x=>x.text),act:'edit-signs'},
+  {l:'Tape played forward',done:!!(p.tape.hour||p.tape.tomorrow||p.tape.week),act:'tape'},
+  {l:'Local numbers',done:p.lines.some(l=>l.name||l.phone),act:'edit-lines'},
+  {l:'Calming music',done:p.music.some(m=>m.url),act:'edit-music'}];}
+function badgeList(){
+  const rode=live(S.cravings).filter(c=>c.out==='passed').length,best=bestCiStreak(),wn=live(S.warn).length,br=S.tools.breathe||0,pd=planParts().every(x=>x.done);
+  return [
+    {i:I.wave,l:'First wave',d:'Ride out a craving',got:rode>=1},
+    {i:I.wave,l:'Wave rider',d:'Ride out 10 cravings',got:rode>=10,p:Math.min(rode,10)+' of 10'},
+    {i:I.wave,l:'Tide turner',d:'Ride out 50 cravings',got:rode>=50,p:Math.min(rode,50)+' of 50'},
+    {i:I.list,l:'Showing up',d:'3 check-ins in a row',got:best>=3},
+    {i:I.list,l:'Full week',d:'7 check-ins in a row',got:best>=7,p:Math.min(best,7)+' of 7'},
+    {i:I.list,l:'Steady habit',d:'30 check-ins in a row',got:best>=30,p:Math.min(best,30)+' of 30'},
+    {i:I.pulse,l:'Early warning',d:'4 warning-signs checks',got:wn>=4,p:Math.min(wn,4)+' of 4'},
+    {i:I.breath,l:'Calm breath',d:'3 breathing sessions',got:br>=3,p:Math.min(br,3)+' of 3'},
+    {i:I.rules,l:'Ready plan',d:'Every plan part filled in',got:pd}];
+}
+function badgesHTML(){const B=badgeList();const n=B.filter(b=>b.got).length;
+  return '<div class="card-h" style="margin:10px 2px -4px"><h2 class="sec-title" style="margin:0">Skills you’ve built</h2><span class="fine">'+n+' of '+B.length+'</span></div><div class="card"><div class="badges">'+B.map(b=>'<div class="badge'+(b.got?' got':'')+'"><span class="md" aria-hidden="true">'+b.i+'</span><b>'+esc(b.l)+'</b><span>'+esc(!b.got&&b.p?b.d+', '+b.p:b.d)+'</span><span class="sr">'+(b.got?'Earned.':'Not earned yet.')+'</span></div>').join('')+'</div></div>';}
+function weekStats(endK){const ks=[];for(let i=6;i>=0;i--)ks.push(addDays(endK,-i));const startK=dk(S.profile.start);const inR=ks.filter(k=>k>=startK);
+  const cis=inR.map(checkin).filter(Boolean),cr=inR.map(dayCrav).filter(v=>v!=null),md=cis.filter(c=>c.mood).map(c=>+c.mood),sl=cis.filter(c=>c.sleep!=null).map(c=>+c.sleep);
+  return {days:inR.length,n:cis.length,crav:cr.length?avg(cr):null,mood:md.length?avg(md):null,sleep:sl.length?avg(sl):null};}
+function weekHTML(){
+  const today=dk(Date.now());const a=weekStats(today),b=weekStats(addDays(today,-7));if(!a.days)return '';
+  const f1=v=>v==null?'–':v.toFixed(1);
+  const delta=(x,y,unit,dp)=>{if(x==null)return '<em>'+I.flat+'No entries yet</em>';if(y==null)return '<em>'+I.flat+'Nothing to compare yet</em>';const d=x-y;if(Math.abs(d)<(dp?.05:.5))return '<em>'+I.flat+'Same as last week</em>';return '<em>'+(d<0?I.down:I.up)+(d<0?'Down ':'Up ')+Math.abs(d).toFixed(dp)+unit+' from last week</em>';};
+  return '<div class="card"><div><h3>This week</h3><p class="fine">Your last 7 days compared with the 7 before.</p></div><div class="wk">'+
+    '<div><b>'+f1(a.crav)+'<small>/10</small></b><span>Average craving</span>'+delta(a.crav,b.crav,'',1)+'</div>'+
+    '<div><b>'+(a.mood==null?'–':esc(MOODS[clamp(Math.round(a.mood),1,5)-1].l))+'</b><span>Average mood'+(a.mood==null?'':', '+f1(a.mood)+' of 5')+'</span>'+delta(a.mood,b.mood,'',1)+'</div>'+
+    '<div><b>'+f1(a.sleep)+'<small> h</small></b><span>Average sleep</span>'+delta(a.sleep,b.sleep,' h',1)+'</div>'+
+    '<div><b>'+a.n+'<small>/'+a.days+'</small></b><span>Check-ins</span>'+delta(a.n,b.days?b.n:null,'',0)+'</div>'+
+  '</div></div>';
+}
+function heatHTML(){
+  const today=dk(Date.now()),startK=dk(S.profile.start),s=stats(),W=18;
+  const end=addDays(today,6-parseDk(today).getDay()),first=addDays(end,-(W*7-1));
+  let cells='',mon='',lastM=-1,any=0;
+  const mOf=wi=>parseDk(addDays(first,wi*7)).getMonth();
+  for(let wi=0;wi<W;wi++){const w0=addDays(first,wi*7),d0=parseDk(w0),m=d0.getMonth();
+    const show=m!==lastM&&wi<W-2&&(wi>0||(mOf(1)===m&&mOf(2)===m));
+    mon+='<span>'+(show?esc(d0.toLocaleDateString(LOC,{month:'short'})):'')+'</span>';lastM=m;
+    for(let d=0;d<7;d++){const k=addDays(w0,d);let c='';
+      if(k>today||k<startK)c='n';else if(s.useDays.has(k))c='u';else{const v=dayCrav(k);if(v!=null){any++;c='l'+(v<=1?1:v<=3?2:v<=5?3:v<=7?4:5);}}
+      if(k===today)c+=' t';cells+='<i class="'+c.trim()+'" data-k="'+k+'"></i>';}}
+  const wd=[1,3,5].map(i=>new Date(2023,0,1+i).toLocaleDateString(LOC,{weekday:'narrow'}));
+  const mix=p=>'<i style="background:color-mix(in srgb,var(--tide) '+p+'%,var(--surface-2))"></i>';
+  return '<div class="card"><div><h3>Craving strength, last 4 months</h3><p class="fine">Each square is a day. Darker means a stronger craving. Tap a square.</p></div>'+
+  (any>=3?'<div class="heat-wrap"><span></span><div class="heat-m" aria-hidden="true">'+mon+'</div><div class="heat-d" aria-hidden="true"><span></span><span>'+wd[0]+'</span><span></span><span>'+wd[1]+'</span><span></span><span>'+wd[2]+'</span><span></span></div><div class="heat" role="img" aria-label="Daily craving strength for the last 18 weeks. A table of the last 30 days is under the craving chart.">'+cells+'</div></div>'+
+    '<p class="cap" id="heatCap">Tap a day to see it.</p><div class="legend"><span class="ramp">Less<i style="background:var(--surface-2)"></i>'+mix(22)+mix(42)+mix(62)+mix(82)+'<i style="background:var(--tide)"></i>More</span><span><i class="ux" style="background:var(--berry)"></i>Used</span></div>'
+  :'<p class="fine">This fills in after a few days of check-ins or craving logs.</p>')+'</div>';
+}
+function wireHeat(v){const h=$('.heat',v);if(!h)return;const cap=$('#heatCap',v);const s=stats();
+  h.addEventListener('click',e=>{const c=e.target.closest('i[data-k]');if(!c||c.classList.contains('n'))return;$$('.heat i.sel',v).forEach(x=>x.classList.remove('sel'));c.classList.add('sel');const k=c.dataset.k,val=dayCrav(k);
+    cap.textContent=fmtD(parseDk(k).getTime(),{weekday:'short',month:'short',day:'numeric'})+': '+(s.useDays.has(k)?'used that day':val==null?'no entry':'strongest craving '+val+'/10');});}
+
+/* ============ Celebration and sharing ============ */
+function medalSVG(){let rays='';for(let i=0;i<16;i++){const a=i/16*Math.PI*2,r1=82,r2=i%2?92:99;rays+='<line x1="'+(100+Math.cos(a)*r1).toFixed(1)+'" y1="'+(100+Math.sin(a)*r1).toFixed(1)+'" x2="'+(100+Math.cos(a)*r2).toFixed(1)+'" y2="'+(100+Math.sin(a)*r2).toFixed(1)+'"/>';}
+  return '<svg viewBox="0 0 200 200"><defs><radialGradient id="mdG" cx="36%" cy="30%" r="78%"><stop offset="0" style="stop-color:#FFEBC2"/><stop offset=".5" style="stop-color:var(--lantern)"/><stop offset="1" style="stop-color:#7A4E08"/></radialGradient></defs><g class="rays" style="stroke:var(--lantern);stroke-width:3;stroke-linecap:round;opacity:.65">'+rays+'</g><circle cx="100" cy="100" r="74" fill="url(#mdG)"/><circle cx="100" cy="100" r="64" fill="none" stroke="rgba(255,255,255,.5)" stroke-width="1.5" stroke-dasharray="1 6" stroke-linecap="round"/><path d="M60 154c6.7-5 13.3-5 20 0s13.3 5 20 0 13.3-5 20 0 13.3 5 20 0" fill="none" stroke="rgba(255,255,255,.5)" stroke-width="3" stroke-linecap="round"/></svg>';}
+function openCelebrate(mm){
+  const rw=rewardFor(mm.h);const parts=mm.l.split(' ');
+  openSheet(b=>{
+    b.classList.add('celebrate');
+    b.innerHTML='<div class="medal" aria-hidden="true">'+medalSVG()+'<div class="num"><b>'+esc(parts[0])+'</b><span>'+esc(parts.slice(1).join(' '))+'</span></div></div>'+
+    '<h2>'+esc(mm.l)+' '+freeWord()+'</h2><p class="lede">'+esc(mm.n)+'</p>'+(mm.s?cite(mm.s):'')+
+    (rw?'<div class="note-box"><h3>'+(rw.mine?'Your reward':'Ebb’s pick for your reward')+'</h3><p class="reason">'+esc(rw.t)+'</p>'+(rw.mine?'':'<button class="linkbtn" data-act="rewards" style="align-self:flex-start">Choose a different one</button>')+'</div>':'')+
+    '<div class="actions"><button class="btn btn-primary btn-block" data-act="share-mile" data-h="'+mm.h+'">'+I.share+'Share as an image</button><button class="btn btn-line btn-block" data-act="sheet-close">Done</button></div>';
+  },{label:'Milestone reached'});
+  setTimeout(confetti,260);buzz([20,40,20]);
+}
+function confetti(){
+  if(RM.matches)return;const c=document.createElement('canvas');c.className='confetti';c.setAttribute('aria-hidden','true');document.body.appendChild(c);
+  const d=Math.min(2,devicePixelRatio||1),W=innerWidth,H=innerHeight;c.width=W*d;c.height=H*d;const x=c.getContext('2d');x.scale(d,d);
+  const cs=getComputedStyle(document.documentElement);const pal=['--tide','--lantern','--berry','--foam','--lantern'].map(k=>cs.getPropertyValue(k).trim()||'#12786F');
+  const P=Array.from({length:150},()=>({x:W/2+(Math.random()-.5)*W*.35,y:H*.34,vx:(Math.random()-.5)*10,vy:-Math.random()*12-4,r:Math.random()*6.28,vr:(Math.random()-.5)*.3,s:5+Math.random()*7,c:pal[Math.floor(Math.random()*pal.length)],k:Math.random()<.22?2:Math.random()<.4?1:0}));
+  const star=s=>{x.beginPath();for(let i=0;i<10;i++){const a=i*Math.PI/5-Math.PI/2,r=i%2?s*.42:s;x.lineTo(Math.cos(a)*r,Math.sin(a)*r);}x.closePath();x.fill();};
+  const t0=performance.now();
+  const f=now=>{const t=(now-t0)/1000;x.clearRect(0,0,W,H);P.forEach(p=>{p.vy+=.28;p.vx*=.99;p.x+=p.vx;p.y+=p.vy;p.r+=p.vr;x.save();x.translate(p.x,p.y);x.rotate(p.r);x.globalAlpha=Math.max(0,1-t/3.4);x.fillStyle=p.c;if(p.k===2)star(p.s*.8);else if(p.k===1){x.beginPath();x.arc(0,0,p.s/2.4,0,6.283);x.fill();}else x.fillRect(-p.s/2,-p.s/4,p.s,p.s/2);x.restore();});if(t<3.5)requestAnimationFrame(f);else c.remove();};
+  requestAnimationFrame(f);
+}
+async function shareFile(blob,name,title,downloadFirst){
+  const dl=()=>{try{const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},4000);return 'downloaded';}catch(e){return 'fail';}};
+  if(downloadFirst&&!IS_IOS)return dl();
+  try{const f=new File([blob],name,{type:blob.type});if(navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({files:[f],title});return 'shared';}}catch(e){if(e&&e.name==='AbortError')return 'cancel';}
+  return dl();
+}
+async function shareImage(big,unit){
+  toast('Making your image…');
+  try{if(document.fonts&&document.fonts.load)await Promise.race([Promise.all([document.fonts.load('400 200px "Young Serif"'),document.fonts.load('700 40px "Atkinson Hyperlegible"')]),sleep(1500)]);}catch(e){}
+  const Wd=1080,Ht=1350,c=document.createElement('canvas');c.width=Wd;c.height=Ht;const x=c.getContext('2d');
+  const ph=skyPhase();const tmp=document.createElement('div');tmp.setAttribute('data-sky',ph);tmp.style.cssText='position:absolute;width:0;height:0;overflow:hidden';document.body.appendChild(tmp);
+  const cs=getComputedStyle(tmp);const g=(k,d)=>cs.getPropertyValue(k).trim()||d;
+  const col={s1:g('--sky1','#C6E2EC'),s3:g('--sky3','#E0EFF1'),s2:g('--sky2','#EEF5F1'),ink:g('--ink','#0F2A2E'),ink2:g('--ink-2','#44605F'),foam:hexRGB(g('--foam','#CDE7E1'))||[205,231,225],tide:hexRGB(g('--tide','#12786F'))||[18,120,111],sun:hexRGB(g('--sun','#FFD58A'))||[255,213,138],moon:hexRGB(g('--moon','#F3EFD9'))||[243,239,217]};tmp.remove();
+  const bg=x.createLinearGradient(0,0,0,Ht);bg.addColorStop(0,col.s1);bg.addColorStop(.52,col.s3);bg.addColorStop(1,col.s2);x.fillStyle=bg;x.fillRect(0,0,Wd,Ht);
+  const base=Ht*.69;
+  if(ph==='night'){const R=mulberry(3);for(let i=0;i<80;i++){x.globalAlpha=.3+R()*.6;x.fillStyle=rgbStr(col.moon);x.beginPath();x.arc(R()*Wd,R()*base*.85,1+R()*2.4,0,6.283);x.fill();}
+    const mx=Wd*.8,my=300,mr=70;x.globalAlpha=1;crescent(x,mx,my,mr,rgbStr(col.moon));}
+  else{const sx=Wd*.78,sy=ph==='day'?320:base-60,sr=ph==='dusk'?120:95;const gl=x.createRadialGradient(sx,sy,sr*.5,sx,sy,sr*4);gl.addColorStop(0,rgbStr(col.sun,.7));gl.addColorStop(1,rgbStr(col.sun,0));x.fillStyle=gl;x.beginPath();x.arc(sx,sy,sr*4,0,6.283);x.fill();x.fillStyle=rgbStr(col.sun);x.beginPath();x.arc(sx,sy,sr,0,6.283);x.fill();}
+  const deep=rgbStr(mixC(col.foam,col.tide,.42));
+  [{a:.42,amp:26,k:1.5,ph:0,dy:-18},{a:.68,amp:18,k:1.05,ph:2.1,dy:14},{a:1,amp:13,k:.72,ph:4.2,dy:44}].forEach((ly,i)=>{x.beginPath();x.moveTo(0,Ht);for(let px=0;px<=Wd+10;px+=10){const u=px/Wd;x.lineTo(px,base+ly.dy+Math.sin(u*Math.PI*2*ly.k+ly.ph)*ly.amp+Math.sin(u*Math.PI*5.3*ly.k)*ly.amp*.3);}x.lineTo(Wd,Ht);x.closePath();const gr=x.createLinearGradient(0,base,0,Ht);gr.addColorStop(0,rgbStr(col.foam));gr.addColorStop(1,deep);x.globalAlpha=ly.a;x.fillStyle=gr;x.fill();if(i!==1){x.globalAlpha=i?.35:.55;x.strokeStyle=rgbStr(col.tide);x.lineWidth=i?3:4;x.stroke();}});
+  x.globalAlpha=1;x.textBaseline='alphabetic';
+  x.fillStyle=rgbStr(col.tide);x.beginPath();x.arc(118,132,32,0,6.283);x.fill();x.strokeStyle='#fff';x.lineWidth=4;x.lineCap='round';x.beginPath();for(let i=0;i<=24;i++){const px=96+i*2;const py=138+Math.sin(i/24*Math.PI*2.2)*5;i?x.lineTo(px,py):x.moveTo(px,py);}x.stroke();
+  x.fillStyle=col.ink;x.font='400 64px "Young Serif", Georgia, serif';x.fillText('Ebb',168,154);
+  x.font='400 '+(String(big).length>3?250:320)+'px "Young Serif", Georgia, serif';x.fillText(String(big),84,640);
+  x.font='400 110px "Young Serif", Georgia, serif';x.fillText(unit,92,770);
+  x.font='700 56px "Atkinson Hyperlegible", system-ui, sans-serif';x.fillStyle=col.ink2;x.fillText(freeWord(),96,860);
+  x.fillStyle=col.ink;x.font='400 66px "Young Serif", Georgia, serif';x.fillText('Lilipas din ito.',96,1190);
+  x.fillStyle=col.ink2;x.font='400 42px "Atkinson Hyperlegible", system-ui, sans-serif';x.fillText('Every craving passes.',98,1250);
+  const blob=await new Promise(r=>c.toBlob(r,'image/png'));if(!blob){toast('Couldn’t make the image on this device.');return;}
+  const res=await shareFile(blob,'ebb-progress.png','My progress');if(res==='downloaded')toast('Image saved.');else if(res==='fail')toast('Couldn’t share the image.');
+}
+
+/* ============ Passcode lock ============ */
+const Lock={on:false,soft:false,hiddenAt:0,fails:0,until:0,after:null};const LOCK_GRACE=60000;
+function lockEnabled(){return !!(S&&S.profile&&S.settings&&S.settings.lock&&S.settings.lock.h);}
+async function pinHash(pin,salt,m){
+  const s='ebb:'+salt+':'+pin;
+  if(m!=='f'&&window.crypto&&crypto.subtle&&window.TextEncoder){try{const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));return {h:Array.from(new Uint8Array(b)).map(v=>v.toString(16).padStart(2,'0')).join(''),m:'s'};}catch(e){}}
+  let a=0x811c9dc5,b2=0x9e3779b9^s.length;for(let i=0;i<s.length;i++){const ch=s.charCodeAt(i);a=Math.imul(a^ch,16777619);b2=Math.imul(b2^ch,2246822519);}
+  for(let k=0;k<4000;k++){a=Math.imul(a^(a>>>13),16777619);b2=Math.imul(b2^(b2>>>15),2246822519);}
+  return {h:(a>>>0).toString(16)+(b2>>>0).toString(16),m:'f'};
+}
+async function pinCheck(pin){const L=S.settings.lock;if(!L)return false;const r=await pinHash(pin,L.salt,L.m);return r.h===L.h;}
+function pinPad(root,o){
+  let pin='',busy=false;const wm=($('.topbar .wordmark svg')||{outerHTML:''}).outerHTML;
+  root.insertAdjacentHTML('beforeend','<div class="lock-in">'+(o.brand?'<div class="wordmark">'+wm+'<span>Ebb</span></div>':'')+'<h2>'+esc(o.title)+'</h2>'+(o.sub?'<p class="fine" style="text-align:center;max-width:32ch">'+esc(o.sub)+'</p>':'')+'<div class="pin-dots" aria-hidden="true"><i></i><i></i><i></i><i></i></div><p class="pin-msg" role="status" aria-live="polite"></p><div class="keypad">'+[1,2,3,4,5,6,7,8,9].map(d=>'<button type="button" data-k="'+d+'">'+d+'</button>').join('')+'<button type="button" class="k0" data-k="0">0</button><button type="button" class="kx" data-k="x" aria-label="Delete">'+I.back+'</button></div>'+(o.extra||'')+'</div>');
+  const box=root.lastElementChild,dots=$$('.pin-dots i',box),msg=$('.pin-msg',box),wrap=$('.pin-dots',box);
+  const paint=()=>dots.forEach((d,i)=>d.classList.toggle('on',i<pin.length));
+  const api={fail(m){msg.textContent=m||'';wrap.classList.remove('shake');void wrap.offsetWidth;wrap.classList.add('shake');pin='';paint();busy=false;},reset(m){pin='';paint();msg.textContent=m||'';busy=false;}};
+  const press=k=>{if(busy)return;if(k==='x'){pin=pin.slice(0,-1);paint();return;}if(pin.length>=4)return;pin+=k;paint();msg.textContent=pin.length+' of 4 digits';if(pin.length===4){busy=true;const p=pin;setTimeout(()=>o.onPin(p,api),140);}};
+  $('.keypad',box).addEventListener('click',e=>{const b=e.target.closest('[data-k]');if(b)press(b.dataset.k);});
+  const kd=e=>{if(!box.isConnected){document.removeEventListener('keydown',kd);return;}if(/^[0-9]$/.test(e.key)){e.preventDefault();press(e.key);}else if(e.key==='Backspace'){e.preventDefault();press('x');}};
+  document.addEventListener('keydown',kd);
+  return api;
+}
+function showLock(soft){
+  if(!lockEnabled())return;
+  if(Lock.on){if(!soft)Lock.soft=false;return;}
+  Lock.on=true;Lock.soft=!!soft;
+  const el=$('#lock');el.hidden=false;el.innerHTML='<canvas class="tide" aria-hidden="true"></canvas>';
+  $('#app').inert=true;$('#sheetRoot').inert=true;
+  drawLockPad(el);
+  makeTide($('canvas',el),t=>({level:.55+Math.sin(t*.4)*.03,amp:.9}),{});
+}
+function drawLockPad(el){
+  $$('.lock-in',el).forEach(n=>n.remove());
+  pinPad(el,{brand:true,title:'Enter your passcode',extra:'<button type="button" class="linkbtn" id="lkForgot">Forgot your passcode?</button>',onPin:async(pin,api)=>{
+    if(Date.now()<Lock.until){api.fail('Too many tries. Wait a moment, then try again.');return;}
+    if(await pinCheck(pin)){Lock.fails=0;buzz(10);hideLock();}
+    else{Lock.fails++;buzz([30,40,30]);if(Lock.fails>=5){Lock.fails=0;Lock.until=Date.now()+30000;api.fail('Too many tries. Try again in 30 seconds.');}else api.fail('That’s not it. Try again.');}}});
+  $('#lkForgot',el).onclick=()=>forgotPin(el);
+}
+function forgotPin(el){
+  $$('.lock-in',el).forEach(n=>n.remove());
+  el.insertAdjacentHTML('beforeend','<div class="lock-in"><h2>Forgot your passcode?</h2><p class="lede" style="text-align:center;max-width:34ch">Ebb can’t recover it. You can erase the entries on this phone and start over, then restore a backup file if you saved one.</p><div class="actions" style="width:100%;max-width:360px"><button class="btn btn-danger btn-block" id="lkWipe">Erase and start over</button><button class="btn btn-line btn-block" id="lkBack">Back</button></div></div>');
+  $('#lkBack',el).onclick=()=>drawLockPad(el);
+  $('#lkWipe',el).onclick=()=>{S=blank();saveLocal();Lock.on=false;Lock.soft=false;el.hidden=true;el.innerHTML='';$('#app').inert=false;$('#sheetRoot').inert=false;closeSheet(true);applyTheme();showOnboarding();};
+}
+function hideLock(){
+  const el=$('#lock');el.hidden=true;el.innerHTML='';Lock.on=false;Lock.soft=false;$('#app').inert=false;$('#sheetRoot').inert=false;
+  if(Lock.after){const f=Lock.after;Lock.after=null;setTimeout(f,60);}
+  else if(PENDING_CELEB&&!busyUI()){const m=PENDING_CELEB;PENDING_CELEB=null;openCelebrate(m);}
+}
+function openLockSetup(){
+  openSheet(b=>{
+    const pad=(t,sub,cb)=>{b.innerHTML='<div class="sheet-pin"></div>';pinPad($('.sheet-pin',b),{title:t,sub,onPin:cb});};
+    const verify=next=>pad('Enter your current passcode','',async(p,api)=>{if(await pinCheck(p))next();else{buzz([30,40,30]);api.fail('That’s not it. Try again.');}});
+    const choose=()=>pad('Choose a 4-digit passcode','Avoid your birthday or 1234.',p1=>pad('Enter it again','',async(p2,api)=>{
+      if(p2!==p1){api.fail('Those didn’t match. Start again.');setTimeout(choose,1100);return;}
+      const salt=uid()+uid();const r=await pinHash(p2,salt);S.settings.lock={h:r.h,salt,m:r.m};save();buzz(15);closeSheet();render();toast('Passcode on. Tap the lock at the top to lock Ebb anytime.');}));
+    const has=lockEnabled();
+    b.innerHTML='<div><p class="step">Privacy</p><h2>Passcode lock</h2></div><p class="lede">Ebb asks for a 4-digit passcode when it opens, and when you come back after more than a minute away.</p><div class="note-box"><p>This keeps people who pick up your phone out of Ebb. It doesn’t encrypt your entries. Ebb can’t recover a forgotten passcode, so save a backup file too.</p></div><div class="actions">'+(has?'<button class="btn btn-primary btn-block" id="lsChange">Change passcode</button><button class="btn btn-line btn-block" id="lsOff" style="color:var(--berry)">Turn off passcode</button>':'<button class="btn btn-primary btn-block" id="lsOn">Set a passcode</button>')+'</div>';
+    const on=$('#lsOn',b),ch=$('#lsChange',b),off=$('#lsOff',b);
+    if(on)on.onclick=choose;if(ch)ch.onclick=()=>verify(choose);
+    if(off)off.onclick=()=>verify(()=>{S.settings.lock=null;save();closeSheet();render();toast('Passcode turned off.');});
+  },{label:'Passcode lock'});
+}
+
+/* ============ Calm sound engine (Web Audio, generated, no files) ============ */
+const Snd={ctx:null,master:null,nodes:[],timers:[],mode:null,on:false,sw:null,_b:{},_st:0,
+  ac(){if(this.ctx)return this.ctx;const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return null;try{const c=new AC();this.ctx=c;this.master=c.createGain();this.master.gain.value=0;this.master.connect(c.destination);}catch(e){return null;}return this.ctx;},
+  buf(kind){if(this._b[kind])return this._b[kind];const c=this.ctx,len=Math.floor(c.sampleRate*6),b=c.createBuffer(2,len,c.sampleRate);
+    for(let ch=0;ch<2;ch++){const d=b.getChannelData(ch);
+      if(kind==='brown'){let l=0;for(let i=0;i<len;i++){l=(l+.02*(Math.random()*2-1))/1.02;d[i]=l*3.5;}}
+      else{let b0=0,b1=0,b2=0,b3=0,b4=0,b5=0,b6=0;for(let i=0;i<len;i++){const w=Math.random()*2-1;b0=.99886*b0+w*.0555179;b1=.99332*b1+w*.0750759;b2=.969*b2+w*.153852;b3=.8665*b3+w*.3104856;b4=.55*b4+w*.5329522;b5=-.7616*b5-w*.016898;d[i]=(b0+b1+b2+b3+b4+b5+b6+w*.5362)*.11;b6=w*.115926;}}
+      const dr=d[len-1]-d[0];for(let i=0;i<len;i++)d[i]-=dr*i/len;}
+    return this._b[kind]=b;},
+  track(n){this.nodes.push(n);n.onended=()=>{const i=this.nodes.indexOf(n);if(i>=0)this.nodes.splice(i,1);};return n;},
+  src(kind){const s=this.ctx.createBufferSource();s.buffer=this.buf(kind);s.loop=true;s.start();return this.track(s);},
+  osc(type,f){const o=this.ctx.createOscillator();o.type=type;o.frequency.value=f;o.start();return this.track(o);},
+  gain(v){const g=this.ctx.createGain();g.gain.value=v;return g;},
+  filt(type,f,q){const x=this.ctx.createBiquadFilter();x.type=type;x.frequency.value=f;if(q!=null)x.Q.value=q;return x;},
+  build(mode){const c=this.ctx,M=this.master;
+    if(mode==='ocean'){const s=this.src('brown'),lp=this.filt('lowpass',520,.5),wg=this.gain(.55);s.connect(lp);lp.connect(wg);wg.connect(M);
+      const l1=this.osc('sine',.085),l1g=this.gain(.38);l1.connect(l1g);l1g.connect(wg.gain);
+      const l2=this.osc('sine',.085),l2g=this.gain(260);l2.connect(l2g);l2g.connect(lp.frequency);
+      const s2=this.src('pink'),bp=this.filt('bandpass',900,.4),g2=this.gain(.05);s2.connect(bp);bp.connect(g2);g2.connect(M);const l3=this.osc('sine',.085),l3g=this.gain(.045);l3.connect(l3g);l3g.connect(g2.gain);
+      this.sw={wg,l1g,lp,l2g};}
+    else if(mode==='rain'){const s=this.src('pink'),hp=this.filt('highpass',500,.3),lp=this.filt('lowpass',8000,.3),g=this.gain(.5);s.connect(hp);hp.connect(lp);lp.connect(g);g.connect(M);
+      const r=this.src('brown'),rl=this.filt('lowpass',220,.5),rg=this.gain(.35);r.connect(rl);rl.connect(rg);rg.connect(M);
+      const fl=this.osc('sine',.13),fg=this.gain(.06);fl.connect(fg);fg.connect(g.gain);this.sw=null;}
+    else{const dl=c.createDelay(2);dl.delayTime.value=.42;const fb=this.gain(.38),wet=this.gain(.35),lp=this.filt('lowpass',1600,.3);dl.connect(fb);fb.connect(dl);dl.connect(wet);wet.connect(M);lp.connect(M);lp.connect(dl);
+      const dr=this.osc('sine',65.41),dg=this.gain(.05);dr.connect(dg);dg.connect(lp);
+      const N=[130.81,146.83,164.81,196,220,261.63,293.66,329.63,392];let next=c.currentTime+.2,last=4;
+      const sched=()=>{while(next<c.currentTime+1.2){let i=clamp(last+Math.round((Math.random()-.5)*4),0,N.length-1);last=i;this.note(N[i],next,lp,1);if(Math.random()<.25)this.note(N[clamp(i-2,0,N.length-1)],next+.06,lp,.5);next+=2.2+Math.random()*1.8;}};
+      sched();this.timers.push(setInterval(sched,500));this.sw=null;}
+  },
+  note(f,t,dest,vol){const c=this.ctx,o=c.createOscillator(),o2=c.createOscillator(),g=c.createGain(),g2=c.createGain();o.type='sine';o.frequency.value=f;o2.type='triangle';o2.frequency.value=f*2.003;g2.gain.value=.12;
+    g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.16*vol,t+1.8);g.gain.exponentialRampToValueAtTime(.0008,t+7.5);o.connect(g);o2.connect(g2);g2.connect(g);g.connect(dest);o.start(t);o2.start(t);o.stop(t+7.7);o2.stop(t+7.7);this.track(o);this.track(o2);},
+  play(mode){const c=this.ac();if(!c)return false;try{if(c.state!=='running')c.resume();}catch(e){}
+    clearTimeout(this._st);if(this.mode!==mode){this.kill();try{this.build(mode);}catch(e){return false;}this.mode=mode;}
+    const now=c.currentTime,g=this.master.gain;g.cancelScheduledValues(now);g.setValueAtTime(g.value,now);g.linearRampToValueAtTime(.85,now+1.6);this.on=true;return true;},
+  stop(){if(!this.ctx||!this.on)return;this.on=false;const now=this.ctx.currentTime,g=this.master.gain;g.cancelScheduledValues(now);g.setValueAtTime(g.value,now);g.linearRampToValueAtTime(0,now+.9);clearTimeout(this._st);this._st=setTimeout(()=>{if(!this.on){this.kill();this.mode=null;try{this.ctx.suspend();}catch(e){}}},1000);},
+  kill(){this.timers.forEach(clearInterval);this.timers=[];this.nodes.slice().forEach(n=>{try{n.onended=null;n.stop();}catch(e){}try{n.disconnect();}catch(e){}});this.nodes=[];this.sw=null;},
+  breath(kind,secs){if(!this.on||!this.sw||!this.ctx)return;const now=this.ctx.currentTime,{wg,l1g,lp,l2g}=this.sw;l1g.gain.setTargetAtTime(0,now,.5);l2g.gain.setTargetAtTime(0,now,.5);
+    if(kind!=='in'&&kind!=='out')return;wg.gain.cancelScheduledValues(now);wg.gain.setValueAtTime(wg.gain.value,now);wg.gain.linearRampToValueAtTime(kind==='in'?.95:.32,now+secs);lp.frequency.cancelScheduledValues(now);lp.frequency.setValueAtTime(lp.frequency.value,now);lp.frequency.linearRampToValueAtTime(kind==='in'?900:380,now+secs);}
+};
+const SOUNDS={ocean:'Ocean waves',rain:'Rain',tones:'Soft tones'};
+function safeUrl(u){u=String(u||'').trim();if(!u)return '#';if(!/^https?:\/\//i.test(u))u='https://'+u.replace(/^\/+/,'');return /^https?:\/\/[^\s"'<>]+$/i.test(u)?u:'#';}
+function openSounds(){
+  let mode=SOUNDS[S.settings.soundMode]?S.settings.soundMode:'ocean',mins=20,left=1200,playing=false,tmr=0,last=0,tide=null;
+  openSheet(b=>{
+    const mus=S.plan.music.filter(m=>m.url);
+    b.innerHTML='<div><p class="step">Music for hard moments</p><h2>Calm sounds</h2></div><p class="lede">Put these on while an urge passes, before sleep, or whenever you need to settle. Ebb makes the sound itself, so it works offline.</p>'+
+    '<div class="sound-stage"><canvas class="tide" aria-hidden="true"></canvas><div class="in"><p class="clock" id="snC">20:00</p><p class="fine" id="snM" style="color:var(--ink-2)">'+esc(SOUNDS[mode])+'</p></div></div>'+
+    segHTML('snd',Object.keys(SOUNDS).map(k=>({v:k,l:SOUNDS[k]})),mode)+
+    '<div class="field"><span class="flabel">Play for</span>'+segHTML('snT',[10,20,30,60].map(m=>({v:String(m),l:m+' min'})),'20')+'</div>'+
+    '<button type="button" class="playbtn" id="snP" aria-label="Play">'+I.play+'</button>'+
+    '<p class="fine" style="text-align:center">On iPhone, turn off silent mode to hear it.</p>'+
+    '<div class="note-box"><h3>What the research says</h3><p>In a Cochrane review of 21 studies, music therapy with a trained music therapist, added to treatment in detox and rehab, likely reduced cravings and raised motivation for treatment. Listening on your own isn’t therapy, but it’s a calm way to wait out an urge.</p>'+cite('ghetti')+'</div>'+
+    '<div class="card soft"><div class="card-h"><h3>My music</h3><button class="linkbtn" data-act="edit-music">'+(mus.length?'Edit':'Add')+'</button></div>'+(mus.length?'<div>'+mus.map(m=>'<div class="linkrow"><b>'+esc(m.name||'My music')+'</b><a href="'+esc(safeUrl(m.url))+'" target="_blank" rel="noopener">'+I.ext+'Open</a></div>').join('')+'</div>':'')+'<p class="fine">Save songs or playlists that calm you, from Spotify, YouTube or anywhere. Skip songs you used to play while using, since they can work like a trigger.</p></div>'+
+    '<button class="btn btn-line btn-block" data-act="videos">'+I.video+'Videos and guided audio</button>';
+    const C=$('#snC',b),M=$('#snM',b),P=$('#snP',b);
+    tide=makeTide($('.sound-stage canvas',b),t=>({level:.2+(playing?Math.sin(t*.5)*.04:0),amp:playing?1.1:.5}),{bubbles:true});
+    const paint=()=>{C.textContent=Math.floor(left/60)+':'+pad(Math.floor(left%60));P.innerHTML=playing?I.pause:I.play;P.classList.toggle('on',playing);P.setAttribute('aria-label',playing?'Pause':'Play');};
+    const stop=()=>{playing=false;clearInterval(tmr);Snd.stop();paint();};
+    P.onclick=()=>{if(playing){stop();return;}if(!Snd.play(mode)){toast('Sound isn’t available on this device.');return;}playing=true;last=Date.now();clearInterval(tmr);tmr=setInterval(()=>{const now=Date.now();left=Math.max(0,left-(now-last)/1000);last=now;paint();if(left<=0){stop();left=mins*60;paint();toast('Done. Notice how you feel now.');}},500);paint();};
+    bindChips(b,'snd',v=>{if(!v)return;mode=v;S.settings.soundMode=v;saveLocal();M.textContent=SOUNDS[v];if(playing)Snd.play(v);});
+    bindChips(b,'snT',v=>{if(!v)return;mins=+v;left=mins*60;paint();});
+    paint();
+  },{label:'Calm sounds'});
+  Sheet.cleanup=()=>{clearInterval(tmr);Snd.stop();if(tide)tide.destroy();};
+}
+function openVideos(){
+  const item=(t,d,src,btn,ic)=>'<div class="card"><h3>'+esc(t)+'</h3><p class="fine" style="color:var(--ink-2)">'+esc(d)+'</p>'+cite(src)+'<a class="btn btn-quiet" href="'+SRC[src].u+'" target="_blank" rel="noopener" style="align-self:flex-start">'+ic+esc(btn)+'</a></div>';
+  openSheet(b=>{b.innerHTML='<div><p class="step">Watch and listen</p><h2>Videos and guided audio</h2></div><p class="lede">Free, short, and from trusted sources. They open in your browser and need internet.</p>'+
+    item('Why are drugs so hard to quit?','A 4-minute animated video from the U.S. National Institute on Drug Abuse. It shows how drugs change the brain’s reward system, and how people heal with support. Includes a transcript.','nidavid','Watch the video',I.video)+
+    item('Guided urge surfing and meditations','Free recordings from Mindfulness-Based Relapse Prevention, the program tested in the Bowen et al. (2014) trial, including an urge surfing practice. Shared by CU Change at the University of Colorado Boulder.','mbrp','Listen',I.sound)+
+    '<p class="fine">Both are in English. Ebb’s urge-surfing timer and Calm sounds work offline.</p>';},{label:'Videos and guided audio'});
+}
+function openSexHelp(){
+  const hasTrig=trigList().some(t=>t.k==='sex');const tracking=(S.profile.substances||[]).some(x=>BEHAV.test(x));
+  openSheet(b=>{b.innerHTML='<div><p class="step">For everyone, any orientation</p><h2>Sex and recovery</h2></div><p class="lede">For some people, sex and using get tied together. For others, sex or porn itself starts to feel out of control. Both can get better with support.</p>'+
+    '<div class="ph-sec" style="border-top:0"><h3>Who you love isn’t the problem</h3><p>Being gay, lesbian, bisexual or transgender isn’t an addiction or an illness, and it isn’t something to recover from. The Psychological Association of the Philippines condemns “conversion therapy,” which tries to change it, and says it has no credible evidence behind it. In a U.S. national study, sexual minority adults who went through it had nearly twice the odds of suicidal thoughts.</p>'+cite('pap')+cite('blosnich')+'</div>'+
+    '<div class="ph-sec"><h3>When sex or porn feels out of control</h3><p>The WHO’s ICD-11 calls this compulsive sexual behaviour disorder: failing for months to control strong, repeated sexual urges, and carrying on despite harm or little satisfaction. It’s about losing control, not about who you’re attracted to. Distress that comes only from moral or religious disapproval of your desires doesn’t count.</p>'+cite('icd')+
+    '<p>Talk therapy has the best evidence so far, mainly cognitive behavioral therapy (CBT) and acceptance and commitment therapy (ACT). The research is still young. The skills in Ebb fit too: urge surfing, HALT, knowing your triggers and having an exit plan.</p>'+cite('csbd')+cite('ppu')+
+    (tracking?'<p class="fine">You’re tracking this in Ebb. Your streak and craving tools work the same way.</p>':'<button class="btn btn-quiet" data-act="edit-recovery" style="align-self:flex-start">Track it in Ebb</button><p class="fine">Choose “Compulsive sex or porn use” in your recovery details.</p>')+'</div>'+
+    '<div class="ph-sec"><h3>Chemsex: sex on shabu or other drugs</h3><p>Using drugs for sex, most often shabu, is called chemsex. In a survey of 479 Filipino men who have sex with men, recent chemsex was linked to reporting HIV.</p>'+cite('chemsexph')+
+    '<ul><li>Get tested for HIV and other STIs regularly. LoveYourself runs free testing and PrEP, medicine that prevents HIV.</li><li>If you may have been exposed to HIV, PEP can prevent it if you start within 72 hours, and sooner is better. Go to an HIV clinic or hospital right away.</li><li>Don’t mix poppers with erection pills like Viagra. Together they can drop your blood pressure to a deadly level.</li><li>Everyone involved has to be able to say yes. Someone who is very high or passed out can’t.</li></ul>'+cite('loveyourself')+cite('pep')+cite('poppers')+
+    '<p>In recovery, plan for this trigger like any other. Delete or mute hookup apps for now, and tell your counselor or doctor that sex and using are linked for you.</p>'+
+    (hasTrig?'<p class="fine">“Sex, dating or hookup apps” is in your trigger list, so you’ll see how often it comes up in Insights.</p>':'<button class="btn btn-quiet" data-act="edit-triggers" style="align-self:flex-start">Add it to my triggers</button>')+
+    '<a class="btn btn-primary" href="https://loveyourself.ph" target="_blank" rel="noopener">'+I.heart+'Visit LoveYourself</a></div>'+
+    '<div class="ph-sec"><h3>Talk to someone today</h3><p>The NCMH Crisis Hotline 1553 is free and open 24/7. If anyone is in danger, call 911.</p><div class="row"><a class="btn btn-quiet" href="tel:1553">'+I.phone+'1553</a><a class="btn btn-quiet" href="tel:1550">'+I.phone+'DOH 1550</a></div></div>';
+  },{label:'Sex and recovery'});
+}
+
+/* ============ Reminders and summaries ============ */
+function icsText(hhmm){
+  const [hh,mm]=String(hhmm||'20:00').split(':').map(Number);const d=new Date();d.setHours(hh||0,mm||0,0,0);if(d<new Date())d.setDate(d.getDate()+1);
+  const f=x=>x.getFullYear()+pad(x.getMonth()+1)+pad(x.getDate())+'T'+pad(x.getHours())+pad(x.getMinutes())+'00';
+  const n=new Date(),stamp=n.getUTCFullYear()+pad(n.getUTCMonth()+1)+pad(n.getUTCDate())+'T'+pad(n.getUTCHours())+pad(n.getUTCMinutes())+pad(n.getUTCSeconds())+'Z';
+  return ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Ebb//Check-in//EN','CALSCALE:GREGORIAN','BEGIN:VEVENT','UID:ebb-'+uid()+'@ebb','DTSTAMP:'+stamp,'DTSTART:'+f(d),'DTEND:'+f(new Date(d.getTime()+10*MIN)),'RRULE:FREQ=DAILY','SUMMARY:Check in','DESCRIPTION:Two minutes in Ebb.','BEGIN:VALARM','ACTION:DISPLAY','DESCRIPTION:Check in','TRIGGER:PT0M','END:VALARM','END:VEVENT','END:VCALENDAR',''].join('\r\n');
+}
+function openReminder(){
+  openSheet(b=>{
+    b.innerHTML='<div><p class="step">Daily habit</p><h2>Check-in reminder</h2></div><p class="lede">Add a daily reminder to your phone’s calendar. The event only says “Check in”, so nobody else can tell what it’s for.</p>'+
+    '<div class="field"><label for="rmT">Remind me at</label><input type="time" id="rmT" value="20:00"></div>'+
+    '<div class="actions"><button class="btn btn-primary btn-block" id="rmGo">'+I.cal+'Add to my calendar</button></div><p class="fine">Your phone saves or opens a calendar file. Open it and tap Add. To stop the reminder, delete the event in your calendar.</p>';
+    $('#rmGo',b).onclick=async()=>{const r=await shareFile(new Blob([icsText($('#rmT',b).value)],{type:'text/calendar'}),'ebb-check-in.ics','Check-in reminder',true);if(r!=='cancel'&&r!=='fail')toast('Open the file and tap Add.');else if(r==='fail')toast('Couldn’t make the calendar file here.');};
+  },{label:'Check-in reminder'});
+}
+function summaryText(){
+  const s=stats(),today=dk(Date.now()),startK=dk(S.profile.start);const ks=[];for(let i=29;i>=0;i--)ks.push(addDays(today,-i));const inR=ks.filter(k=>k>=startK);
+  const cis=inR.map(checkin).filter(Boolean),cr=inR.map(dayCrav).filter(v=>v!=null),md=cis.filter(c=>c.mood).map(c=>+c.mood),sl=cis.filter(c=>c.sleep!=null).map(c=>+c.sleep);
+  const t0=parseDk(inR[0]||today).getTime();const crav=live(S.cravings).filter(c=>c.t>=t0);const passed=crav.filter(c=>c.out!=='used').length;
+  const tc={};crav.forEach(c=>(c.trig||[]).forEach(k=>tc[k]=(tc[k]||0)+1));const top=Object.keys(tc).sort((a,b)=>tc[b]-tc[a]).slice(0,3).map(k=>trigL(k)+' ('+tc[k]+')');
+  const bins=Array(8).fill(0);crav.forEach(c=>bins[Math.floor(new Date(c.t).getHours()/3)]++);const pk=bins.indexOf(Math.max(...bins));
+  const hc={};HALT.forEach(x=>hc[x.k]=crav.filter(c=>c.halt&&c.halt[x.k]).length);const ht=HALT.slice().sort((a,b)=>hc[b.k]-hc[a.k])[0];
+  const slips=lapsesSorted().filter(l=>l.t>=t0&&l.t>S.profile.start),lw=lastWarn();
+  const w1=inR.slice(0,7).map(dayCrav).filter(v=>v!=null),w4=inR.slice(-7).map(dayCrav).filter(v=>v!=null);
+  const L=['Ebb summary, '+fmtDY(t0)+' to '+fmtDY(Date.now())];
+  if(S.plan.name)L.push('Name: '+S.plan.name);
+  L.push('Recovering from: '+(S.profile.substances.join(', ')||'not listed'),'Recovery start: '+fmtDY(S.profile.start),'Current stretch: '+dur(s.streakMs)+'. Longest: '+dur(s.longest)+'.','Days without use since start: '+s.clean+' of '+s.total+'.','','Last 30 days','- Check-ins: '+cis.length+' of '+inR.length+' days');
+  if(cr.length)L.push('- Average daily craving: '+avg(cr).toFixed(1)+'/10'+(w1.length&&w4.length&&inR.length>=21?' (first week '+avg(w1).toFixed(1)+', last week '+avg(w4).toFixed(1)+')':''));
+  if(md.length)L.push('- Average mood: '+avg(md).toFixed(1)+' of 5');
+  if(sl.length)L.push('- Average sleep: '+avg(sl).toFixed(1)+' h');
+  L.push('- Cravings logged: '+crav.length+', passed without use: '+passed);
+  if(top.length)L.push('- Top triggers: '+top.join(', '));
+  if(crav.length)L.push('- Cravings peak: '+BIN_LONG[pk]);
+  if(crav.length&&hc[ht.k])L.push('- Most common HALT state during cravings: '+ht.l);
+  L.push('- Slips: '+(slips.length?slips.map(l=>fmtDY(l.t)+(l.kind==='relapse'?' (return to regular use)':'')).join(', '):'none'));
+  if(lw)L.push('- Last warning-signs check: '+STAGES[lw.stage].t+' ('+fmtDY(lw.t)+')');
+  L.push('','Self-reported in the Ebb app. Not a diagnosis.');
+  return L.join('\n');
+}
+function openSummary(){
+  const txt=summaryText();
+  openSheet(b=>{
+    b.innerHTML='<div><p class="step">For your counselor or doctor</p><h2>Your last 30 days</h2></div><p class="lede">A plain-text summary you can send or read out at your next session.</p><textarea id="smT" rows="14" readonly style="font-size:14px">'+esc(txt)+'</textarea><p class="fine">It includes what you’re recovering from. Share it only with people you trust.</p><div class="actions">'+(navigator.share?'<button class="btn btn-primary btn-block" id="smS">'+I.share+'Share</button>':'')+'<button class="btn btn-quiet btn-block" id="smC">Copy</button></div><p class="fine" id="smM"></p>';
+    const sh=$('#smS',b);if(sh)sh.onclick=async()=>{try{await navigator.share({title:'Ebb summary',text:txt});}catch(e){}};
+    $('#smC',b).onclick=async()=>{try{await navigator.clipboard.writeText(txt);$('#smM',b).textContent='Copied.';}catch(e){const ta=$('#smT',b);ta.focus();ta.select();$('#smM',b).textContent='Selected. Use Copy from your phone’s menu.';}};
+  },{label:'Summary for my counselor'});
+}
+
+/* ============ Updates ============ */
+// Check for a new version when Ebb comes back to the front; reload quietly when it's safe.
+const SW={reg:null,checked:0,pending:false,reloading:false};
+document.addEventListener('visibilitychange',()=>{
+  if(document.hidden){if(SW.pending&&!SW.reloading){SW.reloading=true;location.reload();}return;}
+  if(SW.reg&&Date.now()-SW.checked>10*MIN){SW.checked=Date.now();try{SW.reg.update();}catch(e){}}
+});
+const SEEN_KEY='ebb-seen-version';
+function seenVersion(){try{return localStorage.getItem(SEEN_KEY);}catch(e){return APP_VERSION;}}
+function markSeen(){try{localStorage.setItem(SEEN_KEY,APP_VERSION);}catch(e){}}
+function openWhatsNew(){
+  markSeen();
+  const it=(ic,t,d)=>'<li><span class="ic" aria-hidden="true">'+ic+'</span><div><b>'+t+'</b><p class="fine" style="color:var(--ink-2)">'+d+'</p></div></li>';
+  openSheet(b=>{b.innerHTML='<div><p class="step">Version '+APP_VERSION+'</p><h2>What’s new in Ebb</h2></div><ul class="wn">'+
+    it(I.wave,'A living horizon','Today’s sky follows the time of day, and the tide rises as your next milestone gets closer.')+
+    it(I.music,'Calm sounds and videos','Ocean, rain and soft tones that work offline, your own calming music, and short videos from NIDA.')+
+    it(I.gift,'Rewards picked for you','Ebb sets a realistic reward for every milestone. Swap in your own anytime.')+
+    it(I.coin,'Heads-ups before hard moments','On payday, and before the hours your cravings usually hit.')+
+    it(I.star,'Celebrations and progress','Milestone celebrations, a shareable image, badges, a weekly review and a craving heatmap.')+
+    it(I.lock,'Privacy and reminders','A passcode lock, a discreet calendar reminder, and a summary to share with your counselor.')+
+    it(I.rainbow,'Sex and recovery','Support for any orientation, including compulsive sex or porn use, chemsex and HIV prevention.')+
+    '</ul><div class="actions"><button class="btn btn-primary btn-block" data-act="sounds">'+I.music+'Try Calm sounds</button><button class="btn btn-line btn-block" data-act="sheet-close">Got it</button></div>';},{label:'What’s new in Ebb'});
+}
+
+/* ============ Install on Android ============ */
+let DEFER_INSTALL=null;
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();DEFER_INSTALL=e;if(S&&S.profile&&ROUTE==='today'&&!busyUI())render();});
+window.addEventListener('appinstalled',()=>{DEFER_INSTALL=null;});
+
 /* ============ Global actions ============ */
 function shiftCal(n){let m=CAL.m+n,y=CAL.y;if(m<0){m=11;y--;}if(m>11){m=0;y++;}CAL={y,m};render();}
 const ACTS={
@@ -1605,13 +2355,20 @@ const ACTS={
   sos:()=>openSOS(),craving:()=>openCraving(),checkin:a=>openCheckin(a.dataset.k),lapse:()=>openLapse(),warn:()=>openWarn(),
   breathe:()=>openBreathe(),ground:()=>openGround(),halt:()=>openHaltTool(),tape:()=>openTape(),delay:()=>openDelay(),rules:()=>openRules(),safety:()=>openSafety(),
   day:a=>openDay(a.dataset.k),calprev:()=>shiftCal(-1),calnext:()=>shiftCal(1),entry:a=>openEntry(a.dataset.type,a.dataset.id),
-  'sheet-close':()=>closeSheet(),
+  'sheet-close':()=>{closeSheet();if(PENDING_CELEB){const m=PENDING_CELEB;PENDING_CELEB=null;setTimeout(()=>{if(!busyUI())openCelebrate(m);else PENDING_CELEB=m;},420);}},
+  sounds:()=>openSounds(),videos:()=>openVideos(),sexhelp:()=>openSexHelp(),'lock-setup':()=>openLockSetup(),'lock-now':()=>showLock(false),
+  reminder:()=>openReminder(),summary:()=>openSummary(),
+  'share-streak':()=>{const st=fmtStreak(stats().streakMs);shareImage(String(st.big),st.unit);},
+  mile:a=>{const mm=MILES.find(x=>x.h===+a.dataset.h);if(mm)openCelebrate(mm);},
+  'share-mile':a=>{const mm=MILES.find(x=>x.h===+a.dataset.h);if(!mm)return;const p=mm.l.split(' ');shareImage(p[0],p.slice(1).join(' '));},
+  'install-android':async()=>{if(!DEFER_INSTALL)return;const e=DEFER_INSTALL;DEFER_INSTALL=null;try{e.prompt();await e.userChoice;}catch(_){}render();},
+  'edit-music':()=>openListEditor({title:'My calming music',intro:'Songs or playlists that calm you. Paste a link from Spotify, YouTube or anywhere else.',items:S.plan.music,fields:[{k:'name',l:'Name',ph:'For example: Sunday morning playlist'},{k:'url',l:'Link',ph:'https://open.spotify.com/…',type:'url'}],onSave:r=>S.plan.music=r}),
   'edit-reasons':()=>openListEditor({title:'Why I’m doing this',intro:'Short and personal works best. These show up on your Today screen and during cravings.',items:S.plan.reasons,fields:[{k:'text',l:'Reason',ph:'For example: be there for my kids'}],onSave:r=>S.plan.reasons=r}),
   'edit-contacts':()=>openListEditor({title:'My people',intro:'People you can call or text when it’s hard.',items:S.plan.contacts,fields:[{k:'name',l:'Name',ph:'Name'},{k:'phone',l:'Phone',ph:'Phone number',type:'tel'}],onSave:r=>S.plan.contacts=r}),
   'edit-risks':()=>openListEditor({title:'High-risk situations',intro:'Name a situation where using feels likely, then a specific way out.',items:S.plan.risks,fields:[{k:'situation',l:'When',ph:'For example: payday with cash on me',multi:true},{k:'plan',l:'My exit plan',ph:'For example: send money to savings, go straight home',multi:true}],onSave:r=>S.plan.risks=r}),
   'edit-signs':()=>openListEditor({title:'My early warning signs',intro:'Things you notice in yourself before things slide.',items:S.plan.signs,fields:[{k:'text',l:'Warning sign',ph:'For example: skipping meals'}],onSave:r=>S.plan.signs=r}),
   'edit-recovery':()=>openRecoveryEditor(),
-  phhelp:()=>openPHHelp(),'backup-file':()=>backupFile(),install:()=>openInstall(),rewards:()=>openRewards(),prefs:()=>openPrefs(),
+  phhelp:()=>openPHHelp(),whatsnew:()=>openWhatsNew(),'backup-file':()=>backupFile(),install:()=>openInstall(),rewards:()=>openRewards(),prefs:()=>openPrefs(),
   addcrav:a=>openCravingEdit(null,a.dataset.k),
   addslip:a=>{const k=a.dataset.k;openLapse({t:k===dk(Date.now())?Date.now():parseDk(k).getTime()+20*HOUR});},
   'edit-triggers':()=>openListEditor({title:'Trigger list',intro:'Rename, remove or add triggers. They appear when you log cravings and slips. Past entries keep their labels.',items:trigList().map(t=>({id:t.k,l:t.l})),fields:[{k:'l',l:'Trigger',ph:'For example: passing the old tambayan'}],max:30,
@@ -1634,16 +2391,24 @@ document.addEventListener('click',e=>{const a=e.target.closest('[data-act]');if(
   const inSheet=a.closest('#sheetRoot');const act=a.dataset.act;
   if(inSheet&&act!=='sheet-close')closeSheet(true);
   f(a,e);});
-document.addEventListener('keydown',e=>{if(e.key==='Escape'&&$('#sheetRoot').classList.contains('open'))closeSheet();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!Lock.on&&$('#sheetRoot').classList.contains('open'))ACTS['sheet-close']();});
 
 /* ============ Boot ============ */
 function boot(){
   LOCAL_OK=testLocal();
-  S=normalize(loadLocal());
+  S=normalize(loadLocal());applyTheme();
   readRoute();
-  if(!S.profile)showOnboarding();else render();
+  let goA=null;try{goA=new URLSearchParams(location.search).get('go');if(goA)history.replaceState(null,'',location.pathname+(location.hash||''));}catch(e){}
+  if(!S.profile)showOnboarding();else{render();if(lockEnabled())showLock(false);}
+  if(goA&&S.profile&&['craving','sos','checkin','breathe','sounds'].includes(goA)){const run=()=>ACTS[goA]({dataset:{}});if(Lock.on)Lock.after=run;else setTimeout(run,150);}
+  else if(S.profile&&!S.demo&&seenVersion()!==APP_VERSION){const run=()=>openWhatsNew();if(Lock.on)Lock.after=run;else setTimeout(run,700);}
+  else markSeen();
   initCloud();
-  if(APP_BUILD&&'serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost'||location.hostname==='127.0.0.1')){navigator.serviceWorker.register('sw.js').catch(()=>{});}
+  if(APP_BUILD&&'serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost'||location.hostname==='127.0.0.1')){
+    const hadCtl=!!navigator.serviceWorker.controller;
+    navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!hadCtl||SW.reloading)return;if(busyUI())SW.pending=true;else{SW.reloading=true;location.reload();}});
+    navigator.serviceWorker.register('sw.js').then(r=>{SW.reg=r;SW.checked=Date.now();}).catch(()=>{});
+  }
   if(APP_BUILD&&IS_STANDALONE&&navigator.storage&&navigator.storage.persist){navigator.storage.persist().catch(()=>{});}
   setInterval(()=>{if(!document.hidden&&ROUTE==='today')tick();},30000);
 }

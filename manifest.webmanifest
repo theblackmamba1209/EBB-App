@@ -1,7 +1,7 @@
 {
   "name": "Ebb Recovery Tracker",
   "short_name": "Ebb",
-  "description": "A private, research-based recovery tracker made for the Philippines.",
+  "description": "A private, research-based recovery tracker made for the Philippines. Ride out cravings, catch warning signs early, and keep every substance-free day.",
   "id": "./",
   "start_url": "./",
   "scope": "./",
@@ -30,6 +30,56 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "I'm having a craving",
+      "short_name": "Craving",
+      "url": "./?go=craving",
+      "icons": [
+        {
+          "src": "icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Help now",
+      "short_name": "Help now",
+      "url": "./?go=sos",
+      "icons": [
+        {
+          "src": "icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Daily check-in",
+      "short_name": "Check-in",
+      "url": "./?go=checkin",
+      "icons": [
+        {
+          "src": "icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Calm sounds",
+      "short_name": "Sounds",
+      "url": "./?go=sounds",
+      "icons": [
+        {
+          "src": "icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
     }
   ]
 }
